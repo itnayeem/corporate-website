@@ -1,8 +1,9 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, Check, Building2, FileText, CheckCircle2, Globe } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import logoPath from "@assets/noviatify-logo.png";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
@@ -12,6 +13,61 @@ function FadeUp({ children, delay = 0, className = "" }: { children: React.React
       transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }} className={className}>
       {children}
     </motion.div>
+  );
+}
+
+function FaqItem({ q, a, delay }: { q: string; a: string; delay: number }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+  const [open, setOpen] = useState(false);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay }}
+      className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm"
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-5 text-left bg-white hover:bg-gray-50 transition-colors"
+      >
+        <span className="font-semibold text-gray-900 pr-4">{q}</span>
+        <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.2 }} className="text-primary text-xl font-bold flex-shrink-0">+</motion.span>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <p className="px-5 pb-5 text-gray-500 text-sm leading-relaxed bg-white">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function MiniFooter() {
+  return (
+    <footer className="bg-[#040918] text-white py-10 border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <Link href="/" className="flex items-center gap-2">
+          <img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" />
+        </Link>
+        <p className="text-white/30 text-sm">© 2023. Noviatify All Rights Reserved.</p>
+        <div className="flex gap-5 text-sm text-white/40">
+          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+          <Link href="/about/contact" className="hover:text-white transition-colors">Contact</Link>
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -95,7 +151,7 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* Sub-heading */}
+      {/* Steps */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-20">
@@ -127,7 +183,7 @@ export default function HowItWorks() {
                     </ul>
                   </div>
 
-                  <div className={`${i % 2 === 1 ? "lg:col-start-1 lg:row-start-1" : ""}`}>
+                  <div className={i % 2 === 1 ? "lg:col-start-1 lg:row-start-1" : ""}>
                     <motion.div
                       whileHover={{ scale: 1.02, rotate: i % 2 === 0 ? 1 : -1 }}
                       className={`bg-gradient-to-br ${step.color} rounded-3xl p-10 flex items-center justify-center min-h-56 shadow-2xl`}
@@ -142,7 +198,7 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* Entity reference */}
+      {/* Entity types */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-12">
@@ -215,68 +271,7 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* Footer */}
       <MiniFooter />
     </div>
-  );
-}
-
-function FaqItem({ q, a, delay }: { q: string; a: string; delay: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-  const [open, setOpen] = useState(false);
-  import { useState } from "react";
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay }}
-      className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm"
-    >
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-5 text-left bg-white hover:bg-gray-50 transition-colors"
-      >
-        <span className="font-semibold text-gray-900 pr-4">{q}</span>
-        <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.2 }} className="text-primary text-xl font-bold flex-shrink-0">+</motion.span>
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden"
-          >
-            <p className="px-5 pb-5 text-gray-500 text-sm leading-relaxed bg-white">{a}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
-
-import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import logoPath from "@assets/noviatify-logo.png";
-
-function MiniFooter() {
-  return (
-    <footer className="bg-[#040918] text-white py-10 border-t border-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <Link href="/" className="flex items-center gap-2">
-          <img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" />
-        </Link>
-        <p className="text-white/30 text-sm">© 2023. Noviatify All Rights Reserved.</p>
-        <div className="flex gap-5 text-sm text-white/40">
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-          <Link href="/about/contact" className="hover:text-white transition-colors">Contact</Link>
-        </div>
-      </div>
-    </footer>
   );
 }

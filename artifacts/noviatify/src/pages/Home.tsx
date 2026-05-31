@@ -90,6 +90,7 @@ function TypedText({ words }: { words: string[] }) {
       setDeleting(false);
       setIdx(i => (i + 1) % words.length);
     }
+    return undefined;
   }, [char, deleting, idx, words]);
 
   return (
