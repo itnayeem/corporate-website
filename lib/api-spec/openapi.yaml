@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: content
+    description: Editable site content
+  - name: admin
+    description: Admin authentication
 paths:
   /healthz:
     get:
@@ -24,6 +28,68 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /content:
+    get:
+      operationId: getContent
+      tags: [content]
+      summary: Get site content
+      description: Returns the editable site content document
+      responses:
+        "200":
+          description: Site content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteContent"
+    put:
+      operationId: updateContent
+      tags: [content]
+      summary: Update site content
+      description: Replaces the editable site content document (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteContentInput"
+      responses:
+        "200":
+          description: Updated site content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteContent"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      description: Exchanges the admin password for a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCredentials"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminToken"
+        "401":
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +99,45 @@ components:
           type: string
       required:
         - status
-
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    SiteContentData:
+      type: object
+      additionalProperties: true
+    SiteContent:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/SiteContentData"
+        updatedAt:
+          type: ["string", "null"]
+          format: date-time
+    SiteContentInput:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/SiteContentData"
+    AdminCredentials:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          minLength: 1
+    AdminToken:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string

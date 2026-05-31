@@ -4,12 +4,10 @@ import { Link } from "wouter";
 import { ArrowRight, ShieldCheck, Zap, HeadphonesIcon, FileCheck, Star, CheckCircle2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import logoPath from "@assets/noviatify-logo.png";
+import { useContent } from "@/content/ContentContext";
 
 interface GenericPageProps {
-  title: string;
-  subtitle?: string;
-  description?: string;
-  cta?: { label: string; href: string };
+  pageKey: string;
 }
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -28,77 +26,33 @@ function FadeUp({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-const trustFeatures = [
-  {
-    icon: Zap,
-    title: "Lightning-Fast Filing",
-    desc: "Most formations are completed within 24–72 hours. Expedited options available for same-day processing.",
-    color: "from-blue-500 to-blue-700",
-  },
-  {
-    icon: ShieldCheck,
-    title: "100% Compliance Guarantee",
-    desc: "Every filing is reviewed by our compliance team before submission. We stand behind every document we file.",
-    color: "from-indigo-500 to-indigo-700",
-  },
-  {
-    icon: HeadphonesIcon,
-    title: "Expert Support",
-    desc: "Our business formation specialists are available to answer questions throughout your entire process.",
-    color: "from-violet-500 to-violet-700",
-  },
-  {
-    icon: FileCheck,
-    title: "All 50 States",
-    desc: "Noviatify operates in every U.S. state. Form your business wherever your goals take you.",
-    color: "from-cyan-500 to-cyan-700",
-  },
+// Visual config kept in code; index-mapped to content.site.genericShared.features
+const featureVisuals = [
+  { icon: Zap, color: "from-blue-500 to-blue-700" },
+  { icon: ShieldCheck, color: "from-indigo-500 to-indigo-700" },
+  { icon: HeadphonesIcon, color: "from-violet-500 to-violet-700" },
+  { icon: FileCheck, color: "from-cyan-500 to-cyan-700" },
 ];
 
-const testimonials = [
-  {
-    name: "Marcus W.",
-    role: "Founder, SaaS startup",
-    body: "Noviatify made the whole process effortless. I had my LLC up and running in less than two days. Worth every penny.",
-    stars: 5,
-  },
-  {
-    name: "Priya S.",
-    role: "E-commerce entrepreneur",
-    body: "I was nervous about doing this on my own but Noviatify walked me through everything. Highly recommend.",
-    stars: 5,
-  },
-  {
-    name: "Daniel R.",
-    role: "Freelance consultant",
-    body: "Switched my registered agent to Noviatify and the transition was seamless. Their team is responsive and professional.",
-    stars: 5,
-  },
-];
+export default function GenericPage({ pageKey }: GenericPageProps) {
+  const content = useContent();
+  const pages = content.site.genericPages as Record<
+    string,
+    { title: string; subtitle: string; description: string; cta: { label: string; href: string } }
+  >;
+  const page = pages[pageKey] ?? {
+    title: "Noviatify",
+    subtitle: "",
+    description:
+      "Noviatify handles all the paperwork so you can focus on what matters — building your business.",
+    cta: { label: "Start Now — It's Free", href: "/start" },
+  };
+  const shared = content.site.genericShared;
+  const footer = content.site.footer;
+  const { title, subtitle, description, cta } = page;
 
-const faqs = [
-  {
-    q: "How long does it take to get started?",
-    a: "You can complete your application in under 5 minutes. Most filings are processed within 24–72 hours after submission.",
-  },
-  {
-    q: "Are there any hidden fees?",
-    a: "Never. Noviatify is fully transparent about all costs, including state filing fees, before you complete your application.",
-  },
-  {
-    q: "What if I need help during the process?",
-    a: "Our support team is available to assist you at any step. Reach out via chat or email and we typically respond within a few hours.",
-  },
-];
-
-export default function GenericPage({
-  title,
-  subtitle,
-  description = "Noviatify handles all the paperwork so you can focus on what matters — building your business.",
-  cta = { label: "Start Now — It's Free", href: "/start" },
-}: GenericPageProps) {
   return (
-    <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
+    <div className="min-h-screen bg-[#060d2b] text-white overflow-x-hidden">
       <Navbar />
 
       {/* Hero */}
@@ -126,13 +80,13 @@ export default function GenericPage({
                 </motion.button>
               </Link>
               <Link href="/how-it-works" className="text-white/60 hover:text-white text-sm font-medium transition-colors underline underline-offset-4">
-                See how it works
+                {shared.seeHow}
               </Link>
             </div>
 
             {/* Quick trust bar */}
             <div className="flex flex-wrap gap-6 mt-10">
-              {["No hidden fees", "All 50 states", "24–72 hr filing", "1,000+ businesses formed"].map(item => (
+              {shared.trustBar.map(item => (
                 <div key={item} className="flex items-center gap-2 text-white/50 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                   {item}
@@ -144,63 +98,63 @@ export default function GenericPage({
 
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 60V30C360 0 720 0 1080 30C1260 45 1350 55 1440 30V60H0Z" fill="white" />
+            <path d="M0 60V30C360 0 720 0 1080 30C1260 45 1350 55 1440 30V60H0Z" fill="#060d2b" />
           </svg>
         </div>
       </section>
 
       {/* Why Noviatify */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              Why Thousands Choose Noviatify
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
+              {shared.whyTitle}
             </h2>
-            <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-              From first-time founders to serial entrepreneurs, Noviatify delivers the speed, accuracy, and support you need.
+            <p className="text-white/55 text-lg max-w-2xl mx-auto">
+              {shared.whySubtitle}
             </p>
           </FadeUp>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trustFeatures.map((f, i) => (
-              <FadeUp key={f.title} delay={i * 0.1}>
-                <motion.div
-                  whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(37,117,252,0.1)" }}
-                  className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm h-full"
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 shadow-lg`}>
-                    <f.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 text-base mb-2">{f.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
-                </motion.div>
-              </FadeUp>
-            ))}
+            {shared.features.map((f, i) => {
+              const Icon = featureVisuals[i % featureVisuals.length].icon;
+              const color = featureVisuals[i % featureVisuals.length].color;
+              return (
+                <FadeUp key={f.title} delay={i * 0.1}>
+                  <motion.div
+                    whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}
+                    className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm h-full"
+                  >
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 shadow-lg`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-white text-base mb-2">{f.title}</h3>
+                    <p className="text-white/55 text-sm leading-relaxed">{f.desc}</p>
+                  </motion.div>
+                </FadeUp>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* How it works mini-strip */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-[#0a1330]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-gray-900" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              Get Started in 3 Simple Steps
+            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
+              {shared.stepsTitle}
             </h2>
           </FadeUp>
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { num: "1", label: "Choose Your Entity", desc: "Pick the business structure that fits your goals and the state where you want to form." },
-              { num: "2", label: "Complete the Form", desc: "Answer a few simple questions online. No legal jargon — just plain, clear prompts." },
-              { num: "3", label: "We File For You", desc: "Noviatify submits everything to the state and delivers your formation documents by email." },
-            ].map((step, i) => (
+            {shared.steps.map((step, i) => (
               <FadeUp key={step.num} delay={i * 0.12}>
                 <div className="text-center">
                   <div className="w-14 h-14 rounded-full bg-primary text-white font-black text-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/30">
                     {step.num}
                   </div>
-                  <h3 className="font-bold text-gray-900 text-lg mb-2">{step.label}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+                  <h3 className="font-bold text-white text-lg mb-2">{step.label}</h3>
+                  <p className="text-white/55 text-sm leading-relaxed">{step.desc}</p>
                 </div>
               </FadeUp>
             ))}
@@ -221,27 +175,27 @@ export default function GenericPage({
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-3" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              Trusted by Business Owners
+            <h2 className="text-3xl font-extrabold text-white mb-3" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
+              {shared.testimonialsTitle}
             </h2>
-            <p className="text-gray-500">Real reviews from real Noviatify customers</p>
+            <p className="text-white/55">{shared.testimonialsSubtitle}</p>
           </FadeUp>
           <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+            {shared.testimonials.map((t, i) => (
               <FadeUp key={t.name} delay={i * 0.1}>
-                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 h-full flex flex-col">
+                <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-6 h-full flex flex-col">
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: t.stars }).map((_, si) => (
                       <Star key={si} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-gray-700 text-sm leading-relaxed flex-1 mb-4">"{t.body}"</p>
+                  <p className="text-white/80 text-sm leading-relaxed flex-1 mb-4">"{t.body}"</p>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
-                    <p className="text-gray-400 text-xs">{t.role}</p>
+                    <p className="font-semibold text-white text-sm">{t.name}</p>
+                    <p className="text-white/40 text-xs">{t.role}</p>
                   </div>
                 </div>
               </FadeUp>
@@ -251,19 +205,19 @@ export default function GenericPage({
       </section>
 
       {/* FAQ */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-[#0a1330]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              Common Questions
+            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
+              {shared.faqTitle}
             </h2>
           </FadeUp>
           <div className="space-y-4">
-            {faqs.map((faq, i) => (
+            {shared.faqs.map((faq, i) => (
               <FadeUp key={i} delay={i * 0.08}>
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-                  <h3 className="font-bold text-gray-900 mb-2">{faq.q}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{faq.a}</p>
+                <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold text-white mb-2">{faq.q}</h3>
+                  <p className="text-white/55 text-sm leading-relaxed">{faq.a}</p>
                 </div>
               </FadeUp>
             ))}
@@ -277,10 +231,10 @@ export default function GenericPage({
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeUp>
             <h2 className="text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              Ready to make it official?
+              {shared.ctaTitle}
             </h2>
             <p className="text-blue-100 text-lg mb-8 max-w-xl mx-auto">
-              Join 1,000+ business owners who trusted Noviatify to get their company off the ground — fast and stress-free.
+              {shared.ctaSubtitle}
             </p>
             <Link href={cta.href}>
               <motion.button
@@ -300,11 +254,11 @@ export default function GenericPage({
       <footer className="bg-[#040918] text-white py-10 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Link href="/"><img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" /></Link>
-          <p className="text-white/30 text-sm">© 2023. Noviatify All Rights Reserved.</p>
+          <p className="text-white/30 text-sm">{footer.copyright}</p>
           <div className="flex gap-5 text-sm text-white/40">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="/about/contact" className="hover:text-white transition-colors">Contact</Link>
+            {footer.links.map((l) => (
+              <Link key={l.href} href={l.href} className="hover:text-white transition-colors">{l.label}</Link>
+            ))}
           </div>
         </div>
       </footer>
