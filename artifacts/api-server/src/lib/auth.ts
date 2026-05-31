@@ -1,7 +1,12 @@
 import crypto from "node:crypto";
 import type { RequestHandler } from "express";
 
-const SECRET = process.env.SESSION_SECRET ?? "dev-insecure-secret-change-me";
+const SECRET = process.env.SESSION_SECRET;
+if (!SECRET) {
+  throw new Error(
+    "SESSION_SECRET is required but not set. Configure it before starting the server.",
+  );
+}
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
 
 /**

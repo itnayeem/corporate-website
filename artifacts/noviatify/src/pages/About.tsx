@@ -79,7 +79,7 @@ export default function About() {
               ))}
               <div className="grid grid-cols-2 gap-5">
                 {mission.stats.map((item, i) => {
-                  const meta = statMeta[i];
+                  const meta = statMeta[i % statMeta.length];
                   const Icon = meta.icon;
                   return (
                     <motion.div key={item.label} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
@@ -173,7 +173,7 @@ export default function About() {
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {valuesSection.values.map((v, i) => {
-              const meta = valueMeta[i];
+              const meta = valueMeta[i % valueMeta.length];
               const Icon = meta.icon;
               return (
                 <FadeUp key={v.title} delay={i * 0.08}>

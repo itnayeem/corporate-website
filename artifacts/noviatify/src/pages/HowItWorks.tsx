@@ -133,8 +133,8 @@ export default function HowItWorks() {
 
           <div className="space-y-24">
             {steps.items.map((step, i) => {
-              const StepIcon = stepIcons[i];
-              const color = stepColors[i];
+              const StepIcon = stepIcons[i % stepIcons.length];
+              const color = stepColors[i % stepColors.length];
               return (
                 <FadeUp key={step.num} delay={0.1}>
                   <div className={`grid lg:grid-cols-2 gap-14 items-center ${i % 2 === 1 ? "lg:grid-flow-dense" : ""}`}>
@@ -190,7 +190,7 @@ export default function HowItWorks() {
                     whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(37,117,252,0.15)" }}
                     className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:border-blue-200 transition-all duration-300 cursor-pointer text-center group"
                   >
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${entityColors[i]} flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${entityColors[i % entityColors.length]} flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                       <Globe className="w-7 h-7 text-white" />
                     </div>
                     <h3 className="font-extrabold text-white text-xl mb-1">{e.name}</h3>

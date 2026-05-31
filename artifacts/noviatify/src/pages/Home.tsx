@@ -187,7 +187,7 @@ export default function Home() {
                 transition={{ duration: 0.7, delay: 0.38, ease: [0.22, 1, 0.36, 1] }}
                 className="text-lg text-white/65 mb-10 max-w-xl leading-relaxed"
               >
-                Since 2020, join more than 1,000 business owners using Noviatify to start and grow their companies with total confidence.
+                {c.hero.description}
               </motion.p>
 
               <motion.div
@@ -226,7 +226,7 @@ export default function Home() {
                 className="flex items-center gap-4 mt-8"
               >
                 <div className="flex -space-x-2.5">
-                  {["SM", "MT", "DR", "EM"].map((init, i) => (
+                  {c.hero.avatars.map((init, i) => (
                     <div key={i} className="w-9 h-9 rounded-full border-2 border-[#060d2b] bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
                       {init}
                     </div>
@@ -354,7 +354,7 @@ export default function Home() {
                   whileHover={{ scale: 1.07, opacity: 1 }}
                   className="px-7 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white/40 hover:text-white/80 hover:border-white/10 hover:shadow-md transition-all duration-300 cursor-default"
                 >
-                  <span className={pressStyles[i]}>{name}</span>
+                  <span className={pressStyles[i % pressStyles.length]}>{name}</span>
                 </motion.div>
               ))}
             </div>
@@ -397,7 +397,7 @@ export default function Home() {
                   whileHover={{ y: -10, boxShadow: "0 30px 60px rgba(37,117,252,0.15)" }}
                   className="group relative bg-white/[0.04] border border-white/10 rounded-3xl p-8 shadow-sm hover:border-blue-200 transition-all duration-400 cursor-pointer h-full flex flex-col"
                 >
-                  <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl bg-gradient-to-r ${entityGradients[i]}`} />
+                  <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl bg-gradient-to-r ${entityGradients[i % entityGradients.length]}`} />
                   <div className="flex items-center justify-between mb-5">
                     <span className="bg-white/5 text-primary text-xs font-bold px-3 py-1 rounded-full">{e.badge}</span>
                     <motion.div whileHover={{ rotate: 15 }} className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center">
@@ -517,7 +517,7 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {c.services.items.map((svc, i) => {
-              const Icon = serviceIcons[i];
+              const Icon = serviceIcons[i % serviceIcons.length];
               return (
               <FadeUp key={svc.full} delay={i * 0.06}>
                 <Link href={svc.href}>
@@ -555,7 +555,7 @@ export default function Home() {
               </p>
               <div className="space-y-5">
                 {c.whyChooseUs.items.map((item, i) => {
-                  const meta = whyIcons[i];
+                  const meta = whyIcons[i % whyIcons.length];
                   const Icon = meta.icon;
                   return (
                   <motion.div
