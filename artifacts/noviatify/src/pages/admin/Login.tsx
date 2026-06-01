@@ -19,7 +19,7 @@ export default function AdminLogin() {
       {
         onSuccess: (res) => {
           setAdminToken(res.token);
-          navigate("/admin/editor");
+          navigate("/");
         },
         onError: () => setError("Incorrect password. Please try again."),
       },
@@ -43,7 +43,7 @@ export default function AdminLogin() {
           </div>
           <h1 className="text-2xl font-extrabold text-white mb-1">Admin Access</h1>
           <p className="text-white/50 text-sm mb-6">
-            Enter your password to edit your site content.
+            Sign in, then click any text on your site to edit it in place.
           </p>
 
           <form onSubmit={handleSubmit}>

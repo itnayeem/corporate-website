@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowRight, Check, Building2, FileText, CheckCircle2, Globe } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
+import { Editable } from "@/components/admin/Editable";
 import logoPath from "@assets/noviatify-logo.png";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -17,7 +18,7 @@ function FadeUp({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-function FaqItem({ q, a, delay }: { q: string; a: string; delay: number }) {
+function FaqItem({ qPath, aPath, delay }: { qPath: string; aPath: string; delay: number }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
   const [open, setOpen] = useState(false);
@@ -34,7 +35,7 @@ function FaqItem({ q, a, delay }: { q: string; a: string; delay: number }) {
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-5 text-left bg-white/[0.04] hover:bg-white/5 transition-colors"
       >
-        <span className="font-semibold text-white pr-4">{q}</span>
+        <Editable as="span" className="font-semibold text-white pr-4" path={qPath} />
         <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.2 }} className="text-primary text-xl font-bold flex-shrink-0">+</motion.span>
       </button>
       <AnimatePresence>
@@ -46,7 +47,7 @@ function FaqItem({ q, a, delay }: { q: string; a: string; delay: number }) {
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <p className="px-5 pb-5 text-white/55 text-sm leading-relaxed bg-white/[0.04]">{a}</p>
+            <Editable as="p" className="px-5 pb-5 text-white/55 text-sm leading-relaxed bg-white/[0.04]" path={aPath} multiline />
           </motion.div>
         )}
       </AnimatePresence>
@@ -63,10 +64,10 @@ function MiniFooter() {
         <Link href="/" className="flex items-center gap-2">
           <img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" />
         </Link>
-        <p className="text-white/30 text-sm">{footer.copyright}</p>
+        <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
         <div className="flex gap-5 text-sm text-white/40">
-          {footer.links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-white transition-colors">{link.label}</Link>
+          {footer.links.map((link, i) => (
+            <Link key={link.href} href={link.href} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></Link>
           ))}
         </div>
       </div>
@@ -94,20 +95,16 @@ export default function HowItWorks() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
-            <span className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4">{hero.eyebrow}</span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {hero.title}
-            </h1>
-            <p className="text-white/60 text-lg max-w-xl mb-8 leading-relaxed">
-              {hero.subtitle}
-            </p>
+            <Editable as="span" className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4" path="howItWorks.hero.eyebrow" />
+            <Editable as="h1" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="howItWorks.hero.title" />
+            <Editable as="p" className="text-white/60 text-lg max-w-xl mb-8 leading-relaxed" path="howItWorks.hero.subtitle" multiline />
             <Link href={hero.cta.href}>
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
                 className="bg-primary text-white font-bold px-8 py-4 rounded-full shadow-xl shadow-blue-900/40 hover:bg-blue-600 transition-colors inline-flex items-center gap-2 group"
               >
-                {hero.cta.label}
+                <Editable as="span" path="howItWorks.hero.cta.label" />
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </Link>
@@ -126,9 +123,7 @@ export default function HowItWorks() {
       <section className="py-20 bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {steps.title}
-            </h2>
+            <Editable as="h2" className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="howItWorks.steps.title" />
           </FadeUp>
 
           <div className="space-y-24">
@@ -140,18 +135,16 @@ export default function HowItWorks() {
                   <div className={`grid lg:grid-cols-2 gap-14 items-center ${i % 2 === 1 ? "lg:grid-flow-dense" : ""}`}>
                     <div className={i % 2 === 1 ? "lg:col-start-2" : ""}>
                       <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${color} text-white font-black text-xl shadow-lg mb-6`}>
-                        {step.num}
+                        <Editable as="span" path={`howItWorks.steps.items.${i}.num`} />
                       </div>
-                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-                        {step.title}
-                      </h3>
-                      <p className="text-white/55 text-lg leading-relaxed mb-6">{step.desc}</p>
-                      <p className="font-semibold text-white mb-3">{step.extra}</p>
+                      <Editable as="h3" className="text-2xl sm:text-3xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }} path={`howItWorks.steps.items.${i}.title`} />
+                      <Editable as="p" className="text-white/55 text-lg leading-relaxed mb-6" path={`howItWorks.steps.items.${i}.desc`} multiline />
+                      <Editable as="p" className="font-semibold text-white mb-3" path={`howItWorks.steps.items.${i}.extra`} />
                       <ul className="space-y-2">
-                        {step.list.map(item => (
+                        {step.list.map((item, j) => (
                           <motion.li key={item} className="flex items-center gap-2 text-white/80" whileHover={{ x: 4 }}>
                             <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            {item}
+                            <Editable as="span" path={`howItWorks.steps.items.${i}.list.${j}`} />
                           </motion.li>
                         ))}
                       </ul>
@@ -177,10 +170,8 @@ export default function HowItWorks() {
       <section className="py-20 bg-[#0a1330]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {entities.title}
-            </h2>
-            <p className="text-white/55 mt-3 text-lg">{entities.subtitle}</p>
+            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="howItWorks.entities.title" />
+            <Editable as="p" className="text-white/55 mt-3 text-lg" path="howItWorks.entities.subtitle" multiline />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {entities.items.map((e, i) => (
@@ -193,9 +184,9 @@ export default function HowItWorks() {
                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${entityColors[i % entityColors.length]} flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                       <Globe className="w-7 h-7 text-white" />
                     </div>
-                    <h3 className="font-extrabold text-white text-xl mb-1">{e.name}</h3>
-                    <p className="text-white/55 text-sm mb-4">{e.sub}</p>
-                    <span className="text-primary text-sm font-semibold group-hover:underline">{entities.cardCta}</span>
+                    <Editable as="h3" className="font-extrabold text-white text-xl mb-1" path={`howItWorks.entities.items.${i}.name`} />
+                    <Editable as="p" className="text-white/55 text-sm mb-4" path={`howItWorks.entities.items.${i}.sub`} />
+                    <Editable as="span" className="text-primary text-sm font-semibold group-hover:underline" path="howItWorks.entities.cardCta" />
                   </motion.div>
                 </Link>
               </FadeUp>
@@ -208,13 +199,11 @@ export default function HowItWorks() {
       <section className="py-20 bg-[#060d2b]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {faq.title}
-            </h2>
+            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="howItWorks.faq.title" />
           </FadeUp>
           <div className="space-y-4">
             {faq.items.map((item, i) => (
-              <FaqItem key={i} q={item.q} a={item.a} delay={i * 0.06} />
+              <FaqItem key={i} qPath={`howItWorks.faq.items.${i}.q`} aPath={`howItWorks.faq.items.${i}.a`} delay={i * 0.06} />
             ))}
           </div>
         </div>
@@ -225,15 +214,15 @@ export default function HowItWorks() {
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeUp>
-            <h2 className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }}>{cta.title}</h2>
-            <p className="text-blue-100 text-lg mb-8 max-w-xl mx-auto">{cta.subtitle}</p>
+            <Editable as="h2" className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="howItWorks.cta.title" />
+            <Editable as="p" className="text-blue-100 text-lg mb-8 max-w-xl mx-auto" path="howItWorks.cta.subtitle" multiline />
             <Link href={cta.button.href}>
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 60px rgba(255,255,255,0.2)" }}
                 whileTap={{ scale: 0.97 }}
                 className="bg-white text-primary font-extrabold px-12 py-5 rounded-full shadow-2xl hover:bg-gray-50 transition-colors inline-flex items-center gap-2 text-lg"
               >
-                {cta.button.label}
+                <Editable as="span" path="howItWorks.cta.button.label" />
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
             </Link>

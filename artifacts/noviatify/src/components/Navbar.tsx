@@ -4,6 +4,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronDown } from "lucide-react";
 import logoPath from "@assets/noviatify-logo.png";
 import { useContent } from "@/content/ContentContext";
+import { Editable } from "@/components/admin/Editable";
 
 export default function Navbar() {
   const content = useContent();
@@ -40,10 +41,10 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
             <Link href="/" className="text-white/80 hover:text-white transition-colors">
-              {nav.home}
+              <Editable as="span" path="site.nav.home" />
             </Link>
             <Link href="/how-it-works" className="text-white/80 hover:text-white transition-colors">
-              {nav.howItWorks}
+              <Editable as="span" path="site.nav.howItWorks" />
             </Link>
 
             {/* Services dropdown */}
@@ -53,7 +54,7 @@ export default function Navbar() {
               onMouseLeave={() => setServicesOpen(false)}
             >
               <button className="flex items-center gap-1 text-white/80 hover:text-white transition-colors">
-                {nav.services}
+                <Editable as="span" path="site.nav.services" />
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${servicesOpen ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
@@ -77,13 +78,13 @@ export default function Navbar() {
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/75 hover:bg-white/5 hover:text-white transition-colors"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
-                          {s.label}
+                          <Editable as="span" path={`site.nav.serviceLinks.${i}.label`} />
                         </Link>
                       </motion.div>
                     ))}
                     <div className="border-t border-white/10 mt-1 pt-1">
                       <Link href="/services" className="flex items-center gap-2 px-4 py-2.5 text-sm text-blue-400 font-semibold hover:bg-white/5 transition-colors">
-                        {nav.viewAllServices}
+                        <Editable as="span" path="site.nav.viewAllServices" />
                       </Link>
                     </div>
                   </motion.div>
@@ -98,7 +99,7 @@ export default function Navbar() {
               onMouseLeave={() => setAboutOpen(false)}
             >
               <button className="flex items-center gap-1 text-white/80 hover:text-white transition-colors">
-                {nav.about}
+                <Editable as="span" path="site.nav.about" />
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${aboutOpen ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
@@ -114,7 +115,7 @@ export default function Navbar() {
                       <motion.div key={a.href} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}>
                         <Link href={a.href} className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/75 hover:bg-white/5 hover:text-white transition-colors">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
-                          {a.label}
+                          <Editable as="span" path={`site.nav.aboutLinks.${i}.label`} />
                         </Link>
                       </motion.div>
                     ))}
@@ -127,7 +128,7 @@ export default function Navbar() {
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-4">
             <Link href="/login" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
-              {nav.login}
+              <Editable as="span" path="site.nav.login" />
             </Link>
             <Link href="/start">
               <motion.button
@@ -135,7 +136,7 @@ export default function Navbar() {
                 whileTap={{ scale: 0.97 }}
                 className="bg-primary text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-lg shadow-blue-500/30 hover:bg-blue-600 transition-colors"
               >
-                {nav.startCta}
+                <Editable as="span" path="site.nav.startCta" />
               </motion.button>
             </Link>
           </div>
@@ -160,17 +161,17 @@ export default function Navbar() {
             className="lg:hidden bg-[#060d2b] border-t border-white/10 overflow-hidden"
           >
             <div className="px-4 py-4 space-y-1">
-              {nav.mobileLinks.map((item) => (
+              {nav.mobileLinks.map((item, i) => (
                 <Link key={item.href} href={item.href} className="block px-3 py-2.5 rounded-xl text-sm font-medium text-white/80 hover:bg-white/5 hover:text-white transition-colors">
-                  {item.label}
+                  <Editable as="span" path={`site.nav.mobileLinks.${i}.label`} />
                 </Link>
               ))}
               <div className="pt-3 flex gap-2 border-t border-white/10 mt-2">
                 <Link href="/login" className="flex-1 text-center py-2.5 border border-white/15 rounded-full text-sm font-medium text-white/80 hover:bg-white/5">
-                  {nav.login}
+                  <Editable as="span" path="site.nav.login" />
                 </Link>
                 <Link href="/start" className="flex-1 text-center py-2.5 bg-primary text-white rounded-full text-sm font-bold hover:bg-blue-600">
-                  {nav.startCta}
+                  <Editable as="span" path="site.nav.startCta" />
                 </Link>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { ArrowRight, ShieldCheck, Zap, HeadphonesIcon, FileCheck, Star, CheckCir
 import Navbar from "@/components/Navbar";
 import logoPath from "@assets/noviatify-logo.png";
 import { useContent } from "@/content/ContentContext";
+import { Editable } from "@/components/admin/Editable";
 
 interface GenericPageProps {
   pageKey: string;
@@ -49,7 +50,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
   };
   const shared = content.site.genericShared;
   const footer = content.site.footer;
-  const { title, subtitle, description, cta } = page;
+  const { subtitle, cta } = page;
 
   return (
     <div className="min-h-screen bg-[#060d2b] text-white overflow-x-hidden">
@@ -64,9 +65,9 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
-            {subtitle && <span className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4">{subtitle}</span>}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5 max-w-3xl" style={{ fontFamily: "'Inter Tight', sans-serif" }}>{title}</h1>
-            <p className="text-white/60 text-lg max-w-xl leading-relaxed mb-8">{description}</p>
+            {subtitle && <Editable as="span" className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4" path={`site.genericPages.${pageKey}.subtitle`} />}
+            <Editable as="h1" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5 max-w-3xl" style={{ fontFamily: "'Inter Tight', sans-serif" }} path={`site.genericPages.${pageKey}.title`} />
+            <Editable as="p" className="text-white/60 text-lg max-w-xl leading-relaxed mb-8" multiline path={`site.genericPages.${pageKey}.description`} />
 
             <div className="flex flex-wrap gap-4 items-center">
               <Link href={cta.href}>
@@ -75,21 +76,21 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
                   whileTap={{ scale: 0.97 }}
                   className="bg-primary text-white font-bold px-8 py-4 rounded-full shadow-xl shadow-blue-900/40 hover:bg-blue-600 transition-colors inline-flex items-center gap-2 group"
                 >
-                  {cta.label}
+                  <Editable as="span" path={`site.genericPages.${pageKey}.cta.label`} />
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
               </Link>
               <Link href="/how-it-works" className="text-white/60 hover:text-white text-sm font-medium transition-colors underline underline-offset-4">
-                {shared.seeHow}
+                <Editable as="span" path="site.genericShared.seeHow" />
               </Link>
             </div>
 
             {/* Quick trust bar */}
             <div className="flex flex-wrap gap-6 mt-10">
-              {shared.trustBar.map(item => (
+              {shared.trustBar.map((item, i) => (
                 <div key={item} className="flex items-center gap-2 text-white/50 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
-                  {item}
+                  <Editable as="span" path={`site.genericShared.trustBar.${i}`} />
                 </div>
               ))}
             </div>
@@ -107,12 +108,8 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
       <section className="py-20 bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {shared.whyTitle}
-            </h2>
-            <p className="text-white/55 text-lg max-w-2xl mx-auto">
-              {shared.whySubtitle}
-            </p>
+            <Editable as="h2" className="text-3xl sm:text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="site.genericShared.whyTitle" />
+            <Editable as="p" className="text-white/55 text-lg max-w-2xl mx-auto" multiline path="site.genericShared.whySubtitle" />
           </FadeUp>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -128,8 +125,8 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 shadow-lg`}>
                       <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="font-bold text-white text-base mb-2">{f.title}</h3>
-                    <p className="text-white/55 text-sm leading-relaxed">{f.desc}</p>
+                    <Editable as="h3" className="font-bold text-white text-base mb-2" path={`site.genericShared.features.${i}.title`} />
+                    <Editable as="p" className="text-white/55 text-sm leading-relaxed" multiline path={`site.genericShared.features.${i}.desc`} />
                   </motion.div>
                 </FadeUp>
               );
@@ -142,19 +139,17 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
       <section className="py-20 bg-[#0a1330]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {shared.stepsTitle}
-            </h2>
+            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="site.genericShared.stepsTitle" />
           </FadeUp>
           <div className="grid md:grid-cols-3 gap-8">
             {shared.steps.map((step, i) => (
               <FadeUp key={step.num} delay={i * 0.12}>
                 <div className="text-center">
                   <div className="w-14 h-14 rounded-full bg-primary text-white font-black text-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/30">
-                    {step.num}
+                    <Editable as="span" path={`site.genericShared.steps.${i}.num`} />
                   </div>
-                  <h3 className="font-bold text-white text-lg mb-2">{step.label}</h3>
-                  <p className="text-white/55 text-sm leading-relaxed">{step.desc}</p>
+                  <Editable as="h3" className="font-bold text-white text-lg mb-2" path={`site.genericShared.steps.${i}.label`} />
+                  <Editable as="p" className="text-white/55 text-sm leading-relaxed" multiline path={`site.genericShared.steps.${i}.desc`} />
                 </div>
               </FadeUp>
             ))}
@@ -166,7 +161,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
                 whileTap={{ scale: 0.97 }}
                 className="bg-primary text-white font-bold px-8 py-4 rounded-full shadow-xl shadow-blue-900/30 hover:bg-blue-600 transition-colors inline-flex items-center gap-2"
               >
-                {cta.label}
+                <Editable as="span" path={`site.genericPages.${pageKey}.cta.label`} />
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
@@ -178,10 +173,8 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
       <section className="py-20 bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-white mb-3" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {shared.testimonialsTitle}
-            </h2>
-            <p className="text-white/55">{shared.testimonialsSubtitle}</p>
+            <Editable as="h2" className="text-3xl font-extrabold text-white mb-3" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="site.genericShared.testimonialsTitle" />
+            <Editable as="p" className="text-white/55" path="site.genericShared.testimonialsSubtitle" />
           </FadeUp>
           <div className="grid md:grid-cols-3 gap-6">
             {shared.testimonials.map((t, i) => (
@@ -192,10 +185,10 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
                       <Star key={si} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-white/80 text-sm leading-relaxed flex-1 mb-4">"{t.body}"</p>
+                  <p className="text-white/80 text-sm leading-relaxed flex-1 mb-4">"<Editable as="span" multiline path={`site.genericShared.testimonials.${i}.body`} />"</p>
                   <div>
-                    <p className="font-semibold text-white text-sm">{t.name}</p>
-                    <p className="text-white/40 text-xs">{t.role}</p>
+                    <Editable as="p" className="font-semibold text-white text-sm" path={`site.genericShared.testimonials.${i}.name`} />
+                    <Editable as="p" className="text-white/40 text-xs" path={`site.genericShared.testimonials.${i}.role`} />
                   </div>
                 </div>
               </FadeUp>
@@ -208,16 +201,14 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
       <section className="py-20 bg-[#0a1330]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {shared.faqTitle}
-            </h2>
+            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="site.genericShared.faqTitle" />
           </FadeUp>
           <div className="space-y-4">
             {shared.faqs.map((faq, i) => (
               <FadeUp key={i} delay={i * 0.08}>
                 <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm">
-                  <h3 className="font-bold text-white mb-2">{faq.q}</h3>
-                  <p className="text-white/55 text-sm leading-relaxed">{faq.a}</p>
+                  <Editable as="h3" className="font-bold text-white mb-2" multiline path={`site.genericShared.faqs.${i}.q`} />
+                  <Editable as="p" className="text-white/55 text-sm leading-relaxed" multiline path={`site.genericShared.faqs.${i}.a`} />
                 </div>
               </FadeUp>
             ))}
@@ -230,19 +221,15 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeUp>
-            <h2 className="text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {shared.ctaTitle}
-            </h2>
-            <p className="text-blue-100 text-lg mb-8 max-w-xl mx-auto">
-              {shared.ctaSubtitle}
-            </p>
+            <Editable as="h2" className="text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="site.genericShared.ctaTitle" />
+            <Editable as="p" className="text-blue-100 text-lg mb-8 max-w-xl mx-auto" multiline path="site.genericShared.ctaSubtitle" />
             <Link href={cta.href}>
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 60px rgba(255,255,255,0.2)" }}
                 whileTap={{ scale: 0.97 }}
                 className="bg-white text-primary font-extrabold px-12 py-5 rounded-full shadow-2xl hover:bg-gray-50 transition-colors inline-flex items-center gap-2 text-lg"
               >
-                {cta.label}
+                <Editable as="span" path={`site.genericPages.${pageKey}.cta.label`} />
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
             </Link>
@@ -254,10 +241,10 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
       <footer className="bg-[#040918] text-white py-10 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Link href="/"><img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" /></Link>
-          <p className="text-white/30 text-sm">{footer.copyright}</p>
+          <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
           <div className="flex gap-5 text-sm text-white/40">
-            {footer.links.map((l) => (
-              <Link key={l.href} href={l.href} className="hover:text-white transition-colors">{l.label}</Link>
+            {footer.links.map((l, i) => (
+              <Link key={l.href} href={l.href} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></Link>
             ))}
           </div>
         </div>

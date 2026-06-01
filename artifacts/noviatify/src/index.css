@@ -170,3 +170,20 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* ── Inline admin editing affordances ───────────────────────── */
+.nv-editable {
+  outline: 1px dashed rgba(37, 117, 252, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+  cursor: text;
+  transition: outline-color 0.15s ease, background-color 0.15s ease;
+}
+.nv-editable:hover {
+  outline-color: rgba(37, 117, 252, 0.95);
+  background-color: rgba(37, 117, 252, 0.08);
+}
+.nv-editable:focus {
+  outline: 2px solid #2575fc;
+  background-color: rgba(37, 117, 252, 0.12);
+}

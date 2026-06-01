@@ -8,6 +8,7 @@ import {
 import logoPath from "@assets/noviatify-logo.png";
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
+import { Editable } from "@/components/admin/Editable";
 
 /* ── helpers ────────────────────────────────────────────────── */
 function useCountUp(target: number, dur: number, active: boolean) {
@@ -166,7 +167,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
                 </span>
-                {c.hero.badge}
+                <Editable as="span" path="home.hero.badge" />
               </motion.div>
 
               <motion.h1
@@ -176,9 +177,9 @@ export default function Home() {
                 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-[1.07] tracking-tight mb-6"
                 style={{ fontFamily: "'Inter Tight', sans-serif" }}
               >
-                {c.hero.titlePrefix}{" "}
+                <Editable as="span" path="home.hero.titlePrefix" />{" "}
                 <TypedText words={c.hero.typedWords} />{" "}
-                {c.hero.titleSuffix}
+                <Editable as="span" path="home.hero.titleSuffix" />
               </motion.h1>
 
               <motion.p
@@ -187,7 +188,7 @@ export default function Home() {
                 transition={{ duration: 0.7, delay: 0.38, ease: [0.22, 1, 0.36, 1] }}
                 className="text-lg text-white/65 mb-10 max-w-xl leading-relaxed"
               >
-                {c.hero.description}
+                <Editable as="span" path="home.hero.description" multiline />
               </motion.p>
 
               <motion.div
@@ -202,7 +203,7 @@ export default function Home() {
                     whileTap={{ scale: 0.97 }}
                     className="bg-primary text-white font-bold px-8 py-4 rounded-full text-base shadow-xl shadow-blue-900/40 hover:bg-blue-600 transition-colors flex items-center gap-2 group"
                   >
-                    {c.hero.primaryCta}
+                    <Editable as="span" path="home.hero.primaryCta" />
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </motion.button>
                 </Link>
@@ -213,7 +214,7 @@ export default function Home() {
                     className="flex items-center gap-2 bg-white/10 hover:bg-white/16 border border-white/20 text-white font-medium px-6 py-4 rounded-full transition-all backdrop-blur-sm text-base"
                   >
                     <Play className="w-4 h-4 fill-white" />
-                    {c.hero.secondaryCta}
+                    <Editable as="span" path="home.hero.secondaryCta" />
                   </motion.button>
                 </Link>
               </motion.div>
@@ -236,7 +237,7 @@ export default function Home() {
                   <div className="flex gap-0.5 mb-0.5">
                     {Array(5).fill(0).map((_, i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}
                   </div>
-                  <p className="text-white/60 text-xs">{c.hero.socialProof}</p>
+                  <Editable as="p" className="text-white/60 text-xs" path="home.hero.socialProof" />
                 </div>
               </motion.div>
             </motion.div>
@@ -256,17 +257,17 @@ export default function Home() {
                     <div key={i} className={`w-3 h-3 rounded-full ${c}`} />
                   ))}
                   <div className="flex-1 h-5 bg-white/5 rounded-full mx-2 flex items-center px-3">
-                    <span className="text-white/30 text-xs">{c.dashboard.url}</span>
+                    <Editable as="span" className="text-white/30 text-xs" path="home.dashboard.url" />
                   </div>
                 </div>
 
                 {/* Stats row */}
                 <div className="grid grid-cols-3 gap-3 mb-4">
-                  {c.dashboard.stats.map(s => (
+                  {c.dashboard.stats.map((s, i) => (
                     <div key={s.label} className="bg-white/6 border border-white/10 rounded-xl p-3">
-                      <div className="text-white/40 text-xs mb-1">{s.label}</div>
-                      <div className="text-white font-black text-xl">{s.val}</div>
-                      <div className="text-green-400 text-xs mt-0.5">{s.trend}</div>
+                      <Editable as="div" className="text-white/40 text-xs mb-1" path={`home.dashboard.stats.${i}.label`} />
+                      <Editable as="div" className="text-white font-black text-xl" path={`home.dashboard.stats.${i}.val`} />
+                      <Editable as="div" className="text-green-400 text-xs mt-0.5" path={`home.dashboard.stats.${i}.trend`} />
                     </div>
                   ))}
                 </div>
@@ -285,8 +286,8 @@ export default function Home() {
                         <CheckCircle2 className="w-4 h-4 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white/90 text-sm font-medium truncate">{item.name}</p>
-                        <p className={`text-xs font-semibold ${item.color}`}>{item.status}</p>
+                        <Editable as="p" className="text-white/90 text-sm font-medium truncate" path={`home.dashboard.filings.${i}.name`} />
+                        <Editable as="p" className={`text-xs font-semibold ${item.color}`} path={`home.dashboard.filings.${i}.status`} />
                       </div>
                     </motion.div>
                   ))}
@@ -299,21 +300,21 @@ export default function Home() {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute -top-5 -right-5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-xl"
               >
-                {c.dashboard.badges.award}
+                <Editable as="span" path="home.dashboard.badges.award" />
               </motion.div>
               <motion.div
                 animate={{ y: [8, -8, 8] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute -bottom-5 -left-5 bg-gradient-to-r from-primary to-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-xl"
               >
-                {c.dashboard.badges.since}
+                <Editable as="span" path="home.dashboard.badges.since" />
               </motion.div>
               <motion.div
                 animate={{ x: [-6, 6, -6], opacity: [0.8, 1, 0.8] }}
                 transition={{ duration: 6, repeat: Infinity }}
                 className="absolute top-1/2 -right-8 bg-yellow-400 text-yellow-900 text-xs font-black px-3 py-1.5 rounded-xl shadow-lg"
               >
-                {c.dashboard.badges.forbes}
+                <Editable as="span" path="home.dashboard.badges.forbes" />
               </motion.div>
             </motion.div>
           </div>
@@ -332,7 +333,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-12">
             <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white max-w-3xl mx-auto leading-snug">
-              {c.socialProof.headingPrefix}{" "}
+              <Editable as="span" path="home.socialProof.headingPrefix" />{" "}
               <motion.span
                 className="text-primary"
                 animate={statsInView ? { scale: [1, 1.15, 1] } : {}}
@@ -340,13 +341,13 @@ export default function Home() {
               >
                 {countVal}+
               </motion.span>{" "}
-              {c.socialProof.headingSuffix}
+              <Editable as="span" path="home.socialProof.headingSuffix" multiline />
             </p>
           </FadeUp>
 
           {/* Press logos */}
           <FadeUp delay={0.1}>
-            <p className="text-center text-xs text-white/40 font-bold uppercase tracking-widest mb-5">{c.socialProof.featuredInLabel}</p>
+            <Editable as="p" className="text-center text-xs text-white/40 font-bold uppercase tracking-widest mb-5" path="home.socialProof.featuredInLabel" />
             <div className="flex flex-wrap justify-center gap-6 mb-14">
               {c.socialProof.press.map((name, i) => (
                 <motion.div
@@ -354,7 +355,7 @@ export default function Home() {
                   whileHover={{ scale: 1.07, opacity: 1 }}
                   className="px-7 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white/40 hover:text-white/80 hover:border-white/10 hover:shadow-md transition-all duration-300 cursor-default"
                 >
-                  <span className={pressStyles[i % pressStyles.length]}>{name}</span>
+                  <Editable as="span" className={pressStyles[i % pressStyles.length]} path={`home.socialProof.press.${i}`} />
                 </motion.div>
               ))}
             </div>
@@ -368,8 +369,8 @@ export default function Home() {
                   whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(37,117,252,0.12)" }}
                   className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 text-center shadow-sm transition-all duration-300"
                 >
-                  <div className="text-4xl font-extrabold text-primary mb-1">{s.value}</div>
-                  <div className="text-sm text-white/55 font-medium">{s.label}</div>
+                  <Editable as="div" className="text-4xl font-extrabold text-primary mb-1" path={`home.socialProof.stats.${i}.value`} />
+                  <Editable as="div" className="text-sm text-white/55 font-medium" path={`home.socialProof.stats.${i}.label`} />
                 </motion.div>
               </FadeUp>
             ))}
@@ -381,13 +382,9 @@ export default function Home() {
       <section className="py-24 bg-[#0a1330]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-16">
-            <span className="text-primary text-sm font-bold uppercase tracking-widest">{c.entities.label}</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-3 mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {c.entities.title}
-            </h2>
-            <p className="text-white/55 text-lg max-w-2xl mx-auto">
-              {c.entities.subtitle}
-            </p>
+            <Editable as="span" className="text-primary text-sm font-bold uppercase tracking-widest" path="home.entities.label" />
+            <Editable as="h2" className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-3 mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="home.entities.title" />
+            <Editable as="p" className="text-white/55 text-lg max-w-2xl mx-auto" path="home.entities.subtitle" multiline />
           </FadeUp>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -399,19 +396,19 @@ export default function Home() {
                 >
                   <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-3xl bg-gradient-to-r ${entityGradients[i % entityGradients.length]}`} />
                   <div className="flex items-center justify-between mb-5">
-                    <span className="bg-white/5 text-primary text-xs font-bold px-3 py-1 rounded-full">{e.badge}</span>
+                    <Editable as="span" className="bg-white/5 text-primary text-xs font-bold px-3 py-1 rounded-full" path={`home.entities.items.${i}.badge`} />
                     <motion.div whileHover={{ rotate: 15 }} className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center">
                       <Building2 className="w-5 h-5 text-primary" />
                     </motion.div>
                   </div>
-                  <h3 className="text-3xl font-black text-white mb-1" style={{ fontFamily: "'Inter Tight', sans-serif" }}>{e.name}</h3>
-                  <p className="text-primary font-semibold text-sm mb-3">{e.sub}</p>
-                  <p className="text-white/55 text-sm leading-relaxed mb-6 flex-1">{e.desc}</p>
+                  <Editable as="h3" className="text-3xl font-black text-white mb-1" style={{ fontFamily: "'Inter Tight', sans-serif" }} path={`home.entities.items.${i}.name`} />
+                  <Editable as="p" className="text-primary font-semibold text-sm mb-3" path={`home.entities.items.${i}.sub`} />
+                  <Editable as="p" className="text-white/55 text-sm leading-relaxed mb-6 flex-1" path={`home.entities.items.${i}.desc`} multiline />
                   <ul className="space-y-2 mb-7">
-                    {e.features.map(f => (
+                    {e.features.map((f, fi) => (
                       <li key={f} className="flex items-center gap-2 text-sm text-white/80">
                         <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        {f}
+                        <Editable as="span" path={`home.entities.items.${i}.features.${fi}`} />
                       </li>
                     ))}
                   </ul>
@@ -421,7 +418,8 @@ export default function Home() {
                       whileTap={{ scale: 0.98 }}
                       className="w-full py-3 rounded-xl border border-primary/30 text-primary font-semibold text-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300 flex items-center justify-center gap-2"
                     >
-                      {c.entities.ctaPrefix} {e.name}
+                      <Editable as="span" path="home.entities.ctaPrefix" />{" "}
+                      <Editable as="span" path={`home.entities.items.${i}.name`} />
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </motion.button>
                   </Link>
@@ -444,13 +442,9 @@ export default function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-16">
-            <span className="text-blue-400 text-sm font-bold uppercase tracking-widest">{c.howItWorks.label}</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-3 mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {c.howItWorks.title}
-            </h2>
-            <p className="text-white/55 text-lg max-w-2xl mx-auto">
-              {c.howItWorks.subtitle}
-            </p>
+            <Editable as="span" className="text-blue-400 text-sm font-bold uppercase tracking-widest" path="home.howItWorks.label" />
+            <Editable as="h2" className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-3 mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="home.howItWorks.title" />
+            <Editable as="p" className="text-white/55 text-lg max-w-2xl mx-auto" path="home.howItWorks.subtitle" multiline />
           </FadeUp>
 
           <div className="grid md:grid-cols-3 gap-10 relative">
@@ -467,10 +461,10 @@ export default function Home() {
                     whileHover={{ rotate: 10 }}
                     className="w-24 h-24 mx-auto bg-gradient-to-br from-primary to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-blue-900/50 group-hover:shadow-blue-500/40 transition-shadow"
                   >
-                    <span className="text-white font-black text-2xl">{s.num}</span>
+                    <Editable as="span" className="text-white font-black text-2xl" path={`home.howItWorks.steps.${i}.num`} />
                   </motion.div>
-                  <h3 className="text-xl font-bold text-white mb-3">{s.title}</h3>
-                  <p className="text-white/55 text-sm leading-relaxed max-w-xs mx-auto">{s.desc}</p>
+                  <Editable as="h3" className="text-xl font-bold text-white mb-3" path={`home.howItWorks.steps.${i}.title`} />
+                  <Editable as="p" className="text-white/55 text-sm leading-relaxed max-w-xs mx-auto" path={`home.howItWorks.steps.${i}.desc`} multiline />
                 </motion.div>
               </FadeUp>
             ))}
@@ -483,7 +477,7 @@ export default function Home() {
                 whileTap={{ scale: 0.97 }}
                 className="bg-primary text-white font-bold px-10 py-4 rounded-full shadow-xl shadow-blue-900/40 transition-all inline-flex items-center gap-2 group"
               >
-                {c.howItWorks.cta}
+                <Editable as="span" path="home.howItWorks.cta" />
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </Link>
@@ -496,11 +490,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <FadeUp className="max-w-2xl">
-              <span className="text-primary text-sm font-bold uppercase tracking-widest">{c.services.label}</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-3 mb-3" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-                {c.services.title}
-              </h2>
-              <p className="text-white/55 text-lg">{c.services.subtitle}</p>
+              <Editable as="span" className="text-primary text-sm font-bold uppercase tracking-widest" path="home.services.label" />
+              <Editable as="h2" className="text-3xl sm:text-4xl font-extrabold text-white mt-3 mb-3" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="home.services.title" />
+              <Editable as="p" className="text-white/55 text-lg" path="home.services.subtitle" multiline />
             </FadeUp>
             <FadeUp>
               <Link href="/services">
@@ -509,7 +501,7 @@ export default function Home() {
                   whileTap={{ scale: 0.97 }}
                   className="border border-white/10 text-white/80 font-semibold px-6 py-3 rounded-full hover:border-primary hover:text-primary transition-all text-sm"
                 >
-                  {c.services.viewAll}
+                  <Editable as="span" path="home.services.viewAll" />
                 </motion.button>
               </Link>
             </FadeUp>
@@ -546,13 +538,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <FadeUp>
-              <span className="text-primary text-sm font-bold uppercase tracking-widest">{c.whyChooseUs.label}</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-3 mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-                {c.whyChooseUs.title}
-              </h2>
-              <p className="text-white/55 text-lg mb-10 leading-relaxed">
-                {c.whyChooseUs.description}
-              </p>
+              <Editable as="span" className="text-primary text-sm font-bold uppercase tracking-widest" path="home.whyChooseUs.label" />
+              <Editable as="h2" className="text-3xl sm:text-4xl font-extrabold text-white mt-3 mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="home.whyChooseUs.title" />
+              <Editable as="p" className="text-white/55 text-lg mb-10 leading-relaxed" path="home.whyChooseUs.description" multiline />
               <div className="space-y-5">
                 {c.whyChooseUs.items.map((item, i) => {
                   const meta = whyIcons[i % whyIcons.length];
@@ -571,8 +559,8 @@ export default function Home() {
                       <Icon className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-white text-base">{item.title}</h4>
-                      <p className="text-white/55 text-sm mt-0.5">{item.sub}</p>
+                      <Editable as="h4" className="font-bold text-white text-base" path={`home.whyChooseUs.items.${i}.title`} />
+                      <Editable as="p" className="text-white/55 text-sm mt-0.5" path={`home.whyChooseUs.items.${i}.sub`} />
                     </div>
                   </motion.div>
                   );
@@ -591,14 +579,14 @@ export default function Home() {
                     <div className="flex gap-0.5 mb-3">
                       {Array(5).fill(0).map((_, si) => <Star key={si} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
                     </div>
-                    <p className="text-white/80 text-sm leading-relaxed italic mb-4">"{t.content}"</p>
+                    <p className="text-white/80 text-sm leading-relaxed italic mb-4">"<Editable as="span" path={`home.testimonials.items.${i}.content`} multiline />"</p>
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center flex-shrink-0">
                         <span className="text-white font-bold text-xs">{t.initials}</span>
                       </div>
                       <div>
-                        <p className="font-semibold text-white text-sm">{t.name}</p>
-                        <p className="text-white/40 text-xs">{t.role}</p>
+                        <Editable as="p" className="font-semibold text-white text-sm" path={`home.testimonials.items.${i}.name`} />
+                        <Editable as="p" className="text-white/40 text-xs" path={`home.testimonials.items.${i}.role`} />
                       </div>
                     </div>
                   </motion.div>
@@ -613,10 +601,8 @@ export default function Home() {
       <section className="py-24 bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <span className="text-primary text-sm font-bold uppercase tracking-widest">{c.testimonials.label}</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-3" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {c.testimonials.title}
-            </h2>
+            <Editable as="span" className="text-primary text-sm font-bold uppercase tracking-widest" path="home.testimonials.label" />
+            <Editable as="h2" className="text-3xl sm:text-4xl font-extrabold text-white mt-3" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="home.testimonials.title" />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {c.testimonials.items.map((t, i) => (
@@ -628,14 +614,14 @@ export default function Home() {
                   <div className="flex gap-0.5 mb-3">
                     {Array(5).fill(0).map((_, si) => <Star key={si} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />)}
                   </div>
-                  <p className="text-white/70 text-sm leading-relaxed italic mb-5 flex-1">"{t.content}"</p>
+                  <p className="text-white/70 text-sm leading-relaxed italic mb-5 flex-1">"<Editable as="span" path={`home.testimonials.items.${i}.content`} multiline />"</p>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-xs">{t.initials}</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-white text-sm">{t.name}</p>
-                      <p className="text-white/40 text-xs">{t.role}</p>
+                      <Editable as="p" className="font-semibold text-white text-sm" path={`home.testimonials.items.${i}.name`} />
+                      <Editable as="p" className="text-white/40 text-xs" path={`home.testimonials.items.${i}.role`} />
                     </div>
                   </div>
                 </motion.div>
@@ -658,12 +644,8 @@ export default function Home() {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeUp>
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {c.cta.title}
-            </h2>
-            <p className="text-white/65 text-xl mb-10 max-w-2xl mx-auto">
-              {c.cta.subtitle}
-            </p>
+            <Editable as="h2" className="text-4xl sm:text-5xl font-extrabold text-white mb-6" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="home.cta.title" />
+            <Editable as="p" className="text-white/65 text-xl mb-10 max-w-2xl mx-auto" path="home.cta.subtitle" multiline />
             <motion.div
               animate={{ scale: [1, 1.025, 1] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -675,12 +657,12 @@ export default function Home() {
                   whileTap={{ scale: 0.97 }}
                   className="bg-white text-primary font-extrabold text-lg px-14 py-5 rounded-full shadow-2xl hover:bg-gray-50 transition-colors inline-flex items-center gap-3"
                 >
-                  {c.cta.button}
+                  <Editable as="span" path="home.cta.button" />
                   <ArrowRight className="w-5 h-5" />
                 </motion.button>
               </Link>
             </motion.div>
-            <p className="text-white/35 text-sm mt-5">{c.cta.fineprint}</p>
+            <Editable as="p" className="text-white/35 text-sm mt-5" path="home.cta.fineprint" />
           </FadeUp>
         </div>
       </section>
@@ -694,9 +676,7 @@ export default function Home() {
               <Link href="/" className="flex items-center gap-2 mb-5">
                 <img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-90" />
               </Link>
-              <p className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs">
-                {c.footer.brandDescription}
-              </p>
+              <Editable as="p" className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs" path="home.footer.brandDescription" multiline />
               <div className="flex gap-3">
                 {c.footer.socials.map(s => (
                   <motion.a
@@ -715,13 +695,13 @@ export default function Home() {
             </div>
 
             {/* Link columns */}
-            {c.footer.columns.map(col => (
+            {c.footer.columns.map((col, ci) => (
               <div key={col.title}>
-                <h4 className="font-bold text-sm uppercase tracking-wider mb-5">{col.title}</h4>
+                <Editable as="h4" className="font-bold text-sm uppercase tracking-wider mb-5" path={`home.footer.columns.${ci}.title`} />
                 <ul className="space-y-3">
-                  {col.links.map(l => (
+                  {col.links.map((l, li) => (
                     <li key={l.href}>
-                      <Link href={l.href} className="text-white/45 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">{l.label}</Link>
+                      <Link href={l.href} className="text-white/45 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block"><Editable as="span" path={`home.footer.columns.${ci}.links.${li}.label`} /></Link>
                     </li>
                   ))}
                 </ul>
@@ -730,13 +710,13 @@ export default function Home() {
           </div>
 
           <div className="border-t border-white/8 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-white/30 text-sm">{content.site.footer.copyright}</p>
+            <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
             <div className="flex items-center gap-5">
-              {content.site.footer.links.map(l => (
-                <Link key={l.href} href={l.href} className="text-white/30 hover:text-white text-sm transition-colors">{l.label}</Link>
+              {content.site.footer.links.map((l, i) => (
+                <Link key={l.href} href={l.href} className="text-white/30 hover:text-white text-sm transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></Link>
               ))}
             </div>
-            <p className="text-white/30 text-sm">{c.footer.tagline}</p>
+            <Editable as="p" className="text-white/30 text-sm" path="home.footer.tagline" />
           </div>
         </div>
       </footer>

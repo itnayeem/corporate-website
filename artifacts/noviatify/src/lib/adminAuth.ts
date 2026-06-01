@@ -12,10 +12,12 @@ export function getAdminToken(): string | null {
 
 export function setAdminToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
+  window.dispatchEvent(new Event("noviatify-auth"));
 }
 
 export function clearAdminToken(): void {
   localStorage.removeItem(TOKEN_KEY);
+  window.dispatchEvent(new Event("noviatify-auth"));
 }
 
 export function isAdminAuthed(): boolean {

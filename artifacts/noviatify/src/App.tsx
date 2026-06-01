@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ContentProvider } from "@/content/ContentContext";
+import { EditModeProvider } from "@/content/EditModeContext";
+import { EditToolbar } from "@/components/admin/EditToolbar";
 import "@/lib/adminAuth";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
@@ -61,12 +63,15 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ContentProvider>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
+        <EditModeProvider>
+          <TooltipProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+              <EditToolbar />
+            </WouterRouter>
+            <Toaster />
+          </TooltipProvider>
+        </EditModeProvider>
       </ContentProvider>
     </QueryClientProvider>
   );

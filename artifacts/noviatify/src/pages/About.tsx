@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowRight, Award, Users, Globe, Zap, Shield, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
+import { Editable } from "@/components/admin/Editable";
 import logoPath from "@assets/noviatify-logo.png";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -35,7 +36,7 @@ const valueMeta = [
 
 export default function About() {
   const content = useContent();
-  const { hero, mission, milestones, awardsSection, teamSection, valuesSection, cta } = content.about;
+  const { mission, milestones, awardsSection, teamSection, valuesSection, cta } = content.about;
 
   return (
     <div className="min-h-screen bg-[#060d2b] text-white overflow-x-hidden">
@@ -48,13 +49,9 @@ export default function About() {
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "60px 60px" }} />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
-            <span className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4">{hero.eyebrow}</span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-              {hero.title}
-            </h1>
-            <p className="text-white/60 text-lg max-w-2xl leading-relaxed">
-              {hero.subtitle}
-            </p>
+            <Editable as="span" className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4" path="about.hero.eyebrow" />
+            <Editable as="h1" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.hero.title" />
+            <Editable as="p" className="text-white/60 text-lg max-w-2xl leading-relaxed" path="about.hero.subtitle" multiline />
           </motion.div>
         </div>
         <div className="absolute bottom-0 left-0 right-0">
@@ -69,13 +66,9 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-14 items-center">
             <FadeUp>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-6" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-                {mission.title}
-              </h2>
+              <Editable as="h2" className="text-3xl sm:text-4xl font-extrabold text-white mb-6" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.mission.title" />
               {mission.paragraphs.map((p, i) => (
-                <p key={i} className={`text-white/55 text-lg leading-relaxed ${i === mission.paragraphs.length - 1 ? "mb-8" : "mb-6"}`}>
-                  {p}
-                </p>
+                <Editable key={i} as="p" className={`text-white/55 text-lg leading-relaxed ${i === mission.paragraphs.length - 1 ? "mb-8" : "mb-6"}`} path={`about.mission.paragraphs.${i}`} multiline />
               ))}
               <div className="grid grid-cols-2 gap-5">
                 {mission.stats.map((item, i) => {
@@ -86,7 +79,7 @@ export default function About() {
                       transition={{ delay: i * 0.1 }}
                       className="flex items-center gap-3 rounded-2xl p-4 bg-white/5">
                       <Icon className={`w-5 h-5 ${meta.color} flex-shrink-0`} />
-                      <span className="font-bold text-white text-sm">{item.label}</span>
+                      <Editable as="span" className="font-bold text-white text-sm" path={`about.mission.stats.${i}.label`} />
                     </motion.div>
                   );
                 })}
@@ -99,14 +92,12 @@ export default function About() {
                 <FadeUp key={m.year} delay={i * 0.12}>
                   <motion.div whileHover={{ x: 6 }} className="flex gap-5 cursor-default">
                     <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-xs shadow-lg shadow-blue-500/25 flex-shrink-0">
-                        {m.year}
-                      </div>
+                      <Editable as="div" className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-xs shadow-lg shadow-blue-500/25 flex-shrink-0" path={`about.milestones.${i}.year`} />
                       {i < milestones.length - 1 && <div className="w-px h-full bg-gradient-to-b from-primary/30 to-transparent mt-2" />}
                     </div>
                     <div className="pb-6">
-                      <h3 className="font-bold text-white text-lg mb-1">{m.title}</h3>
-                      <p className="text-white/55 text-sm leading-relaxed">{m.desc}</p>
+                      <Editable as="h3" className="font-bold text-white text-lg mb-1" path={`about.milestones.${i}.title`} />
+                      <Editable as="p" className="text-white/55 text-sm leading-relaxed" path={`about.milestones.${i}.desc`} multiline />
                     </div>
                   </motion.div>
                 </FadeUp>
@@ -120,8 +111,8 @@ export default function About() {
       <section className="py-20 bg-[#0a1330]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>{awardsSection.title}</h2>
-            <p className="text-white/55 text-lg mt-3">{awardsSection.subtitle}</p>
+            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.awardsSection.title" />
+            <Editable as="p" className="text-white/55 text-lg mt-3" path="about.awardsSection.subtitle" multiline />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {awardsSection.awards.map((a, i) => (
@@ -131,9 +122,9 @@ export default function About() {
                   <div className="flex gap-0.5 justify-center mb-3">
                     {Array(5).fill(0).map((_, si) => <Star key={si} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
                   </div>
-                  <h3 className="font-black text-2xl text-white mb-1">{a.name}</h3>
-                  <p className="text-blue-400 text-xs font-bold mb-3">{a.year}</p>
-                  <p className="text-white/55 text-sm leading-relaxed">{a.detail}</p>
+                  <Editable as="h3" className="font-black text-2xl text-white mb-1" path={`about.awardsSection.awards.${i}.name`} />
+                  <Editable as="p" className="text-blue-400 text-xs font-bold mb-3" path={`about.awardsSection.awards.${i}.year`} />
+                  <Editable as="p" className="text-white/55 text-sm leading-relaxed" path={`about.awardsSection.awards.${i}.detail`} multiline />
                 </motion.div>
               </FadeUp>
             ))}
@@ -145,19 +136,19 @@ export default function About() {
       <section className="py-20 bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>{teamSection.title}</h2>
-            <p className="text-white/55 text-lg mt-3">{teamSection.subtitle}</p>
+            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.teamSection.title" />
+            <Editable as="p" className="text-white/55 text-lg mt-3" path="about.teamSection.subtitle" multiline />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {teamSection.members.map((member, i) => (
               <FadeUp key={member.name} delay={i * 0.12}>
                 <motion.div whileHover={{ y: -6 }} className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-400/30 transition-all text-center">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/25">
-                    <span className="text-white font-extrabold text-lg">{member.initials}</span>
+                    <Editable as="span" className="text-white font-extrabold text-lg" path={`about.teamSection.members.${i}.initials`} />
                   </div>
-                  <h3 className="font-bold text-white text-base mb-0.5">{member.name}</h3>
-                  <p className="text-blue-400 text-xs font-semibold mb-3">{member.role}</p>
-                  <p className="text-white/55 text-xs leading-relaxed">{member.bio}</p>
+                  <Editable as="h3" className="font-bold text-white text-base mb-0.5" path={`about.teamSection.members.${i}.name`} />
+                  <Editable as="p" className="text-blue-400 text-xs font-semibold mb-3" path={`about.teamSection.members.${i}.role`} />
+                  <Editable as="p" className="text-white/55 text-xs leading-relaxed" path={`about.teamSection.members.${i}.bio`} multiline />
                 </motion.div>
               </FadeUp>
             ))}
@@ -169,7 +160,7 @@ export default function About() {
       <section className="py-20 bg-[#0a1330]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }}>{valuesSection.title}</h2>
+            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.valuesSection.title" />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {valuesSection.values.map((v, i) => {
@@ -181,8 +172,8 @@ export default function About() {
                     <div className={`w-12 h-12 rounded-2xl ${meta.color} flex items-center justify-center mb-4`}>
                       <Icon className="w-6 h-6" />
                     </div>
-                    <h3 className="font-bold text-white text-base mb-2">{v.title}</h3>
-                    <p className="text-white/55 text-sm leading-relaxed">{v.desc}</p>
+                    <Editable as="h3" className="font-bold text-white text-base mb-2" path={`about.valuesSection.values.${i}.title`} />
+                    <Editable as="p" className="text-white/55 text-sm leading-relaxed" path={`about.valuesSection.values.${i}.desc`} multiline />
                   </motion.div>
                 </FadeUp>
               );
@@ -196,19 +187,19 @@ export default function About() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#060d2b] via-[#0c1648] to-[#060d2b]" />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeUp>
-            <h2 className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }}>{cta.title}</h2>
-            <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">{cta.subtitle}</p>
+            <Editable as="h2" className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.cta.title" />
+            <Editable as="p" className="text-white/60 text-lg mb-8 max-w-xl mx-auto" path="about.cta.subtitle" multiline />
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href={cta.primary.href}>
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                   className="bg-primary text-white font-bold px-10 py-4 rounded-full shadow-xl shadow-blue-900/40 hover:bg-blue-600 transition-colors inline-flex items-center gap-2">
-                  {cta.primary.label} <ArrowRight className="w-4 h-4" />
+                  <Editable as="span" path="about.cta.primary.label" /> <ArrowRight className="w-4 h-4" />
                 </motion.button>
               </Link>
               <Link href={cta.secondary.href}>
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                   className="border-2 border-white/30 text-white font-bold px-10 py-4 rounded-full hover:border-white transition-colors inline-flex items-center gap-2">
-                  {cta.secondary.label}
+                  <Editable as="span" path="about.cta.secondary.label" />
                 </motion.button>
               </Link>
             </div>

@@ -1,1 +1,2 @@
 - [Noviatify content CMS](noviatify-content-cms.md) — JSONB doc deep-merged over defaults; index icon/color metadata arrays with modulo or admin-added items crash pages; all visible text must come from content slices.
+- [Noviatify inline visual editor](noviatify-inline-editor.md) — click-to-edit-in-place over the CMS; render every visible string via `<Editable path>`, never mix merged/draft reads for the same string, re-sync draft from the save response.
