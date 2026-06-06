@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronDown } from "lucide-react";
-import logoPath from "@assets/noviatify-logo.png";
+import SiteLogo from "@/components/SiteLogo";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
 import { EditableLink } from "@/components/admin/EditableLink";
@@ -36,7 +36,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-18 py-3">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <img src={logoPath} alt={nav ? "Noviatify" : "Noviatify"} className="h-8 w-auto" />
+            <SiteLogo className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Nav */}

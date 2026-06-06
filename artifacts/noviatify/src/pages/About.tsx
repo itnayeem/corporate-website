@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
 import { EditableLink } from "@/components/admin/EditableLink";
-import logoPath from "@assets/noviatify-logo.png";
+import SiteLogo from "@/components/SiteLogo";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
@@ -210,7 +210,7 @@ export default function About() {
 
       <footer className="bg-[#040918] text-white py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <Link href="/"><img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" /></Link>
+          <Link href="/"><SiteLogo className="h-7 w-auto opacity-80" /></Link>
           <p className="text-white/30 text-sm">{content.site.footer.copyright}</p>
           <div className="flex gap-5 text-sm text-white/40">
             {content.site.footer.links.map((link, i) => (

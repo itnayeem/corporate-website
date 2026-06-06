@@ -5,7 +5,7 @@ import {
   ArrowRight, CheckCircle2, Star, Shield, Zap, Award, Users,
   Building2, Globe, Briefcase, ChevronRight, Play
 } from "lucide-react";
-import logoPath from "@assets/noviatify-logo.png";
+import SiteLogo from "@/components/SiteLogo";
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
@@ -675,7 +675,7 @@ export default function Home() {
             {/* Brand */}
             <div className="col-span-2">
               <Link href="/" className="flex items-center gap-2 mb-5">
-                <img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-90" />
+                <SiteLogo className="h-7 w-auto opacity-90" />
               </Link>
               <Editable as="p" className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs" path="home.footer.brandDescription" multiline />
               <div className="flex gap-3">

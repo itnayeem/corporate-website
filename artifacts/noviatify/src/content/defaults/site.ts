@@ -1,6 +1,9 @@
 export const site = {
   brand: {
     name: "Noviatify",
+    slogan: "Business formation, made effortless.",
+    logoUrl: "",
+    faviconUrl: "",
   },
   nav: {
     home: "Home",

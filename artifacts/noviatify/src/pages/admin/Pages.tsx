@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocation, Link } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   ExternalLink,
@@ -9,10 +10,21 @@ import {
   KeyRound,
   Check,
   Layers,
+  Palette,
+  Upload,
+  ImageIcon,
 } from "lucide-react";
-import { useChangeAdminPassword, ApiError } from "@workspace/api-client-react";
+import {
+  useChangeAdminPassword,
+  useUpdateContent,
+  useRequestUploadUrl,
+  getGetContentQueryKey,
+  ApiError,
+} from "@workspace/api-client-react";
 import { isAdminAuthed, clearAdminToken } from "@/lib/adminAuth";
 import { sitePages } from "@/content/sitePages";
+import { useContent } from "@/content/ContentContext";
+import SiteLogo, { resolveAssetUrl } from "@/components/SiteLogo";
 
 export default function AdminPages() {
   const [, navigate] = useLocation();
@@ -103,6 +115,8 @@ export default function AdminPages() {
             ))}
           </div>
         </section>
+
+        <BrandingCard />
 
         <ChangePasswordCard />
       </main>
@@ -226,6 +240,219 @@ function ChangePasswordCard() {
           )}
         </motion.button>
       </form>
+    </section>
+  );
+}
+
+function BrandingCard() {
+  const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const content = useContent();
+  const brand = content.site.brand;
+
+  const update = useUpdateContent();
+  const requestUpload = useRequestUploadUrl();
+  const logoInput = useRef<HTMLInputElement>(null);
+  const faviconInput = useRef<HTMLInputElement>(null);
+
+  const [name, setName] = useState(brand.name);
+  const [slogan, setSlogan] = useState(brand.slogan ?? "");
+  const [logoUrl, setLogoUrl] = useState(brand.logoUrl ?? "");
+  const [faviconUrl, setFaviconUrl] = useState(brand.faviconUrl ?? "");
+  const [uploading, setUploading] = useState<"logo" | "favicon" | null>(null);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  // Re-seed the form whenever the persisted brand changes (e.g. after save).
+  useEffect(() => {
+    setName(brand.name);
+    setSlogan(brand.slogan ?? "");
+    setLogoUrl(brand.logoUrl ?? "");
+    setFaviconUrl(brand.faviconUrl ?? "");
+  }, [brand.name, brand.slogan, brand.logoUrl, brand.faviconUrl]);
+
+  const handleAuthError = (err: unknown): boolean => {
+    if (err instanceof ApiError && err.status === 401) {
+      clearAdminToken();
+      navigate("/admin");
+      return true;
+    }
+    return false;
+  };
+
+  const uploadFile = async (file: File, which: "logo" | "favicon") => {
+    setError("");
+    setDone(false);
+    setUploading(which);
+    try {
+      const res = await requestUpload.mutateAsync({
+        data: { name: file.name, size: file.size, contentType: file.type },
+      });
+      const put = await fetch(res.uploadURL, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!put.ok) throw new Error("upload failed");
+      if (which === "logo") setLogoUrl(res.objectPath);
+      else setFaviconUrl(res.objectPath);
+    } catch (err) {
+      if (handleAuthError(err)) return;
+      setError("Could not upload the image. Please try again.");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleSave = () => {
+    setError("");
+    setDone(false);
+    const next = {
+      ...content,
+      site: {
+        ...content.site,
+        brand: { ...content.site.brand, name, slogan, logoUrl, faviconUrl },
+      },
+    };
+    update.mutate(
+      { data: { data: next as unknown as Record<string, unknown> } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetContentQueryKey() });
+          setDone(true);
+          setTimeout(() => setDone(false), 4000);
+        },
+        onError: (err) => {
+          if (handleAuthError(err)) return;
+          setError("Could not save branding. Please try again.");
+        },
+      },
+    );
+  };
+
+  const inputClass =
+    "w-full rounded-lg bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-primary";
+  const faviconSrc = resolveAssetUrl(faviconUrl);
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-1">
+        <Palette className="w-4 h-4 text-blue-400" />
+        <h2 className="text-base font-bold">Branding</h2>
+      </div>
+      <p className="text-white/45 text-sm mb-5">
+        Change your logo, favicon, site name, and slogan. These appear across the
+        whole site.
+      </p>
+
+      <div className="rounded-2xl bg-white/5 border border-white/10 p-6 max-w-md space-y-6">
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-white/60">Site name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your business name"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-white/60">Slogan</label>
+          <input
+            type="text"
+            value={slogan}
+            onChange={(e) => setSlogan(e.target.value)}
+            placeholder="A short tagline"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-white/60">Logo</label>
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-32 rounded-lg bg-[#060d2b] border border-white/10 flex items-center justify-center overflow-hidden">
+              <SiteLogo className="max-h-9 max-w-28 w-auto" />
+            </div>
+            <input
+              ref={logoInput}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) uploadFile(f, "logo");
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => logoInput.current?.click()}
+              disabled={uploading === "logo"}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 border border-white/15 px-3 py-2 rounded-lg hover:bg-white/5 transition disabled:opacity-50"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              {uploading === "logo" ? "Uploading…" : "Upload logo"}
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-white/60">
+            Favicon{" "}
+            <span className="font-normal text-white/35">
+              (browser tab icon)
+            </span>
+          </label>
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-lg bg-[#060d2b] border border-white/10 flex items-center justify-center overflow-hidden">
+              {faviconSrc ? (
+                <img src={faviconSrc} alt="Favicon" className="h-7 w-7 object-contain" />
+              ) : (
+                <ImageIcon className="w-5 h-5 text-white/25" />
+              )}
+            </div>
+            <input
+              ref={faviconInput}
+              type="file"
+              accept="image/png,image/x-icon,image/svg+xml,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) uploadFile(f, "favicon");
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => faviconInput.current?.click()}
+              disabled={uploading === "favicon"}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 border border-white/15 px-3 py-2 rounded-lg hover:bg-white/5 transition disabled:opacity-50"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              {uploading === "favicon" ? "Uploading…" : "Upload favicon"}
+            </button>
+          </div>
+        </div>
+
+        {error && <p className="text-red-400 text-sm">{error}</p>}
+
+        <motion.button
+          type="button"
+          onClick={handleSave}
+          disabled={update.isPending || uploading !== null}
+          whileTap={{ scale: 0.98 }}
+          className="inline-flex items-center justify-center gap-1.5 bg-primary text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-lg shadow-blue-900/30 hover:bg-blue-600 transition disabled:opacity-50"
+        >
+          {done ? (
+            <>
+              <Check className="w-4 h-4" /> Branding saved
+            </>
+          ) : (
+            <>{update.isPending ? "Saving…" : "Save branding"}</>
+          )}
+        </motion.button>
+      </div>
     </section>
   );
 }

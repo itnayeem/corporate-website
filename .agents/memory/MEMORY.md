@@ -2,3 +2,4 @@
 - [Noviatify inline visual editor](noviatify-inline-editor.md) — click-to-edit-in-place over the CMS; render every visible string via `<Editable path>`, never mix merged/draft reads for the same string, re-sync draft from the save response.
 - [Noviatify admin auth & password change](noviatify-admin-auth.md) — scrypt hash in admin_settings w/ ADMIN_PASSWORD env fallback; api-server workflow skips tsc (run typecheck manually); `const SECRET` doesn't narrow into closures.
 - [Noviatify admin page directory](noviatify-admin-auth.md) — `/admin/pages` dashboard lists all public pages from static `src/content/sitePages.ts` (keep in sync with App.tsx routes); login redirects here.
+- [Noviatify branding & object storage](noviatify-branding-storage.md) — admin edits logo/favicon/name/slogan in `site.brand`; `/objects/*` served publicly on purpose (admin-only writer, public images); reset favicon to default when cleared.

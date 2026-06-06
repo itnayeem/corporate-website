@@ -3,7 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, Shield, Briefcase, Globe, CheckCircle2, Users, Building2, Award, FileText } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import logoPath from "@assets/noviatify-logo.png";
+import SiteLogo from "@/components/SiteLogo";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
 import { EditableLink } from "@/components/admin/EditableLink";
@@ -169,7 +169,7 @@ export default function Services() {
       {/* Footer */}
       <footer className="bg-[#040918] text-white py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <Link href="/"><img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" /></Link>
+          <Link href="/"><SiteLogo className="h-7 w-auto opacity-80" /></Link>
           <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
           <div className="flex gap-5 text-sm text-white/40">
             {content.site.footer.links.map((link, i) => (

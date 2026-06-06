@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
 import { EditableLink } from "@/components/admin/EditableLink";
-import logoPath from "@assets/noviatify-logo.png";
+import SiteLogo from "@/components/SiteLogo";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
@@ -63,7 +63,7 @@ function MiniFooter() {
     <footer className="bg-[#040918] text-white py-10 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
         <Link href="/" className="flex items-center gap-2">
-          <img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" />
+          <SiteLogo className="h-7 w-auto opacity-80" />
         </Link>
         <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
         <div className="flex gap-5 text-sm text-white/40">
