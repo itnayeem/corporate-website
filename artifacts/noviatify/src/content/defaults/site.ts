@@ -7,6 +7,8 @@ export const site = {
     howItWorks: "How It Works",
     services: "Services",
     about: "About Us",
+    pricing: "Pricing",
+    pricingHref: "/pricing",
     login: "Login",
     loginHref: "/login",
     startCta: "Start Now",

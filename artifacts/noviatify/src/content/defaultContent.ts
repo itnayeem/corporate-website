@@ -3,6 +3,7 @@ import { home } from "./defaults/home";
 import { howItWorks } from "./defaults/howItWorks";
 import { services } from "./defaults/services";
 import { about } from "./defaults/about";
+import { pricing } from "./defaults/pricing";
 
 export const defaultContent = {
   site,
@@ -10,6 +11,7 @@ export const defaultContent = {
   howItWorks,
   services,
   about,
+  pricing,
 };
 
 export type SiteContent = typeof defaultContent;

@@ -124,6 +124,10 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
+
+            <EditableLink path="site.nav.pricingHref" className="text-white/80 hover:text-white transition-colors">
+              <Editable as="span" path="site.nav.pricing" />
+            </EditableLink>
           </nav>
 
           {/* CTA */}

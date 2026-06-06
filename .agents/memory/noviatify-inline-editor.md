@@ -28,3 +28,9 @@ Admins log in, browse the live public pages, and click any text to edit it in pl
 
 ## Backend is unchanged
 The login + authed GET/PUT persistence is the same proven backend as the base CMS; inline editing is a pure frontend layer over it.
+
+## Inline add/remove of array items (e.g. Pricing packages)
+Two non-obvious requirements when admins add/remove array items live on the page:
+1. **Re-key the rendered items on structural change.** `<Editable>` is uncontrolled (keyed `path:rev`), so after indices shift the same key keeps stale text. Bump a local `structVer` and include it in each item's React `key` (and feature sub-items) so the subtree remounts and re-reads the draft.
+2. **Mutate atomically via a functional updater, never read-then-write.** `<Editable>` commits on **blur**, so clicking Add/Remove right after typing fires the field's blur (queued `setValue`) *and* the click handler in the same batch. If the handler builds the new array from a `getValue()` snapshot taken before the blur applied, the just-typed edit is clobbered. Use `EditModeContext.updateValue(path, (cur)=>...)` which reads the latest draft inside `setDraft` so the blur-commit is preserved.
+**Why:** architect-caught race; both bugs only surface during real editing, not on first render.

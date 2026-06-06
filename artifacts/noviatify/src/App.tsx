@@ -11,6 +11,7 @@ import Home from "@/pages/Home";
 import HowItWorks from "@/pages/HowItWorks";
 import Services from "@/pages/Services";
 import About from "@/pages/About";
+import Pricing from "@/pages/Pricing";
 import GenericPage from "@/pages/GenericPage";
 import AdminLogin from "@/pages/admin/Login";
 import AdminEditor from "@/pages/admin/Editor";
@@ -31,7 +32,6 @@ const genericRoutes = [
   "/services/good-standing",
   "/services/change-agent",
   "/services/name-change",
-  "/pricing",
   "/order-status",
   "/research",
   "/start",
@@ -47,6 +47,7 @@ function Router() {
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/services" component={Services} />
       <Route path="/about" component={About} />
+      <Route path="/pricing" component={Pricing} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/editor" component={AdminEditor} />
       {genericRoutes.map((path) => (

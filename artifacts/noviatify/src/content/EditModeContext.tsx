@@ -29,6 +29,12 @@ interface EditModeValue {
   getValue: (path: string) => unknown;
   /** Write a value into the draft at a dot-path. */
   setValue: (path: string, value: unknown) => void;
+  /**
+   * Atomically update the draft value at a dot-path using the latest draft.
+   * Use this for structural changes (e.g. add/remove array items) so a pending
+   * blur-commit from an inline field is not clobbered by a stale snapshot.
+   */
+  updateValue: (path: string, updater: (current: unknown) => unknown) => void;
   dirty: boolean;
   saving: boolean;
   justSaved: boolean;
@@ -93,6 +99,17 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
     setJustSaved(false);
   }, []);
 
+  const updateValue = useCallback(
+    (path: string, updater: (current: unknown) => unknown) => {
+      setDraft((prev) =>
+        prev ? setByPath(prev, path, updater(getByPath(prev, path))) : prev,
+      );
+      setDirty(true);
+      setJustSaved(false);
+    },
+    [],
+  );
+
   const save = useCallback(() => {
     if (!draft) return;
     setError("");
@@ -148,6 +165,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       exitEdit,
       getValue,
       setValue,
+      updateValue,
       dirty,
       saving: update.isPending,
       justSaved,
@@ -164,6 +182,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       exitEdit,
       getValue,
       setValue,
+      updateValue,
       dirty,
       update.isPending,
       justSaved,
