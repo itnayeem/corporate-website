@@ -24,6 +24,7 @@ import { isAdminAuthed, clearAdminToken } from "@/lib/adminAuth";
 import { sitePages } from "@/content/sitePages";
 import { useContent } from "@/content/ContentContext";
 import SiteLogo, { resolveAssetUrl } from "@/components/SiteLogo";
+import { CropModal } from "@/components/admin/CropModal";
 
 export default function AdminPages() {
   const [, navigate] = useLocation();
@@ -255,6 +256,10 @@ function BrandingCard() {
   const [uploading, setUploading] = useState<"logo" | "favicon" | null>(null);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [cropping, setCropping] = useState<{
+    file: File;
+    which: "logo" | "favicon";
+  } | null>(null);
 
   // Re-seed the form whenever the persisted brand changes (e.g. after save).
   useEffect(() => {
@@ -271,6 +276,12 @@ function BrandingCard() {
       return true;
     }
     return false;
+  };
+
+  const startUpload = (file: File, which: "logo" | "favicon") => {
+    setError("");
+    setDone(false);
+    setCropping({ file, which });
   };
 
   const uploadFile = async (file: File, which: "logo" | "favicon") => {
@@ -374,7 +385,7 @@ function BrandingCard() {
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) uploadFile(f, "logo");
+                if (f) startUpload(f, "logo");
                 e.target.value = "";
               }}
             />
@@ -412,7 +423,7 @@ function BrandingCard() {
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) uploadFile(f, "favicon");
+                if (f) startUpload(f, "favicon");
                 e.target.value = "";
               }}
             />
@@ -446,6 +457,29 @@ function BrandingCard() {
           )}
         </motion.button>
       </div>
+
+      {cropping && (
+        <CropModal
+          file={cropping.file}
+          title={cropping.which === "logo" ? "Crop your logo" : "Crop your favicon"}
+          maxOutput={cropping.which === "logo" ? 512 : 256}
+          aspectOptions={
+            cropping.which === "logo"
+              ? [
+                  { label: "Wide", value: 3 },
+                  { label: "Standard", value: 4 / 3 },
+                  { label: "Square", value: 1 },
+                ]
+              : [{ label: "Square", value: 1 }]
+          }
+          onCancel={() => setCropping(null)}
+          onCropped={(cropped) => {
+            const { which } = cropping;
+            setCropping(null);
+            uploadFile(cropped, which);
+          }}
+        />
+      )}
     </section>
   );
 }

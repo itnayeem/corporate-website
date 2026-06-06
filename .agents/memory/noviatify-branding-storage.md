@@ -30,6 +30,15 @@ endpoint also restricts `contentType` to `image/*` as defense-in-depth.
 `faviconUrl` is cleared — an early-return on empty leaves a stale favicon in the
 tab. Always handle both set-and-clear branches in the effect.
 
+## Crop step (logo/favicon)
+Picking a logo/favicon opens a `CropModal` (react-easy-crop) before upload; the
+cropped region is drawn to a canvas and exported as **PNG**.
+**Why PNG:** preserves transparency and always satisfies the server's `image/*`
+upload validation regardless of the source file type.
+**How to apply:** keep `restrictPosition` at its default (true) so the crop frame
+can't drift off the image and export a blank/transparent result; gate the confirm
+callback with an `active` ref so a cancel/unmount mid-export can't still upload.
+
 ## Template typecheck quirk
 `objectStorage.ts` `signObjectURL` does `await response.json()` which is typed
 `unknown` under strict TS — cast the destructure (`as { signed_url: string }`).
