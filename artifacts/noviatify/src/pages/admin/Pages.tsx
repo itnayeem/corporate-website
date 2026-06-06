@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import {
   ExternalLink,
   LogOut,
-  SlidersHorizontal,
   Pencil,
   KeyRound,
   Check,
@@ -54,12 +53,6 @@ export default function AdminPages() {
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition"
             >
               <ExternalLink className="w-3.5 h-3.5" /> View site
-            </Link>
-            <Link
-              href="/admin/editor"
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" /> Advanced editor
             </Link>
             <button
               onClick={handleLogout}
