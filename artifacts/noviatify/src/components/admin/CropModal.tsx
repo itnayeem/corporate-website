@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import Cropper, { type Area } from "react-easy-crop";
-import { Check, X, ZoomIn } from "lucide-react";
+import ReactCrop, {
+  type Crop,
+  type PixelCrop,
+  centerCrop,
+  makeAspectCrop,
+} from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
+import { Check, X } from "lucide-react";
 
 type AspectOption = { label: string; value: number };
 
@@ -14,23 +20,35 @@ interface CropModalProps {
   onCropped: (file: File) => void;
 }
 
+function centeredAspectCrop(
+  mediaWidth: number,
+  mediaHeight: number,
+  aspect: number,
+): Crop {
+  return centerCrop(
+    makeAspectCrop({ unit: "%", width: 90 }, aspect, mediaWidth, mediaHeight),
+    mediaWidth,
+    mediaHeight,
+  );
+}
+
 async function cropToFile(
-  src: string,
-  area: Area,
+  image: HTMLImageElement,
+  area: PixelCrop,
   fileName: string,
   maxOutput: number,
 ): Promise<File> {
-  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
+  const scaleX = image.naturalWidth / image.width;
+  const scaleY = image.naturalHeight / image.height;
 
-  const scale = Math.min(1, maxOutput / Math.max(area.width, area.height));
-  const outW = Math.max(1, Math.round(area.width * scale));
-  const outH = Math.max(1, Math.round(area.height * scale));
+  const srcW = area.width * scaleX;
+  const srcH = area.height * scaleY;
+  const srcX = area.x * scaleX;
+  const srcY = area.y * scaleY;
+
+  const scale = Math.min(1, maxOutput / Math.max(srcW, srcH));
+  const outW = Math.max(1, Math.round(srcW * scale));
+  const outH = Math.max(1, Math.round(srcH * scale));
 
   const canvas = document.createElement("canvas");
   canvas.width = outW;
@@ -38,17 +56,7 @@ async function cropToFile(
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("no canvas context");
   ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(
-    image,
-    area.x,
-    area.y,
-    area.width,
-    area.height,
-    0,
-    0,
-    outW,
-    outH,
-  );
+  ctx.drawImage(image, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
 
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob((b) => resolve(b), "image/png", 0.92),
@@ -67,11 +75,11 @@ export function CropModal({
   onCropped,
 }: CropModalProps) {
   const [src, setSrc] = useState<string>("");
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [aspect, setAspect] = useState(aspectOptions[0]?.value ?? 1);
-  const [areaPixels, setAreaPixels] = useState<Area | null>(null);
   const [busy, setBusy] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const activeRef = useRef(true);
 
   useEffect(() => {
@@ -88,23 +96,40 @@ export function CropModal({
     }
     const url = URL.createObjectURL(file);
     setSrc(url);
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-    setAreaPixels(null);
+    setCrop(undefined);
+    setCompletedCrop(null);
     setAspect(aspectOptions[0]?.value ?? 1);
     return () => URL.revokeObjectURL(url);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file]);
 
-  const onCropComplete = useCallback((_: Area, pixels: Area) => {
-    setAreaPixels(pixels);
-  }, []);
+  const onImageLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const { width, height } = e.currentTarget;
+      setCrop(centeredAspectCrop(width, height, aspect));
+    },
+    [aspect],
+  );
+
+  const changeAspect = (value: number) => {
+    setAspect(value);
+    const img = imgRef.current;
+    if (img) {
+      setCrop(centeredAspectCrop(img.width, img.height, value));
+    }
+  };
 
   const handleConfirm = async () => {
-    if (!file || !areaPixels) return;
+    if (!file || !completedCrop || !imgRef.current) return;
+    if (completedCrop.width === 0 || completedCrop.height === 0) return;
     setBusy(true);
     try {
-      const cropped = await cropToFile(src, areaPixels, file.name, maxOutput);
+      const cropped = await cropToFile(
+        imgRef.current,
+        completedCrop,
+        file.name,
+        maxOutput,
+      );
       if (activeRef.current) onCropped(cropped);
     } finally {
       if (activeRef.current) setBusy(false);
@@ -129,21 +154,33 @@ export function CropModal({
           </button>
         </div>
 
-        <div className="relative h-72 bg-[#060d2b]">
+        <div className="flex items-center justify-center max-h-80 overflow-hidden bg-[#060d2b] p-3">
           {src && (
-            <Cropper
-              image={src}
+            <ReactCrop
               crop={crop}
-              zoom={zoom}
+              onChange={(_, percentCrop) => setCrop(percentCrop)}
+              onComplete={(c) => setCompletedCrop(c)}
               aspect={aspect}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-            />
+              keepSelection
+              className="max-h-[18rem]"
+            >
+              <img
+                ref={imgRef}
+                src={src}
+                alt="To crop"
+                onLoad={onImageLoad}
+                className="max-h-[18rem] max-w-full w-auto h-auto object-contain select-none"
+              />
+            </ReactCrop>
           )}
         </div>
 
         <div className="px-5 py-4 space-y-4">
+          <p className="text-xs text-white/40">
+            Drag the box to move it, or drag a corner to resize the area you
+            want to keep.
+          </p>
+
           {aspectOptions.length > 1 && (
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-white/50">Shape</span>
@@ -152,7 +189,7 @@ export function CropModal({
                   <button
                     key={opt.label}
                     type="button"
-                    onClick={() => setAspect(opt.value)}
+                    onClick={() => changeAspect(opt.value)}
                     className={`text-xs font-semibold px-2.5 py-1 rounded-md border transition ${
                       aspect === opt.value
                         ? "bg-primary border-primary text-white"
@@ -166,19 +203,6 @@ export function CropModal({
             </div>
           )}
 
-          <div className="flex items-center gap-3">
-            <ZoomIn className="w-4 h-4 text-white/50 flex-shrink-0" />
-            <input
-              type="range"
-              min={1}
-              max={3}
-              step={0.01}
-              value={zoom}
-              onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-full accent-primary"
-            />
-          </div>
-
           <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
@@ -191,7 +215,12 @@ export function CropModal({
             <button
               type="button"
               onClick={handleConfirm}
-              disabled={busy || !areaPixels}
+              disabled={
+                busy ||
+                !completedCrop ||
+                completedCrop.width <= 0 ||
+                completedCrop.height <= 0
+              }
               className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-primary px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
             >
               <Check className="w-3.5 h-3.5" />
