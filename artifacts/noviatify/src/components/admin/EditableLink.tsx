@@ -73,10 +73,7 @@ export function EditableLink({ path, children, className, block }: EditableLinkP
             title="Edit link destination"
             aria-label="Edit link destination"
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
+            onClick={(e) => e.stopPropagation()}
           >
             <Link2 className="w-3 h-3" />
           </button>
