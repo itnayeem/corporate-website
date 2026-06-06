@@ -9,7 +9,8 @@ A dark-themed, animated multi-page marketing website for Noviatify (a business f
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm --filter @workspace/noviatify run typecheck` — typecheck just the website (use this, not `build`, to verify)
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `pnpm --filter @workspace/db run push` — push DB schema changes (dev/prod DB)
+- `pnpm run build:standalone` — build for a single-Node-process host (e.g. Hostinger): builds the frontend, builds the API server, and copies the frontend into `artifacts/api-server/dist/public`. In production (`NODE_ENV=production`) the API server then serves that static site + SPA fallback alongside `/api`, so the whole app runs from `artifacts/api-server/dist/index.mjs`. Requires `DATABASE_URL` (external Postgres), `SESSION_SECRET`, `ADMIN_PASSWORD`, `PORT`, and `NODE_ENV=production`.
 - Required env: `DATABASE_URL` (Postgres), `ADMIN_PASSWORD` (admin login), `SESSION_SECRET` (token signing — server fails fast if unset)
 
 ## Stack
