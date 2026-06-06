@@ -1,1 +1,2 @@
 - [Local upload storage](local-upload-storage.md) — branding images saved to API server local fs (not object storage); raw-fetch PUT needs manual Bearer token; ephemeral on autoscale deploys.
+- [Hostinger deploy](hostinger-deploy.md) — mirror `onlyBuiltDependencies` in root package.json `pnpm` field too; external hosts ignore the pnpm-workspace.yaml copy and fail esbuild builds.

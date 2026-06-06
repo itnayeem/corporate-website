@@ -1,0 +1,23 @@
+---
+name: Hostinger / external pnpm build-script approval
+description: Why esbuild build scripts get ignored on external hosts and where to allowlist them
+---
+
+# pnpm build-script approval on external hosts (Hostinger)
+
+pnpm 10 does NOT run dependency build scripts (e.g. esbuild's) unless the package
+is allowlisted. If a host's pnpm install fails with `ERR_PNPM_IGNORED_BUILDS:
+Ignored build scripts: esbuild@...`, the allowlist isn't being read.
+
+**Rule:** mirror `onlyBuiltDependencies` in BOTH `pnpm-workspace.yaml` AND the root
+`package.json` `pnpm` field.
+
+**Why:** Replit's local pnpm reads `onlyBuiltDependencies` from
+`pnpm-workspace.yaml`, but some external hosts (Hostinger) read it only from the
+root `package.json` `pnpm` field. Having it only in the workspace yaml builds fine
+locally yet fails the host install. Keep both lists in sync.
+
+**How to apply:** when deploying this repo to a non-Replit Node host and the install
+errors on ignored builds, confirm the root `package.json` has
+`pnpm.onlyBuiltDependencies` listing every native dep that needs a build script
+(currently `@swc/core`, `esbuild`, `msw`, `unrs-resolver`).
