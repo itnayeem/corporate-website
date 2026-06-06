@@ -21,10 +21,3 @@ locally yet fails the host install. Keep both lists in sync.
 errors on ignored builds, confirm the root `package.json` has
 `pnpm.onlyBuiltDependencies` listing every native dep that needs a build script
 (currently `@swc/core`, `esbuild`, `msw`, `unrs-resolver`).
-
-**Also:** root `package.json` pins `packageManager: pnpm@<version>` so hosts using
-corepack run the same pnpm that honors these allowlists. If the host STILL reports
-the ignored-builds error after the allowlist is in place, the host is almost always
-building a STALE commit — it pulls from the user's git remote (e.g. GitHub), not
-from Replit checkpoints, so the fix must be pushed to that remote / a fresh deploy
-triggered from the latest commit.
