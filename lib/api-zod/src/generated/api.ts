@@ -57,3 +57,18 @@ export const AdminLoginResponse = zod.object({
 })
 
 
+/**
+ * Updates the admin password (admin only). Requires the current password.
+ * @summary Change admin password
+ */
+
+export const changeAdminPasswordBodyNewPasswordMin = 8;
+
+
+
+export const ChangeAdminPasswordBody = zod.object({
+  "currentPassword": zod.string().min(1),
+  "newPassword": zod.string().min(changeAdminPasswordBodyNewPasswordMin)
+})
+
+

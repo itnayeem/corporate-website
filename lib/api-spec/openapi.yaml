@@ -90,6 +90,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /admin/password:
+    put:
+      operationId: changeAdminPassword
+      tags: [admin]
+      summary: Change admin password
+      description: Updates the admin password (admin only). Requires the current password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordInput"
+      responses:
+        "204":
+          description: Password updated
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized or incorrect current password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     HealthStatus:
@@ -141,3 +168,15 @@ components:
       properties:
         token:
           type: string
+    ChangePasswordInput:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          minLength: 8

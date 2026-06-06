@@ -34,3 +34,10 @@ export interface AdminToken {
   token: string;
 }
 
+export interface ChangePasswordInput {
+  /** @minLength 1 */
+  currentPassword: string;
+  /** @minLength 8 */
+  newPassword: string;
+}
+

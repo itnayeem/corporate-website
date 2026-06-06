@@ -8,6 +8,7 @@
 
 export * from './adminCredentials';
 export * from './adminToken';
+export * from './changePasswordInput';
 export * from './error';
 export * from './healthStatus';
 export * from './siteContent';

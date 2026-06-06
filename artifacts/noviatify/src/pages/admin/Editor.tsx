@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Save, LogOut, RotateCcw, Check, ExternalLink } from "lucide-react";
+import { Save, LogOut, RotateCcw, Check, ExternalLink, LayoutGrid } from "lucide-react";
 import {
   useGetContent,
   useUpdateContent,
@@ -76,6 +76,12 @@ export default function AdminEditor() {
             <p className="text-white/40 text-xs">Edit any text on your site, then save.</p>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/admin/pages"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" /> Pages
+            </Link>
             <Link
               href="/"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition"
