@@ -30,12 +30,12 @@ export default function AdminPages() {
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (!isAdminAuthed()) navigate("/admin");
+    if (!isAdminAuthed()) navigate("/owner");
   }, [navigate]);
 
   const handleLogout = () => {
     clearAdminToken();
-    navigate("/admin");
+    navigate("/owner");
   };
 
   return (
@@ -158,7 +158,7 @@ function ChangePasswordCard() {
             // a valid session with the wrong current password gets a different message.
             if (body?.error === "Unauthorized") {
               clearAdminToken();
-              navigate("/admin");
+              navigate("/owner");
               return;
             }
             setError("Your current password is incorrect.");
@@ -272,7 +272,7 @@ function BrandingCard() {
   const handleAuthError = (err: unknown): boolean => {
     if (err instanceof ApiError && err.status === 401) {
       clearAdminToken();
-      navigate("/admin");
+      navigate("/owner");
       return true;
     }
     return false;

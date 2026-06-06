@@ -28,7 +28,7 @@ export function EditToolbar() {
   } = useEditMode();
 
   if (!isAdmin) return null;
-  if (location.startsWith("/admin")) return null;
+  if (location.startsWith("/owner")) return null;
 
   return (
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
@@ -51,7 +51,7 @@ export function EditToolbar() {
               <Pencil className="w-4 h-4" /> Edit this page
             </button>
             <Link
-              href="/admin/pages"
+              href="/owner/pages"
               className="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-full hover:bg-white/5 transition"
               title="All pages & settings"
             >

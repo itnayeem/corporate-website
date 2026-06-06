@@ -49,8 +49,8 @@ function Router() {
       <Route path="/services" component={Services} />
       <Route path="/about" component={About} />
       <Route path="/pricing" component={Pricing} />
-      <Route path="/admin" component={AdminLogin} />
-      <Route path="/admin/pages" component={AdminPages} />
+      <Route path="/owner" component={AdminLogin} />
+      <Route path="/owner/pages" component={AdminPages} />
       {genericRoutes.map((path) => (
         <Route key={path} path={path}>
           {() => <GenericPage pageKey={path} />}

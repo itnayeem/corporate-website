@@ -19,7 +19,7 @@ export default function AdminLogin() {
       {
         onSuccess: (res) => {
           setAdminToken(res.token);
-          navigate("/admin/pages");
+          navigate("/owner/pages");
         },
         onError: () => setError("Incorrect password. Please try again."),
       },
