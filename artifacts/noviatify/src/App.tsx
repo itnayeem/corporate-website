@@ -15,7 +15,6 @@ import About from "@/pages/About";
 import Pricing from "@/pages/Pricing";
 import GenericPage from "@/pages/GenericPage";
 import AdminLogin from "@/pages/admin/Login";
-import AdminEditor from "@/pages/admin/Editor";
 import AdminPages from "@/pages/admin/Pages";
 
 const queryClient = new QueryClient();
@@ -52,7 +51,6 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/pages" component={AdminPages} />
-      <Route path="/admin/editor" component={AdminEditor} />
       {genericRoutes.map((path) => (
         <Route key={path} path={path}>
           {() => <GenericPage pageKey={path} />}

@@ -7,7 +7,6 @@ import {
   RotateCcw,
   LogOut,
   Eye,
-  SlidersHorizontal,
   LayoutGrid,
 } from "lucide-react";
 import { useEditMode } from "@/content/EditModeContext";
@@ -58,14 +57,6 @@ export function EditToolbar() {
             >
               <LayoutGrid className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Pages</span>
-            </Link>
-            <Link
-              href="/admin/editor"
-              className="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-xs font-medium px-3 py-2 rounded-full hover:bg-white/5 transition"
-              title="Advanced editor"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Advanced</span>
             </Link>
             <button
               onClick={logout}
