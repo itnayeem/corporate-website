@@ -23,5 +23,17 @@ export default function SiteLogo({
 }) {
   const brand = useContent().site.brand;
   const src = resolveAssetUrl(brand.logoUrl) ?? logoFallback;
-  return <img src={src} alt={alt ?? brand.name} className={className} />;
+  return (
+    <img
+      src={src}
+      alt={alt ?? brand.name}
+      className={className}
+      onError={(e) => {
+        // If a stored logo can't be loaded (e.g. missing file), fall back to
+        // the bundled default instead of showing a broken image.
+        const img = e.currentTarget;
+        if (img.src !== logoFallback) img.src = logoFallback;
+      }}
+    />
+  );
 }

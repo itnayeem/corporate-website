@@ -424,10 +424,10 @@ export const getRequestUploadUrlUrl = () => {
 }
 
 /**
- * Returns a presigned GCS URL for direct upload. The client sends JSON
-metadata here, then uploads the file directly to the returned URL.
+ * Returns a same-origin URL to PUT the file bytes to. The client sends
+JSON metadata here, then uploads the file directly to the returned URL.
 
- * @summary Request a presigned URL for file upload
+ * @summary Reserve a local upload slot
  */
 export const requestUploadUrl = async (uploadUrlRequest: UploadUrlRequest, options?: RequestInit): Promise<UploadUrlResponse> => {
 
@@ -476,7 +476,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type RequestUploadUrlMutationError = ErrorType<Error>
 
     /**
- * @summary Request a presigned URL for file upload
+ * @summary Reserve a local upload slot
  */
 export const useRequestUploadUrl = <TError = ErrorType<Error>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<UploadUrlRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -489,23 +489,22 @@ export const useRequestUploadUrl = <TError = ErrorType<Error>,
       return useMutation(getRequestUploadUrlMutationOptions(options));
     }
 
-export const getGetPublicObjectUrl = (filePath: string,) => {
+export const getGetStorageObjectUrl = (filename: string,) => {
 
 
 
 
-  return `/api/storage/public-objects/${filePath}`
+  return `/api/storage/objects/${filename}`
 }
 
 /**
- * Unconditionally public — no authentication or ACL checks.
-Searches PUBLIC_OBJECT_SEARCH_PATHS for the given file path.
+ * Serves an image previously uploaded via the local upload flow.
 
- * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ * @summary Serve a stored branding image
  */
-export const getPublicObject = async (filePath: string, options?: RequestInit): Promise<Blob> => {
+export const getStorageObject = async (filename: string, options?: RequestInit): Promise<Blob> => {
 
-  return customFetch<Blob>(getGetPublicObjectUrl(filePath),
+  return customFetch<Blob>(getGetStorageObjectUrl(filename),
   {
     ...options,
     method: 'GET'
@@ -518,108 +517,29 @@ export const getPublicObject = async (filePath: string, options?: RequestInit): 
 
 
 
-export const getGetPublicObjectQueryKey = (filePath: string,) => {
+export const getGetStorageObjectQueryKey = (filename: string,) => {
     return [
-    `/api/storage/public-objects/${filePath}`
+    `/api/storage/objects/${filename}`
     ] as const;
     }
 
 
-export const getGetPublicObjectQueryOptions = <TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<Error>>(filePath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetStorageObjectQueryOptions = <TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<Error>>(filename: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPublicObjectQueryKey(filePath);
+  const queryKey =  queryOptions?.queryKey ?? getGetStorageObjectQueryKey(filename);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicObject>>> = ({ signal }) => getPublicObject(filePath, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(filePath), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetPublicObjectQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicObject>>>
-export type GetPublicObjectQueryError = ErrorType<Error>
-
-
-/**
- * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
- */
-
-export function useGetPublicObject<TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<Error>>(
- filePath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetPublicObjectQueryOptions(filePath,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStorageObject>>> = ({ signal }) => getStorageObject(filename, { signal, ...requestOptions });
 
 
 
 
 
-
-
-export const getGetStorageObjectUrl = (objectPath: string,) => {
-
-
-
-
-  return `/api/storage/objects/${objectPath}`
-}
-
-/**
- * Serves object entities uploaded via presigned URLs.
-
- * @summary Serve an object entity from PRIVATE_OBJECT_DIR
- */
-export const getStorageObject = async (objectPath: string, options?: RequestInit): Promise<Blob> => {
-
-  return customFetch<Blob>(getGetStorageObjectUrl(objectPath),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetStorageObjectQueryKey = (objectPath: string,) => {
-    return [
-    `/api/storage/objects/${objectPath}`
-    ] as const;
-    }
-
-
-export const getGetStorageObjectQueryOptions = <TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<Error>>(objectPath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetStorageObjectQueryKey(objectPath);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStorageObject>>> = ({ signal }) => getStorageObject(objectPath, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(objectPath), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(filename), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData> & { queryKey: QueryKey }
 }
 
 export type GetStorageObjectQueryResult = NonNullable<Awaited<ReturnType<typeof getStorageObject>>>
@@ -627,15 +547,15 @@ export type GetStorageObjectQueryError = ErrorType<Error>
 
 
 /**
- * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ * @summary Serve a stored branding image
  */
 
 export function useGetStorageObject<TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<Error>>(
- objectPath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ filename: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetStorageObjectQueryOptions(objectPath,options)
+  const queryOptions = getGetStorageObjectQueryOptions(filename,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

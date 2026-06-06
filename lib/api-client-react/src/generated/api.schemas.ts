@@ -60,9 +60,9 @@ export interface UploadUrlRequest {
 }
 
 export interface UploadUrlResponse {
-  /** Presigned GCS URL for PUT upload. */
+  /** Same-origin URL to PUT the file bytes to. */
   uploadURL: string;
-  /** Normalized object path (e.g. `/objects/uploads/uuid`). */
+  /** Path to persist and render the image from (e.g. `/objects/uuid.png`). */
   objectPath: string;
   metadata?: UploadUrlRequest;
 }

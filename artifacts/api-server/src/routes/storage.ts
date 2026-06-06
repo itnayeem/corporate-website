@@ -1,142 +1,134 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { Readable } from "stream";
+import express, {
+  Router,
+  type IRouter,
+  type Request,
+  type Response,
+} from "express";
+import { randomUUID } from "crypto";
 import {
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
 } from "@workspace/api-zod";
-import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
-import { ObjectPermission } from "../lib/objectAcl";
 import { requireAdmin } from "../lib/auth";
+import {
+  contentTypeForFile,
+  extForContentType,
+  isValidUploadName,
+  readUpload,
+  saveUpload,
+  UploadNotFoundError,
+} from "../lib/localStorage";
 
 const router: IRouter = Router();
-const objectStorageService = new ObjectStorageService();
+
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8 MB
 
 /**
  * POST /storage/uploads/request-url
  *
- * Request a presigned URL for file upload.
- * The client sends JSON metadata (name, size, contentType) — NOT the file.
- * Then uploads the file directly to the returned presigned URL.
+ * Reserve a local upload slot. The client sends JSON metadata (name, size,
+ * contentType) — NOT the file — and gets back a same-origin `uploadURL` to PUT
+ * the bytes to, plus the `objectPath` to persist and render the image from.
  */
-router.post("/storage/uploads/request-url", requireAdmin, async (req: Request, res: Response) => {
-  const parsed = RequestUploadUrlBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Missing or invalid required fields" });
-    return;
-  }
+router.post(
+  "/storage/uploads/request-url",
+  requireAdmin,
+  (req: Request, res: Response) => {
+    const parsed = RequestUploadUrlBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Missing or invalid required fields" });
+      return;
+    }
 
-  // This app only uploads public branding images (logo/favicon). Restrict to
-  // images so the admin-gated endpoint can't be used to stash arbitrary files.
-  if (!parsed.data.contentType.startsWith("image/")) {
-    res.status(400).json({ error: "Only image uploads are allowed" });
-    return;
-  }
-
-  try {
     const { name, size, contentType } = parsed.data;
 
-    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-    const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+    // This app only uploads public branding images (logo/favicon).
+    const ext = extForContentType(contentType);
+    if (!ext) {
+      res.status(400).json({ error: "Only image uploads are allowed" });
+      return;
+    }
+    if (size > MAX_UPLOAD_BYTES) {
+      res.status(400).json({ error: "File is too large (max 8 MB)" });
+      return;
+    }
 
+    const filename = `${randomUUID()}.${ext}`;
     res.json(
       RequestUploadUrlResponse.parse({
-        uploadURL,
-        objectPath,
+        uploadURL: `/api/storage/uploads/${filename}`,
+        objectPath: `/objects/${filename}`,
         metadata: { name, size, contentType },
       }),
     );
-  } catch (error) {
-    req.log.error({ err: error }, "Error generating upload URL");
-    res.status(500).json({ error: "Failed to generate upload URL" });
-  }
-});
+  },
+);
 
 /**
- * GET /storage/public-objects/*
+ * PUT /storage/uploads/:filename
  *
- * Serve public assets from PUBLIC_OBJECT_SEARCH_PATHS.
- * These are unconditionally public — no authentication or ACL checks.
- * IMPORTANT: Always provide this endpoint when object storage is set up.
+ * Receive the raw image bytes and write them to local storage. Admin-gated and
+ * restricted to image content types. The filename is the one minted by
+ * request-url above (`<uuid>.<ext>`), validated here to prevent path traversal.
  */
-router.get("/storage/public-objects/*filePath", async (req: Request, res: Response) => {
-  try {
-    const raw = req.params.filePath;
-    const filePath = Array.isArray(raw) ? raw.join("/") : raw;
-    const file = await objectStorageService.searchPublicObject(filePath);
-    if (!file) {
-      res.status(404).json({ error: "File not found" });
+router.put(
+  "/storage/uploads/:filename",
+  requireAdmin,
+  express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }),
+  async (req: Request, res: Response) => {
+    const filename = String(req.params.filename);
+    if (!isValidUploadName(filename)) {
+      res.status(400).json({ error: "Invalid file name" });
+      return;
+    }
+    if (!(req.get("content-type") ?? "").toLowerCase().startsWith("image/")) {
+      res.status(400).json({ error: "Only image uploads are allowed" });
+      return;
+    }
+    const body = req.body;
+    if (!Buffer.isBuffer(body) || body.length === 0) {
+      res.status(400).json({ error: "Empty upload" });
       return;
     }
 
-    const response = await objectStorageService.downloadObject(file);
-
-    res.status(response.status);
-    response.headers.forEach((value, key) => res.setHeader(key, value));
-
-    if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
-      nodeStream.pipe(res);
-    } else {
-      res.end();
+    try {
+      await saveUpload(filename, body);
+      res.status(200).json({ objectPath: `/objects/${filename}` });
+    } catch (error) {
+      req.log.error({ err: error }, "Error saving upload");
+      res.status(500).json({ error: "Failed to save upload" });
     }
-  } catch (error) {
-    req.log.error({ err: error }, "Error serving public object");
-    res.status(500).json({ error: "Failed to serve public object" });
-  }
-});
+  },
+);
 
 /**
- * GET /storage/objects/*
+ * GET /storage/objects/:filename
  *
- * Serve object entities from PRIVATE_OBJECT_DIR.
- * Intentionally public (no auth/ACL): the only writer is the admin-gated
- * upload endpoint above, and every uploaded object is a public branding image
- * (logo/favicon) meant to be shown to all site visitors. If private/per-user
- * uploads are ever added, gate this route with auth + ACL checks (see the
- * commented example below) before storing anything non-public here.
+ * Serve a stored branding image. Intentionally public (no auth/ACL): the only
+ * writer is the admin-gated upload route and every file is a public image.
  */
-router.get("/storage/objects/*path", async (req: Request, res: Response) => {
-  try {
-    const raw = req.params.path;
-    const wildcardPath = Array.isArray(raw) ? raw.join("/") : raw;
-    const objectPath = `/objects/${wildcardPath}`;
-    const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
-
-    // --- Protected route example (uncomment when using replit-auth) ---
-    // if (!req.isAuthenticated()) {
-    //   res.status(401).json({ error: "Unauthorized" });
-    //   return;
-    // }
-    // const canAccess = await objectStorageService.canAccessObjectEntity({
-    //   userId: req.user.id,
-    //   objectFile,
-    //   requestedPermission: ObjectPermission.READ,
-    // });
-    // if (!canAccess) {
-    //   res.status(403).json({ error: "Forbidden" });
-    //   return;
-    // }
-
-    const response = await objectStorageService.downloadObject(objectFile);
-
-    res.status(response.status);
-    response.headers.forEach((value, key) => res.setHeader(key, value));
-
-    if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
-      nodeStream.pipe(res);
-    } else {
-      res.end();
-    }
-  } catch (error) {
-    if (error instanceof ObjectNotFoundError) {
-      req.log.warn({ err: error }, "Object not found");
+router.get(
+  "/storage/objects/:filename",
+  async (req: Request, res: Response) => {
+    const filename = String(req.params.filename);
+    if (!isValidUploadName(filename)) {
       res.status(404).json({ error: "Object not found" });
       return;
     }
-    req.log.error({ err: error }, "Error serving object");
-    res.status(500).json({ error: "Failed to serve object" });
-  }
-});
+    try {
+      const buffer = await readUpload(filename);
+      res.setHeader("Content-Type", contentTypeForFile(filename));
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      res.status(200).end(buffer);
+    } catch (error) {
+      if (error instanceof UploadNotFoundError) {
+        res.status(404).json({ error: "Object not found" });
+        return;
+      }
+      req.log.error({ err: error }, "Error serving object");
+      res.status(500).json({ error: "Failed to serve object" });
+    }
+  },
+);
 
 export default router;

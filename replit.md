@@ -35,6 +35,7 @@ A dark-themed, animated multi-page marketing website for Noviatify (a business f
 - Admin auth is intentionally simple (single owner): password checked with `timingSafeEqual` against `ADMIN_PASSWORD`; success returns an HMAC token (signed with `SESSION_SECRET`, 12h TTL) stored in localStorage as `noviatify_admin_token` and sent as a Bearer token.
 - Pages derive visual metadata (icons/colors) from fixed local arrays indexed by content position, accessed with modulo so admin-added array items can never crash a page.
 - Dark theme is enforced globally via the `dark` class added in `main.tsx`.
+- Branding image uploads (logo/favicon) are stored on the API server's local filesystem (`artifacts/api-server/public/uploads/`, overridable via `UPLOADS_DIR`) — no third-party file service. Flow: admin POSTs metadata to `/storage/uploads/request-url` (mints `<uuid>.<ext>`, returns a same-origin `uploadURL` + `objectPath`), client PUTs raw bytes to `/storage/uploads/:filename` (admin-gated, `express.raw`), and `/storage/objects/:filename` serves them. The DB only stores the `/objects/...` URL in the content JSONB.
 
 ## Product
 
@@ -51,6 +52,8 @@ A dark-themed, animated multi-page marketing website for Noviatify (a business f
 - `SESSION_SECRET` and `ADMIN_PASSWORD` must be set or auth breaks (server throws at startup if `SESSION_SECRET` is missing). Restart the api-server workflow after changing secrets.
 - After editing a lib's source (e.g. api-client-react), run `pnpm run typecheck:libs`. Verify the website with `pnpm --filter @workspace/noviatify run typecheck`, not `build` (build needs workflow-provided `PORT`/`BASE_PATH`).
 - When adding new editable text to a page, add it to the matching `src/content/defaults/*.ts` slice and read it via `useContent()` — don't hardcode strings in the page.
+- The branding upload PUT is a first-party admin-gated route, so the client must send the admin Bearer token on the raw `fetch` PUT. The global `setAuthTokenGetter` only patches the generated `customFetch`, NOT native `fetch`, so the token is attached manually in `Pages.tsx`.
+- Uploaded images live on the local filesystem. On ephemeral/multi-instance deploys (e.g. autoscale) these files are not shared and don't survive redeploys, while the DB still references `/objects/...`. SiteLogo has an `onError` fallback to the bundled logo; deploy on a single persistent instance (reserved VM with disk) if uploaded branding must persist.
 
 ## Pointers
 

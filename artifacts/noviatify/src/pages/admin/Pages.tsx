@@ -20,7 +20,7 @@ import {
   getGetContentQueryKey,
   ApiError,
 } from "@workspace/api-client-react";
-import { isAdminAuthed, clearAdminToken } from "@/lib/adminAuth";
+import { isAdminAuthed, clearAdminToken, getAdminToken } from "@/lib/adminAuth";
 import { sitePages } from "@/content/sitePages";
 import { useContent } from "@/content/ContentContext";
 import SiteLogo, { resolveAssetUrl } from "@/components/SiteLogo";
@@ -292,12 +292,19 @@ function BrandingCard() {
       const res = await requestUpload.mutateAsync({
         data: { name: file.name, size: file.size, contentType: file.type },
       });
+      const token = getAdminToken();
       const put = await fetch(res.uploadURL, {
         method: "PUT",
-        headers: { "Content-Type": file.type },
+        headers: {
+          "Content-Type": file.type,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: file,
       });
-      if (!put.ok) throw new Error("upload failed");
+      if (!put.ok) {
+        if (put.status === 401) throw new Error("unauthorized");
+        throw new Error("upload failed");
+      }
       if (which === "logo") setLogoUrl(res.objectPath);
       else setFaviconUrl(res.objectPath);
     } catch (err) {

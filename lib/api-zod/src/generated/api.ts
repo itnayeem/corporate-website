@@ -73,10 +73,10 @@ export const ChangeAdminPasswordBody = zod.object({
 
 
 /**
- * Returns a presigned GCS URL for direct upload. The client sends JSON
-metadata here, then uploads the file directly to the returned URL.
+ * Returns a same-origin URL to PUT the file bytes to. The client sends
+JSON metadata here, then uploads the file directly to the returned URL.
 
- * @summary Request a presigned URL for file upload
+ * @summary Reserve a local upload slot
  */
 
 
@@ -95,8 +95,8 @@ export const RequestUploadUrlBody = zod.object({
 
 
 export const RequestUploadUrlResponse = zod.object({
-  "uploadURL": zod.string().url().describe('Presigned GCS URL for PUT upload.'),
-  "objectPath": zod.string().describe('Normalized object path (e.g. `\/objects\/uploads\/uuid`).'),
+  "uploadURL": zod.string().describe('Same-origin URL to PUT the file bytes to.'),
+  "objectPath": zod.string().describe('Path to persist and render the image from (e.g. `\/objects\/uuid.png`).'),
   "metadata": zod.object({
   "name": zod.string().min(1).describe('Original file name.'),
   "size": zod.number().min(1).describe('File size in bytes.'),
@@ -106,23 +106,12 @@ export const RequestUploadUrlResponse = zod.object({
 
 
 /**
- * Unconditionally public — no authentication or ACL checks.
-Searches PUBLIC_OBJECT_SEARCH_PATHS for the given file path.
+ * Serves an image previously uploaded via the local upload flow.
 
- * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
- */
-export const GetPublicObjectParams = zod.object({
-  "filePath": zod.coerce.string().describe('Relative file path within the public search paths.')
-})
-
-
-/**
- * Serves object entities uploaded via presigned URLs.
-
- * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ * @summary Serve a stored branding image
  */
 export const GetStorageObjectParams = zod.object({
-  "objectPath": zod.coerce.string().describe('Object path within the private object dir (e.g. `uploads\/some-uuid`).')
+  "filename": zod.coerce.string().describe('Stored file name (e.g. `some-uuid.png`).')
 })
 
 
