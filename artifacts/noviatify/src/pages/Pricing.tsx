@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, CheckCircle2, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Plus, Trash2, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import logoPath from "@assets/noviatify-logo.png";
 import { useContent } from "@/content/ContentContext";
@@ -64,6 +64,21 @@ export default function Pricing() {
   const removePackage = (i: number) => {
     updateValue("pricing.packages", (cur) =>
       ((cur as Pkg[]) ?? []).filter((_, j) => j !== i),
+    );
+    setStructVer((v) => v + 1);
+  };
+
+  const addFeature = (i: number) => {
+    updateValue(`pricing.packages.${i}.features`, (cur) => [
+      ...((cur as string[]) ?? []),
+      "New feature",
+    ]);
+    setStructVer((v) => v + 1);
+  };
+
+  const removeFeature = (i: number, fi: number) => {
+    updateValue(`pricing.packages.${i}.features`, (cur) =>
+      ((cur as string[]) ?? []).filter((_, j) => j !== fi),
     );
     setStructVer((v) => v + 1);
   };
@@ -137,9 +152,31 @@ export default function Pricing() {
                     {pkg.features.map((f, fi) => (
                       <li key={`${fi}-${structVer}`} className="flex items-start gap-2 text-sm text-white/80">
                         <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <Editable as="span" path={`pricing.packages.${i}.features.${fi}`} />
+                        <Editable as="span" className="flex-1" path={`pricing.packages.${i}.features.${fi}`} />
+                        {editMode && (
+                          <button
+                            type="button"
+                            onClick={() => removeFeature(i, fi)}
+                            title="Remove feature"
+                            aria-label="Remove feature"
+                            className="flex-shrink-0 mt-0.5 text-red-400/70 hover:text-red-400 transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </li>
                     ))}
+                    {editMode && (
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => addFeature(i)}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-blue-400 transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add feature
+                        </button>
+                      </li>
+                    )}
                   </ul>
 
                   <EditableLink path={`pricing.packages.${i}.ctaHref`} block>
