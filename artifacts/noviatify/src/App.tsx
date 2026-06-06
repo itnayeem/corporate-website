@@ -1,4 +1,5 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { AnimatePresence } from "framer-motion";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,9 @@ import { ContentProvider } from "@/content/ContentContext";
 import { EditModeProvider } from "@/content/EditModeContext";
 import { EditToolbar } from "@/components/admin/EditToolbar";
 import BrandHead from "@/components/BrandHead";
+import Preloader from "@/components/Preloader";
+import ScrollProgress from "@/components/ScrollProgress";
+import PageTransition from "@/components/PageTransition";
 import "@/lib/adminAuth";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
@@ -42,22 +46,37 @@ const genericRoutes = [
 ];
 
 function Router() {
+  const [location] = useLocation();
+
+  // Admin routes render without the page transition so redirects stay instant.
+  if (location.startsWith("/owner")) {
+    return (
+      <Switch location={location}>
+        <Route path="/owner" component={AdminLogin} />
+        <Route path="/owner/pages" component={AdminPages} />
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
+
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/how-it-works" component={HowItWorks} />
-      <Route path="/services" component={Services} />
-      <Route path="/about" component={About} />
-      <Route path="/pricing" component={Pricing} />
-      <Route path="/owner" component={AdminLogin} />
-      <Route path="/owner/pages" component={AdminPages} />
-      {genericRoutes.map((path) => (
-        <Route key={path} path={path}>
-          {() => <GenericPage pageKey={path} />}
-        </Route>
-      ))}
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait" initial={false}>
+      <PageTransition key={location}>
+        <Switch location={location}>
+          <Route path="/" component={Home} />
+          <Route path="/how-it-works" component={HowItWorks} />
+          <Route path="/services" component={Services} />
+          <Route path="/about" component={About} />
+          <Route path="/pricing" component={Pricing} />
+          {genericRoutes.map((path) => (
+            <Route key={path} path={path}>
+              {() => <GenericPage pageKey={path} />}
+            </Route>
+          ))}
+          <Route component={NotFound} />
+        </Switch>
+      </PageTransition>
+    </AnimatePresence>
   );
 }
 
@@ -66,6 +85,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ContentProvider>
         <BrandHead />
+        <Preloader />
+        <ScrollProgress />
         <EditModeProvider>
           <TooltipProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>

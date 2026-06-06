@@ -27,7 +27,7 @@ A dark-themed, animated multi-page marketing website for Noviatify (a business f
 - API contract (source of truth): `lib/api-spec` OpenAPI → generates hooks in `lib/api-client-react`
 - API auth + routes: `artifacts/api-server/src/lib/auth.ts`, `artifacts/api-server/src/routes/`
 - Frontend content model: `artifacts/noviatify/src/content/` — `ContentContext.tsx` (provider + `useContent` + deepMerge), `defaultContent.ts` (composes all slices), `defaults/*.ts` (per-area editable text)
-- Admin UI: `artifacts/noviatify/src/pages/admin/{Login,Editor}.tsx`, `src/components/admin/ContentEditor.tsx`, `src/lib/adminAuth.ts`
+- Admin UI: `artifacts/noviatify/src/pages/admin/{Login,Pages}.tsx`, in-place editing via `src/components/admin/` (Editable, EditToolbar, CropModal), `src/lib/adminAuth.ts`
 
 ## Architecture decisions
 
@@ -39,7 +39,7 @@ A dark-themed, animated multi-page marketing website for Noviatify (a business f
 ## Product
 
 - Public site: Home, How It Works, Services, About, plus generic content pages — all dark-themed and animated.
-- Admin CMS at `/admin` (login) → `/admin/editor`: owner logs in with the admin password and edits every piece of site text through a recursive editor; changes persist to the DB and render on the public site.
+- Admin CMS at `/owner` (login) → `/owner/pages` (dashboard): owner logs in with the admin password, then edits site text in place (click any text on the public site) and manages branding; changes persist to the DB and render on the public site.
 
 ## User preferences
 

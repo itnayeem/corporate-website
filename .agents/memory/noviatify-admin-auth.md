@@ -23,4 +23,5 @@ Single-owner admin. Login exchanges a password for an HMAC session token (signed
 
 ## Frontend 401 handling for password change
 - `requireAdmin` returns `{error:"Unauthorized"}` on a bad/expired token; a valid session with the wrong current password returns a different `{error}` message. Both are HTTP 401.
-- In `ChangePasswordCard`, branch on `ApiError.data.error === "Unauthorized"` → clear token + redirect to `/admin`; otherwise show "current password is incorrect". Don't treat every 401 as wrong-password.
+- The admin section lives at `/owner` (login) and `/owner/pages` (dashboard) — it was renamed from `/admin`. All login/logout/401 redirects point to `/owner`.
+- In `ChangePasswordCard`, branch on `ApiError.data.error === "Unauthorized"` → clear token + redirect to `/owner`; otherwise show "current password is incorrect". Don't treat every 401 as wrong-password.
