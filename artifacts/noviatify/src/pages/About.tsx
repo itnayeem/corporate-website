@@ -5,6 +5,7 @@ import { ArrowRight, Award, Users, Globe, Zap, Shield, Star } from "lucide-react
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
+import { EditableLink } from "@/components/admin/EditableLink";
 import logoPath from "@assets/noviatify-logo.png";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -190,18 +191,18 @@ export default function About() {
             <Editable as="h2" className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.cta.title" />
             <Editable as="p" className="text-white/60 text-lg mb-8 max-w-xl mx-auto" path="about.cta.subtitle" multiline />
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href={cta.primary.href}>
+              <EditableLink path="about.cta.primary.href">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                   className="bg-primary text-white font-bold px-10 py-4 rounded-full shadow-xl shadow-blue-900/40 hover:bg-blue-600 transition-colors inline-flex items-center gap-2">
                   <Editable as="span" path="about.cta.primary.label" /> <ArrowRight className="w-4 h-4" />
                 </motion.button>
-              </Link>
-              <Link href={cta.secondary.href}>
+              </EditableLink>
+              <EditableLink path="about.cta.secondary.href">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                   className="border-2 border-white/30 text-white font-bold px-10 py-4 rounded-full hover:border-white transition-colors inline-flex items-center gap-2">
                   <Editable as="span" path="about.cta.secondary.label" />
                 </motion.button>
-              </Link>
+              </EditableLink>
             </div>
           </FadeUp>
         </div>
@@ -212,8 +213,8 @@ export default function About() {
           <Link href="/"><img src={logoPath} alt="Noviatify" className="h-7 w-auto opacity-80" /></Link>
           <p className="text-white/30 text-sm">{content.site.footer.copyright}</p>
           <div className="flex gap-5 text-sm text-white/40">
-            {content.site.footer.links.map((link) => (
-              <Link key={link.href} href={link.href} className="hover:text-white transition-colors">{link.label}</Link>
+            {content.site.footer.links.map((link, i) => (
+              <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors">{link.label}</EditableLink>
             ))}
           </div>
         </div>

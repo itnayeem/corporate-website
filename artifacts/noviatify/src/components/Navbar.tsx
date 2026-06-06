@@ -5,6 +5,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import logoPath from "@assets/noviatify-logo.png";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
+import { EditableLink } from "@/components/admin/EditableLink";
 
 export default function Navbar() {
   const content = useContent();
@@ -73,19 +74,19 @@ export default function Navbar() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.04 }}
                       >
-                        <Link
-                          href={s.href}
+                        <EditableLink
+                          path={`site.nav.serviceLinks.${i}.href`}
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/75 hover:bg-white/5 hover:text-white transition-colors"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
                           <Editable as="span" path={`site.nav.serviceLinks.${i}.label`} />
-                        </Link>
+                        </EditableLink>
                       </motion.div>
                     ))}
                     <div className="border-t border-white/10 mt-1 pt-1">
-                      <Link href="/services" className="flex items-center gap-2 px-4 py-2.5 text-sm text-blue-400 font-semibold hover:bg-white/5 transition-colors">
+                      <EditableLink path="site.nav.viewAllServicesHref" className="flex items-center gap-2 px-4 py-2.5 text-sm text-blue-400 font-semibold hover:bg-white/5 transition-colors">
                         <Editable as="span" path="site.nav.viewAllServices" />
-                      </Link>
+                      </EditableLink>
                     </div>
                   </motion.div>
                 )}
@@ -113,10 +114,10 @@ export default function Navbar() {
                   >
                     {nav.aboutLinks.map((a, i) => (
                       <motion.div key={a.href} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}>
-                        <Link href={a.href} className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/75 hover:bg-white/5 hover:text-white transition-colors">
+                        <EditableLink path={`site.nav.aboutLinks.${i}.href`} className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/75 hover:bg-white/5 hover:text-white transition-colors">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
                           <Editable as="span" path={`site.nav.aboutLinks.${i}.label`} />
-                        </Link>
+                        </EditableLink>
                       </motion.div>
                     ))}
                   </motion.div>
@@ -127,10 +128,10 @@ export default function Navbar() {
 
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
+            <EditableLink path="site.nav.loginHref" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
               <Editable as="span" path="site.nav.login" />
-            </Link>
-            <Link href="/start">
+            </EditableLink>
+            <EditableLink path="site.nav.startHref">
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
@@ -138,7 +139,7 @@ export default function Navbar() {
               >
                 <Editable as="span" path="site.nav.startCta" />
               </motion.button>
-            </Link>
+            </EditableLink>
           </div>
 
           {/* Mobile toggle */}
@@ -162,17 +163,17 @@ export default function Navbar() {
           >
             <div className="px-4 py-4 space-y-1">
               {nav.mobileLinks.map((item, i) => (
-                <Link key={item.href} href={item.href} className="block px-3 py-2.5 rounded-xl text-sm font-medium text-white/80 hover:bg-white/5 hover:text-white transition-colors">
+                <EditableLink key={item.href} path={`site.nav.mobileLinks.${i}.href`} block className="block px-3 py-2.5 rounded-xl text-sm font-medium text-white/80 hover:bg-white/5 hover:text-white transition-colors">
                   <Editable as="span" path={`site.nav.mobileLinks.${i}.label`} />
-                </Link>
+                </EditableLink>
               ))}
               <div className="pt-3 flex gap-2 border-t border-white/10 mt-2">
-                <Link href="/login" className="flex-1 text-center py-2.5 border border-white/15 rounded-full text-sm font-medium text-white/80 hover:bg-white/5">
+                <EditableLink path="site.nav.loginHref" block className="flex-1 text-center py-2.5 border border-white/15 rounded-full text-sm font-medium text-white/80 hover:bg-white/5">
                   <Editable as="span" path="site.nav.login" />
-                </Link>
-                <Link href="/start" className="flex-1 text-center py-2.5 bg-primary text-white rounded-full text-sm font-bold hover:bg-blue-600">
+                </EditableLink>
+                <EditableLink path="site.nav.startHref" block className="flex-1 text-center py-2.5 bg-primary text-white rounded-full text-sm font-bold hover:bg-blue-600">
                   <Editable as="span" path="site.nav.startCta" />
-                </Link>
+                </EditableLink>
               </div>
             </div>
           </motion.div>

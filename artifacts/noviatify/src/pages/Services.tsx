@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import logoPath from "@assets/noviatify-logo.png";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
+import { EditableLink } from "@/components/admin/EditableLink";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
@@ -38,13 +39,13 @@ export default function Services() {
             <Editable as="span" className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4" path="services.hero.eyebrow" />
             <Editable as="h1" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="services.hero.title" />
             <Editable as="p" className="text-white/60 text-lg max-w-xl mb-8 leading-relaxed" path="services.hero.subtitle" multiline />
-            <Link href={s.hero.cta.href}>
+            <EditableLink path="services.hero.cta.href">
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                 className="bg-primary text-white font-bold px-8 py-4 rounded-full shadow-xl shadow-blue-900/40 hover:bg-blue-600 transition-colors inline-flex items-center gap-2 group">
                 <Editable as="span" path="services.hero.cta.label" />
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </motion.button>
-            </Link>
+            </EditableLink>
           </motion.div>
         </div>
         <div className="absolute bottom-0 left-0 right-0">
@@ -84,13 +85,13 @@ export default function Services() {
                     ))}
                   </ul>
                   <Editable as="p" className="text-xs text-white/40 mb-4" path={`services.entities.${i}.price`} />
-                  <Link href={e.href}>
+                  <EditableLink path={`services.entities.${i}.href`} block>
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                       className="w-full py-3 rounded-xl border border-primary/30 text-primary font-semibold text-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300 flex items-center justify-center gap-2">
                       <Editable as="span" path="services.entitiesSection.formLabelPrefix" /><Editable as="span" path={`services.entities.${i}.name`} />
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </motion.button>
-                  </Link>
+                  </EditableLink>
                 </motion.div>
               </FadeUp>
               );
@@ -111,7 +112,7 @@ export default function Services() {
               const Icon = serviceIcons[i % serviceIcons.length];
               return (
               <FadeUp key={svc.title} delay={i * 0.08}>
-                <Link href={svc.href}>
+                <EditableLink path={`services.complianceServices.${i}.href`} block>
                   <motion.div
                     whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(37,117,252,0.10)" }}
                     className="group bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:border-blue-200 transition-all duration-300 cursor-pointer h-full flex flex-col"
@@ -132,7 +133,7 @@ export default function Services() {
                       <Editable as="span" path="services.complianceSection.learnMore" /> <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </span>
                   </motion.div>
-                </Link>
+                </EditableLink>
               </FadeUp>
               );
             })}
@@ -148,18 +149,18 @@ export default function Services() {
             <Editable as="h2" className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="services.cta.title" />
             <Editable as="p" className="text-blue-100 text-lg mb-8 max-w-xl mx-auto" path="services.cta.subtitle" multiline />
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href={s.cta.primary.href}>
+              <EditableLink path="services.cta.primary.href">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                   className="bg-white text-primary font-extrabold px-10 py-4 rounded-full shadow-2xl hover:bg-gray-50 transition-colors inline-flex items-center gap-2">
                   <Editable as="span" path="services.cta.primary.label" /> <ArrowRight className="w-4 h-4" />
                 </motion.button>
-              </Link>
-              <Link href={s.cta.secondary.href}>
+              </EditableLink>
+              <EditableLink path="services.cta.secondary.href">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                   className="border-2 border-white/40 text-white font-bold px-10 py-4 rounded-full hover:border-white transition-colors inline-flex items-center gap-2">
                   <Editable as="span" path="services.cta.secondary.label" />
                 </motion.button>
-              </Link>
+              </EditableLink>
             </div>
           </FadeUp>
         </div>
@@ -172,7 +173,7 @@ export default function Services() {
           <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
           <div className="flex gap-5 text-sm text-white/40">
             {content.site.footer.links.map((link, i) => (
-              <Link key={link.href} href={link.href} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></Link>
+              <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></EditableLink>
             ))}
           </div>
         </div>

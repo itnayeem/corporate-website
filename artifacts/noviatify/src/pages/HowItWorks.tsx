@@ -5,6 +5,7 @@ import { ArrowRight, Check, Building2, FileText, CheckCircle2, Globe } from "luc
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
+import { EditableLink } from "@/components/admin/EditableLink";
 import logoPath from "@assets/noviatify-logo.png";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -67,7 +68,7 @@ function MiniFooter() {
         <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
         <div className="flex gap-5 text-sm text-white/40">
           {footer.links.map((link, i) => (
-            <Link key={link.href} href={link.href} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></Link>
+            <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></EditableLink>
           ))}
         </div>
       </div>
@@ -98,7 +99,7 @@ export default function HowItWorks() {
             <Editable as="span" className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4" path="howItWorks.hero.eyebrow" />
             <Editable as="h1" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="howItWorks.hero.title" />
             <Editable as="p" className="text-white/60 text-lg max-w-xl mb-8 leading-relaxed" path="howItWorks.hero.subtitle" multiline />
-            <Link href={hero.cta.href}>
+            <EditableLink path="howItWorks.hero.cta.href">
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
@@ -107,7 +108,7 @@ export default function HowItWorks() {
                 <Editable as="span" path="howItWorks.hero.cta.label" />
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </motion.button>
-            </Link>
+            </EditableLink>
           </motion.div>
         </div>
 
@@ -176,7 +177,7 @@ export default function HowItWorks() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {entities.items.map((e, i) => (
               <FadeUp key={e.name} delay={i * 0.1}>
-                <Link href={e.href}>
+                <EditableLink path={`howItWorks.entities.items.${i}.href`} block>
                   <motion.div
                     whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(37,117,252,0.15)" }}
                     className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:border-blue-200 transition-all duration-300 cursor-pointer text-center group"
@@ -188,7 +189,7 @@ export default function HowItWorks() {
                     <Editable as="p" className="text-white/55 text-sm mb-4" path={`howItWorks.entities.items.${i}.sub`} />
                     <Editable as="span" className="text-primary text-sm font-semibold group-hover:underline" path="howItWorks.entities.cardCta" />
                   </motion.div>
-                </Link>
+                </EditableLink>
               </FadeUp>
             ))}
           </div>
@@ -216,7 +217,7 @@ export default function HowItWorks() {
           <FadeUp>
             <Editable as="h2" className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="howItWorks.cta.title" />
             <Editable as="p" className="text-blue-100 text-lg mb-8 max-w-xl mx-auto" path="howItWorks.cta.subtitle" multiline />
-            <Link href={cta.button.href}>
+            <EditableLink path="howItWorks.cta.button.href">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 60px rgba(255,255,255,0.2)" }}
                 whileTap={{ scale: 0.97 }}
@@ -225,7 +226,7 @@ export default function HowItWorks() {
                 <Editable as="span" path="howItWorks.cta.button.label" />
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
-            </Link>
+            </EditableLink>
           </FadeUp>
         </div>
       </section>

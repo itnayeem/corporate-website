@@ -7,7 +7,9 @@ export const home = {
     description:
       "Since 2020, join more than 1,000 business owners using Noviatify to start and grow their companies with total confidence.",
     primaryCta: "Start Now — It's Free",
+    primaryCtaHref: "/start",
     secondaryCta: "More reliable, confirmed reviews",
+    secondaryCtaHref: "/how-it-works",
     socialProof: "Trusted by 1,000+ founders",
     avatars: ["SM", "MT", "DR", "EM"],
   },
@@ -87,12 +89,14 @@ export const home = {
       { num: "03", title: "We Handle Everything Else", desc: "Noviatify files all documents with the state. You get confirmation and get back to building." },
     ],
     cta: "Learn More About the Process",
+    ctaHref: "/how-it-works",
   },
   services: {
     label: "Services",
     title: "Comprehensive compliance services",
     subtitle: "Everything you need to keep your business in good standing, all in one place.",
     viewAll: "View all services",
+    viewAllHref: "/services",
     items: [
       { full: "Get a Registered Agent", href: "/services/registered-agent" },
       { full: "Submit an Annual Report", href: "/services/annual-report" },
@@ -130,6 +134,7 @@ export const home = {
     subtitle:
       "Join 1,000+ businesses who started their journey with Noviatify. It takes less than 5 minutes.",
     button: "Start Your Business Now",
+    buttonHref: "/start",
     fineprint: "No credit card required. Setup in minutes.",
   },
   footer: {

@@ -187,3 +187,46 @@
   outline: 2px solid #2575fc;
   background-color: rgba(37, 117, 252, 0.12);
 }
+
+/* ── Inline link-destination editing ────────────────────────── */
+.nv-linkedit {
+  position: relative;
+  display: inline-block;
+}
+.nv-linkedit-block {
+  display: block;
+  width: 100%;
+}
+.nv-linkedit-body {
+  display: inline-block;
+}
+.nv-linkedit-body-block {
+  display: block;
+  width: 100%;
+}
+.nv-linkedit-handle {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #2563eb;
+  color: #fff;
+  border: 2px solid #0b1437;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+.nv-linkedit:hover .nv-linkedit-handle {
+  opacity: 1;
+}
+.nv-linkedit-handle:hover {
+  background: #1d4ed8;
+  transform: scale(1.08);
+}

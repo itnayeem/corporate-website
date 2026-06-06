@@ -8,8 +8,11 @@ export const site = {
     services: "Services",
     about: "About Us",
     login: "Login",
+    loginHref: "/login",
     startCta: "Start Now",
+    startHref: "/start",
     viewAllServices: "View All Services →",
+    viewAllServicesHref: "/services",
     serviceLinks: [
       { label: "Get a Registered Agent", href: "/services/registered-agent" },
       { label: "Submit an Annual Report", href: "/services/annual-report" },
@@ -42,6 +45,7 @@ export const site = {
     ],
   },
   genericShared: {
+    seeHowHref: "/how-it-works",
     whyTitle: "Why Thousands Choose Noviatify",
     whySubtitle:
       "From first-time founders to serial entrepreneurs, Noviatify delivers the speed, accuracy, and support you need.",

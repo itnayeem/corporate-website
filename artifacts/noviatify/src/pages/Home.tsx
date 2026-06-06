@@ -9,6 +9,7 @@ import logoPath from "@assets/noviatify-logo.png";
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
+import { EditableLink } from "@/components/admin/EditableLink";
 
 /* ── helpers ────────────────────────────────────────────────── */
 function useCountUp(target: number, dur: number, active: boolean) {
@@ -197,7 +198,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.52 }}
                 className="flex flex-col sm:flex-row gap-4"
               >
-                <Link href="/start">
+                <EditableLink path="home.hero.primaryCtaHref">
                   <motion.button
                     whileHover={{ scale: 1.04, boxShadow: "0 20px 60px rgba(37,117,252,0.5)" }}
                     whileTap={{ scale: 0.97 }}
@@ -206,8 +207,8 @@ export default function Home() {
                     <Editable as="span" path="home.hero.primaryCta" />
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </motion.button>
-                </Link>
-                <Link href="/how-it-works">
+                </EditableLink>
+                <EditableLink path="home.hero.secondaryCtaHref">
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
@@ -216,7 +217,7 @@ export default function Home() {
                     <Play className="w-4 h-4 fill-white" />
                     <Editable as="span" path="home.hero.secondaryCta" />
                   </motion.button>
-                </Link>
+                </EditableLink>
               </motion.div>
 
               {/* Social proof mini */}
@@ -412,7 +413,7 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <Link href={e.href}>
+                  <EditableLink path={`home.entities.items.${i}.href`} block>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -422,7 +423,7 @@ export default function Home() {
                       <Editable as="span" path={`home.entities.items.${i}.name`} />
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </motion.button>
-                  </Link>
+                  </EditableLink>
                 </motion.div>
               </FadeUp>
             ))}
@@ -471,7 +472,7 @@ export default function Home() {
           </div>
 
           <FadeUp delay={0.6} className="text-center mt-14">
-            <Link href="/how-it-works">
+            <EditableLink path="home.howItWorks.ctaHref">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 60px rgba(37,117,252,0.5)" }}
                 whileTap={{ scale: 0.97 }}
@@ -480,7 +481,7 @@ export default function Home() {
                 <Editable as="span" path="home.howItWorks.cta" />
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </motion.button>
-            </Link>
+            </EditableLink>
           </FadeUp>
         </div>
       </section>
@@ -495,7 +496,7 @@ export default function Home() {
               <Editable as="p" className="text-white/55 text-lg" path="home.services.subtitle" multiline />
             </FadeUp>
             <FadeUp>
-              <Link href="/services">
+              <EditableLink path="home.services.viewAllHref">
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.97 }}
@@ -503,7 +504,7 @@ export default function Home() {
                 >
                   <Editable as="span" path="home.services.viewAll" />
                 </motion.button>
-              </Link>
+              </EditableLink>
             </FadeUp>
           </div>
 
@@ -512,7 +513,7 @@ export default function Home() {
               const Icon = serviceIcons[i % serviceIcons.length];
               return (
               <FadeUp key={svc.full} delay={i * 0.06}>
-                <Link href={svc.href}>
+                <EditableLink path={`home.services.items.${i}.href`} block>
                   <motion.div
                     whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(37,117,252,0.12)" }}
                     className="group bg-white/[0.04] border border-white/10 rounded-2xl p-5 shadow-sm hover:border-blue-200 transition-all duration-300 cursor-pointer flex items-center justify-between"
@@ -525,7 +526,7 @@ export default function Home() {
                     </div>
                     <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" />
                   </motion.div>
-                </Link>
+                </EditableLink>
               </FadeUp>
               );
             })}
@@ -651,7 +652,7 @@ export default function Home() {
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               className="inline-block"
             >
-              <Link href="/start">
+              <EditableLink path="home.cta.buttonHref">
                 <motion.button
                   whileHover={{ scale: 1.06, boxShadow: "0 0 70px rgba(255,255,255,0.25)" }}
                   whileTap={{ scale: 0.97 }}
@@ -660,7 +661,7 @@ export default function Home() {
                   <Editable as="span" path="home.cta.button" />
                   <ArrowRight className="w-5 h-5" />
                 </motion.button>
-              </Link>
+              </EditableLink>
             </motion.div>
             <Editable as="p" className="text-white/35 text-sm mt-5" path="home.cta.fineprint" />
           </FadeUp>
@@ -701,7 +702,7 @@ export default function Home() {
                 <ul className="space-y-3">
                   {col.links.map((l, li) => (
                     <li key={l.href}>
-                      <Link href={l.href} className="text-white/45 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block"><Editable as="span" path={`home.footer.columns.${ci}.links.${li}.label`} /></Link>
+                      <EditableLink path={`home.footer.columns.${ci}.links.${li}.href`} className="text-white/45 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block"><Editable as="span" path={`home.footer.columns.${ci}.links.${li}.label`} /></EditableLink>
                     </li>
                   ))}
                 </ul>
@@ -713,7 +714,7 @@ export default function Home() {
             <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
             <div className="flex items-center gap-5">
               {content.site.footer.links.map((l, i) => (
-                <Link key={l.href} href={l.href} className="text-white/30 hover:text-white text-sm transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></Link>
+                <EditableLink key={l.href} path={`site.footer.links.${i}.href`} className="text-white/30 hover:text-white text-sm transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></EditableLink>
               ))}
             </div>
             <Editable as="p" className="text-white/30 text-sm" path="home.footer.tagline" />

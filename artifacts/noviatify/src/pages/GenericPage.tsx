@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import logoPath from "@assets/noviatify-logo.png";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
+import { EditableLink } from "@/components/admin/EditableLink";
 
 interface GenericPageProps {
   pageKey: string;
@@ -70,7 +71,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
             <Editable as="p" className="text-white/60 text-lg max-w-xl leading-relaxed mb-8" multiline path={`site.genericPages.${pageKey}.description`} />
 
             <div className="flex flex-wrap gap-4 items-center">
-              <Link href={cta.href}>
+              <EditableLink path={`site.genericPages.${pageKey}.cta.href`}>
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.97 }}
@@ -79,10 +80,10 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
                   <Editable as="span" path={`site.genericPages.${pageKey}.cta.label`} />
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
-              </Link>
-              <Link href="/how-it-works" className="text-white/60 hover:text-white text-sm font-medium transition-colors underline underline-offset-4">
+              </EditableLink>
+              <EditableLink path="site.genericShared.seeHowHref" className="text-white/60 hover:text-white text-sm font-medium transition-colors underline underline-offset-4">
                 <Editable as="span" path="site.genericShared.seeHow" />
-              </Link>
+              </EditableLink>
             </div>
 
             {/* Quick trust bar */}
@@ -155,7 +156,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
             ))}
           </div>
           <FadeUp delay={0.4} className="text-center mt-10">
-            <Link href={cta.href}>
+            <EditableLink path={`site.genericPages.${pageKey}.cta.href`}>
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
@@ -164,7 +165,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
                 <Editable as="span" path={`site.genericPages.${pageKey}.cta.label`} />
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
-            </Link>
+            </EditableLink>
           </FadeUp>
         </div>
       </section>
@@ -223,7 +224,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
           <FadeUp>
             <Editable as="h2" className="text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="site.genericShared.ctaTitle" />
             <Editable as="p" className="text-blue-100 text-lg mb-8 max-w-xl mx-auto" multiline path="site.genericShared.ctaSubtitle" />
-            <Link href={cta.href}>
+            <EditableLink path={`site.genericPages.${pageKey}.cta.href`}>
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 60px rgba(255,255,255,0.2)" }}
                 whileTap={{ scale: 0.97 }}
@@ -232,7 +233,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
                 <Editable as="span" path={`site.genericPages.${pageKey}.cta.label`} />
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
-            </Link>
+            </EditableLink>
           </FadeUp>
         </div>
       </section>
@@ -244,7 +245,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
           <Editable as="p" className="text-white/30 text-sm" path="site.footer.copyright" />
           <div className="flex gap-5 text-sm text-white/40">
             {footer.links.map((l, i) => (
-              <Link key={l.href} href={l.href} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></Link>
+              <EditableLink key={l.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></EditableLink>
             ))}
           </div>
         </div>

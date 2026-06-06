@@ -19,5 +19,12 @@ Admins log in, browse the live public pages, and click any text to edit it in pl
 - **Link/button nav suppression:** `Editable` uses capture-phase `preventDefault + stopPropagation` on click/mousedown so wrapping wouter `<Link>`/`<button>` don't navigate while editing. This is sufficient for wouter Link.
 - **Auth reactivity:** `adminAuth.ts` `setAdminToken`/`clearAdminToken` dispatch a `"noviatify-auth"` window event; the provider listens (plus `storage`) to flip `isAdmin` without a reload. Don't double-dispatch after calling `clearAdminToken()` — it already fires the event. A 401 on save clears the token and exits edit mode.
 
+## Editable link destinations (EditableLink)
+- `EditableLink` wraps CTAs/cards/footer-and-nav text links so admins can edit the *destination URL* in edit mode (popover bound to a content path), mirroring how `Editable` edits text. It needs a content dot-path holding the href string — it can't edit a literal.
+- **Convention for hardcoded hrefs:** never restructure an existing content string into an object. ADD a NON-breaking sibling `<labelKey>Href` string field in the same `defaults/*` slice (e.g. `home.hero.primaryCtaHref`, `site.nav.startHref`, `site.genericShared.seeHowHref`) and point `EditableLink` at it.
+- **Outside edit mode** it renders native `<a target=_blank rel=noopener>` when the href is external (scheme like `http:`/`mailto:`/`tel:` or protocol-relative `//`), otherwise wouter `<Link>`. **Why:** feeding an absolute URL to wouter `<Link>` breaks external navigation.
+- `block` prop = full-width buttons (`w-full`) or cards that fill a grid/flex cell; omit for inline buttons/links.
+- **Leave untouched:** the logo `<Link href="/">` and existing external social `<a target=_blank>`. Plain structural nav routes without a content-backed label may stay as plain `<Link>`.
+
 ## Backend is unchanged
 The login + authed GET/PUT persistence is the same proven backend as the base CMS; inline editing is a pure frontend layer over it.
