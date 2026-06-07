@@ -1,0 +1,96 @@
+ npm run build
+
+> workspace@0.0.0 build
+> chmod +x ./node_modules/.bin/esbuild && npm run build:actual
+
+
+> workspace@0.0.0 build:actual
+> npm run typecheck && npm run build --workspace=@workspace/noviatify && npm run build --workspace=@workspace/api-server && rm -rf artifacts/api-server/dist/public && cp -r artifacts/noviatify/dist/public artifacts/api-server/dist/public
+
+
+> workspace@0.0.0 typecheck
+> npm run typecheck:libs && npm run typecheck --workspaces --if-present
+
+
+> workspace@0.0.0 typecheck:libs
+> tsc --build
+
+
+> @workspace/api-server@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @workspace/mockup-sandbox@2.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+src/components/ui/chart.tsx:116:7 - error TS2339: Property 'payload' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; allowEscapeViewBox?: AllowInDimension | undefined; ... 24 more ...; wrapperStyle?: CSSProperties | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+
+116       payload,
+          ~~~~~~~
+
+src/components/ui/chart.tsx:121:7 - error TS2339: Property 'label' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; allowEscapeViewBox?: AllowInDimension | undefined; ... 24 more ...; wrapperStyle?: CSSProperties | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+
+121       label,
+          ~~~~~
+
+src/components/ui/chart.tsx:186:22 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+186             .filter((item) => item.type !== "none")
+                         ~~~~
+
+src/components/ui/chart.tsx:187:19 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+187             .map((item, index) => {
+                      ~~~~
+
+src/components/ui/chart.tsx:187:25 - error TS7006: Parameter 'index' implicitly has an 'any' type.
+
+187             .map((item, index) => {
+                            ~~~~~
+
+src/components/ui/chart.tsx:263:41 - error TS2344: Type '"payload" | "verticalAlign"' does not satisfy the constraint '"string" | "filter" | "fill" | "values" | "color" | "fontFamily" | "children" | "style" | "className" | "slot" | "clipPath" | "mask" | "path" | "key" | "suppressHydrationWarning" | ... 435 more ... | "onBBoxUpdate"'.
+  Type '"payload"' is not assignable to type '"string" | "filter" | "fill" | "values" | "color" | "fontFamily" | "children" | "style" | "className" | "slot" | "clipPath" | "mask" | "path" | "key" | "suppressHydrationWarning" | ... 435 more ... | "onBBoxUpdate"'.
+
+263     Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/ui/chart.tsx:274:19 - error TS2339: Property 'length' does not exist on type '{}'.
+
+274     if (!payload?.length) {
+                      ~~~~~~
+
+src/components/ui/chart.tsx:288:12 - error TS2339: Property 'filter' does not exist on type '{}'.
+
+288           .filter((item) => item.type !== "none")
+               ~~~~~~
+
+src/components/ui/chart.tsx:288:20 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+288           .filter((item) => item.type !== "none")
+                       ~~~~
+
+src/components/ui/chart.tsx:289:17 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+289           .map((item) => {
+                    ~~~~
+
+
+Found 10 errors in the same file, starting at: src/components/ui/chart.tsx:116
+
+npm error Lifecycle script `typecheck` failed with error:
+npm error code 2
+npm error path /Users/nayeem/Desktop/new update /noviatify/artifacts/mockup-sandbox
+npm error workspace @workspace/mockup-sandbox@2.0.0
+npm error location /Users/nayeem/Desktop/new update /noviatify/artifacts/mockup-sandbox
+npm error command failed
+npm error command sh -c tsc -p tsconfig.json --noEmit
+
+
+> @workspace/noviatify@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @workspace/scripts@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+nayeem@NAYEEMs-MacBook-Air noviatify % 
