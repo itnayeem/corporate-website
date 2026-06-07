@@ -1,0 +1,200 @@
+Skip to content
+recharts
+recharts
+Repository navigation
+Code
+Issues
+410
+ (410)
+Pull requests
+41
+ (41)
+Agents
+Discussions
+Actions
+Projects
+Models
+Wiki
+Security and quality
+Insights
+3.0 migration guide
+Pavel Vaněček edited this page on Oct 30, 2025 · 26 revisions
+In version 3.0, we rewrote the whole state management inside of Recharts. We broke down the React state down to smaller chunks and wrote tests. This now enables us to fix some long-opened bugs and add new features.
+
+We tried to keep the changes to minimum so the migration should be easy. Sometimes however the internal state was exposed outside, which means there are some breaking changes.
+
+New minimum version requirements
+React version 16.8 or later
+TypeScript version 5.x or later
+Node.js v18 or later
+Change TS target to es6
+Removes es5 polyfills / drops support for browsers that don't support es6-modules
+Removed recharts-scale dependency - all scale utilities are now maintained within recharts itself. If you were using getNiceTickValues that's now exported directly from the main recharts package in 3.0.
+Removed react-smooth dependency - all animations are now maintained within recharts itself
+Breaking Code Changes
+No more CategoricalChartState
+The big change here is that the CategoricalChartState that used to be passed in several places, no longer exists. Most charts won't need access to it at all so we imagine that most applications using recharts should not require any changes.
+
+If there is a need to access the internal state of Recharts, there will be hooks available that you can use instead. As of 3.0 we only export one hook - useActiveTooltipLabel - Otherwise, let us know which ones you need and we will add them.
+
+Where was CategoricalChartState used? Two main places: Customized, and mouse event handlers.
+
+<Customized /> no longer receives extra props
+All components rendered inside of the Customized components receives two extra props with the full internal state. This is no longer available because the internal state no longer exists. The intent is to use hooks to get the internal state. As of 3.0 we do not export any hooks - let us know which ones you need and we will add them.
+
+Removal of internal props
+Recharts in 2.x had this specialty where it was passing the internal state through special cloned props. These props were only used internally - but because they were technically part of the external API, they were exported and documented as if they were public. We removed most of them. This is on paper a breaking change (we removed props) but they were not doing anything in the first place so there should be no changes necessary.
+
+Examples: Scatter points, Area points, Legend payload, etc.
+
+One of the removed props is activeIndex. See here for examples how to achieve the same using Tooltip: https://recharts.github.io/en-US/guide/activeIndex
+
+Other breaking changes
+Removal of ref.current.current in ResponsiveContainer
+Removed the deprecated alwaysShow prop in Reference components
+Removed isFront prop from reference elements. It has not done anything since pre version 2.
+Ignore nullish values for domain of error bars #4192 - Y domain will now be calculated correctly when using nullish ErrorBar values
+Legend order default may have changed (no order is promised) https://github.com/recharts/recharts/commit/7a3aeceda540c9d7b5d9f3c8400982a7d3ec8688
+Z-Index of Elements (Tooltip, Legend, chart items, etc.) is determined based upon render order since SVG does not have a concept of z-index. If something is overlapping, move the element that has priority below those that do not (i.e. Tooltip always below Legend in your JSX). Previously, recharts hacked the render order which caused other issues like not allowing custom elements.
+XAxis/YAxis axis lines now show even if there are no ticks (previously they did not, previous to 2.5 YAxis did but only due to a bug)
+Scatter - Fix: Tooltip in a scatter chart correctly adds colors styles to Tooltip by default
+Scatter - Scatter points prop removed
+Scatter/Bar/Pie, etc. - activeIndex prop removed
+Area - When connectNulls is true, null datapoints are treated as 0
+Sankey - types are more strict
+Funnel - remove unused animateNewValues
+Area - remove unused animateNewValues
+Pie - remove blendStroke. Prefer to use stroke="none".
+accessibilityLayer no longer calls onMouseMove after keyboard input
+Removed unused refs from types to prevent confusion
+Update TooltipProps to TooltipContentProps when using Tooltip's content prop (custom tooltip)
+Update TooltipContentProps type's label prop to be undefined | string | or number rather than just string
+CartesianGrid has new properties x/yAxisId that correspond to x/yAxisIds on the X/YAxis components respectively. With a different ID than default, CartesianGrid lines will fail to render. This makes the grid rendering deterministic rather than just selecting the first axis it finds (https://github.com/recharts/recharts/issues/6149)
+YAxis: multiple Y axes no longer display in the order they are rendered. Instead they render alphabetically by yAxisId
+New features
+Custom components
+The one big feature in 3.0 is support for custom components: https://github.com/recharts/recharts/issues/2788
+
+So for example this code does not work in 2.0:
+
+const MyCustomAxes = () => (
+  <XAxis dataKey="name" />
+  <YAxis tickCount={7} />
+)
+
+<BarChart width={1100} height={250} data={data}>
+  <Bar dataKey="uv" />
+  <MyCustomAxes />
+</BarChart>
+But it works just fine in 3.0.
+
+This also means that Customized is no longer necessary. These two variants are identical:
+
+<BarChart width={1100} height={250} data={data}>
+  <Customized component={MyCustomComponent} />
+</BarChart>
+<BarChart width={1100} height={250} data={data}>
+  <MyCustomComponent />
+</BarChart>
+We left the Customized export in place but now it's completely optional.
+
+Note: Label cannot be wrapped in a custom component without `CustomLabel.displayName = 'Label';
+
+Tooltip portal
+https://github.com/recharts/recharts/issues/2458
+
+Tooltip now supports a portal prop so that you can choose to render it anywhere else. See example in our storybook here: https://github.com/recharts/recharts/blob/3.x/storybook/stories/Examples/Tooltip.stories.tsx#L372
+
+const TooltipWithPortal = () => {
+  const [portalRef, setPortalRef] = useState<HTMLElement | null>(null);
+
+  return (
+    <>
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart data={pageData}>
+          <Line dataKey="uv" fill="green" />
+          <Line dataKey="pv" fill="red" />
+          {portalRef && <Tooltip portal={portalRef} wrapperStyle={{ width: '25%', marginLeft: 10 }} />}
+        </LineChart>
+      </ResponsiveContainer>
+      <div
+        ref={node => {
+          if (portalRef == null && node != null) {
+            setPortalRef(node);
+          }
+        }}
+      >
+        <p>Inspect the resulting HTML to see that the Tooltip element is rendered according to the portal ref.</p>
+        <p>
+          You now control the container the Tooltip renders in, as well as style attributes such as width, height,
+          etc. Those can be managed via the Tooltip wrapperStyle prop.
+        </p>
+        {/* The Tooltip will render here */}
+      </div>
+    </>
+  );
+};
+Accessibility by default
+Recharts had this prop accessibilityLayer which enables a11y attributes, and keyboard controls. In 2.x this prop is false by default, in 3.0 it's true by default. If you wish to disable it then pass accessibilityLayer={false} in your chart.
+
+Also, the keyboard events are no longer passed through in the onMouseMove callback.
+
+Multiple axes in Polar charts
+Cartesian charts used to support multiple axes for a while, polar charts now do too. https://github.com/recharts/recharts/issues/2605
+
+Multiple axes and Tooltip
+In charts with multiple axes, the Tooltip always selected the first one. Which one was "first" was somewhat arbitrary. Tooltip now has a new prop axisId so you can select which one it should follow.
+
+In charts with one axis of each type (so, 1 XAxis + 1 YAxis), there is no difference.
+
+Auto width y-axis
+Set width="auto" to auto-calculate Y-Axis width instead of relying on increasing margin or calculating width yourself.
+
+Smaller features
+Add symlog as a recharts scale type
+Other bug fixes
+https://github.com/recharts/recharts/issues/5124
+https://github.com/recharts/recharts/issues/5169
+https://recharts.github.io/
+
+Pages 10
+Find a page or section…
+Home
+3.0 migration guide
+New minimum version requirements
+Breaking Code Changes
+No more CategoricalChartState
+<Customized /> no longer receives extra props
+Removal of internal props
+Other breaking changes
+New features
+Custom components
+Tooltip portal
+Accessibility by default
+Multiple axes in Polar charts
+Multiple axes and Tooltip
+Auto width y-axis
+Smaller features
+Other bug fixes
+Axis domains and ticks
+How to install Recharts in React 16 and 17 project
+How to share a demo
+Recharts and accessibility
+Release process
+Tooltip axis
+Tooltip event type and shared prop
+Who uses recharts?
+Clone this wiki locally
+https://github.com/recharts/recharts.wiki.git
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
