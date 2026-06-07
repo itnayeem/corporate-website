@@ -1,0 +1,61 @@
+npm run build       
+
+> workspace@0.0.0 build
+> chmod +x ./node_modules/.bin/esbuild && npm run build:actual
+
+
+> workspace@0.0.0 build:actual
+> npm run typecheck && npm run build --workspace=@workspace/noviatify && npm run build --workspace=@workspace/api-server && rm -rf artifacts/api-server/dist/public && cp -r artifacts/noviatify/dist/public artifacts/api-server/dist/public
+
+
+> workspace@0.0.0 typecheck
+> npm run typecheck:libs && npm run typecheck --workspaces --if-present
+
+
+> workspace@0.0.0 typecheck:libs
+> tsc --build
+
+
+> @workspace/api-server@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @workspace/mockup-sandbox@2.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+src/components/ui/chart.tsx:8:15 - error TS2305: Module '"recharts/types/component/DefaultLegendContent"' has no exported member 'Payload'.
+
+8 import type { Payload as LegendPayloadItem } from "recharts/types/component/DefaultLegendContent"
+                ~~~~~~~
+
+src/components/ui/chart.tsx:202:19 - error TS2322: Type 'string | number | ((obj: any) => any) | undefined' is not assignable to type 'Key | null | undefined'.
+  Type '(obj: any) => any' is not assignable to type 'Key | null | undefined'.
+
+202                   key={item.dataKey}
+                      ~~~
+
+  ../../node_modules/@types/react/index.d.ts:259:9
+    259         key?: Key | null | undefined;
+                ~~~
+    The expected type comes from property 'key' which is declared here on type 'DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>'
+
+
+Found 2 errors in the same file, starting at: src/components/ui/chart.tsx:8
+
+npm error Lifecycle script `typecheck` failed with error:
+npm error code 2
+npm error path /Users/nayeem/Desktop/new update /noviatify/artifacts/mockup-sandbox
+npm error workspace @workspace/mockup-sandbox@2.0.0
+npm error location /Users/nayeem/Desktop/new update /noviatify/artifacts/mockup-sandbox
+npm error command failed
+npm error command sh -c tsc -p tsconfig.json --noEmit
+
+
+> @workspace/noviatify@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @workspace/scripts@0.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+nayeem@NAYEEMs-MacBook-Air noviatify % 
