@@ -15,10 +15,10 @@ paths = [ "/" ]
 localPort = 23250
 
 [services.development]
-run = "pnpm --filter @workspace/noviatify run dev"
+run = "npm run dev --workspace=@workspace/noviatify"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/noviatify", "run", "build" ]
+build = [ "npm", "run", "build", "--workspace=@workspace/noviatify" ]
 publicDir = "artifacts/noviatify/dist/public"
 serve = "static"
 

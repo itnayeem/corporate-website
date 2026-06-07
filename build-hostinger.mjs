@@ -14,7 +14,7 @@ const distDir = path.join(root, "artifacts", "api-server", "dist");
 const deployDir = path.join(root, "deploy");
 
 // 1. Build the frontend + the server bundle and copy the site into the bundle.
-execSync("pnpm run build:standalone", { stdio: "inherit", cwd: root });
+execSync("npm run build:standalone", { stdio: "inherit", cwd: root });
 
 // 2. Start from a clean deploy directory.
 await rm(deployDir, { recursive: true, force: true });

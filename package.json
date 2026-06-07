@@ -2,23 +2,24 @@
   "name": "workspace",
   "version": "0.0.0",
   "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "artifacts/*",
+    "lib/*",
+    "lib/integrations/*",
+    "scripts"
+  ],
   "scripts": {
-    "build": "chmod +x ./node_modules/.bin/esbuild && pnpm run build:actual",
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-    "build:actual": "pnpm run typecheck && pnpm --filter @workspace/noviatify run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/noviatify/dist/public artifacts/api-server/dist/public",
-    "build:standalone": "pnpm --filter @workspace/noviatify run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/noviatify/dist/public artifacts/api-server/dist/public",
+    "build": "chmod +x ./node_modules/.bin/esbuild && npm run build:actual",
+    "build:actual": "npm run typecheck && npm run build --workspace=@workspace/noviatify && npm run build --workspace=@workspace/api-server && rm -rf artifacts/api-server/dist/public && cp -r artifacts/noviatify/dist/public artifacts/api-server/dist/public",
+    "build:standalone": "npm run build --workspace=@workspace/noviatify && npm run build --workspace=@workspace/api-server && rm -rf artifacts/api-server/dist/public && cp -r artifacts/noviatify/dist/public artifacts/api-server/dist/public",
     "build:hostinger": "node ./build-hostinger.mjs",
     "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "typecheck": "npm run typecheck:libs && npm run typecheck --workspaces --if-present"
   },
-  "private": true,
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@swc/core",
-      "esbuild",
-      "msw",
-      "unrs-resolver"
-    ]
+  "overrides": {
+    "esbuild": "0.27.3",
+    "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   },
   "devDependencies": {
     "prettier": "^3.8.3",

@@ -1,2 +1,2 @@
-- [Local upload storage](local-upload-storage.md) — branding images saved to API server local fs (not object storage); raw-fetch PUT needs manual Bearer token; ephemeral on autoscale deploys.
-- [Hostinger deploy](hostinger-deploy.md) — mirror `onlyBuiltDependencies` in root package.json `pnpm` field too; external hosts ignore the pnpm-workspace.yaml copy and fail esbuild builds.
+- [Replit npm install quirks](replit-npm-install.md) — foreground installs orphan-survive shell timeouts; package proxy 502s on un-rewritten tarball URLs; mv to /tmp is a cross-FS copy.
+- [tsc --build stale tsbuildinfo](tsc-build-stale.md) — after clean install, stale tsconfig.tsbuildinfo skips lib dist emit → TS6305; fix with `tsc --build --force`.
