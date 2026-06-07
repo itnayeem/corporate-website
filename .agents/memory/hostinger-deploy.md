@@ -44,6 +44,14 @@ ESM bundle. `deploy/package.json` is minimal with no deps. Static frontend + SPA
 fallback are served by the same process (prod block in app.ts); DB is external
 Postgres (Neon), no MySQL involved.
 
-**How to apply:** rebuild with `pnpm run build:hostinger`, upload `deploy/` contents,
-set startup file `app.js`, Node 20+/24, and env vars DATABASE_URL/SESSION_SECRET/
-ADMIN_PASSWORD in hPanel. `deploy/` is gitignored.
+**How to apply:** rebuild with `pnpm run build:hostinger`, set startup file `app.js`,
+Node 20+/24, and env vars DATABASE_URL/SESSION_SECRET/ADMIN_PASSWORD in hPanel.
+
+**Git-based deploy (preferred):** `deploy/` is intentionally COMMITTED to git (removed
+from .gitignore) because shared hosting cannot build — the host just pulls the repo.
+Workflow: rebuild `deploy/` and commit it, push to GitHub, then in hPanel connect the
+repo via Git and point the Node.js app "Application root" at the repo's `deploy/`
+folder. The pre-built bundle goes stale on any code change, so re-run the build and
+re-commit before pushing. The local zip (`/*.zip`) stays gitignored — it's only for
+manual upload, not the git path. `app.js` also pins `STATIC_DIR` to its own dir so the
+site is found regardless of Passenger's cwd.

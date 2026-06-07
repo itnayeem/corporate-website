@@ -77,9 +77,11 @@ Steps
 4. Application URL: your domain.
 5. Application startup file: app.js
 6. Create the app.
-7. Upload ALL files from this bundle into the application root:
-     app.js, index.mjs, package.json, the pino-*.mjs / thread-stream-worker.mjs
-     files, and the public/ folder.
+7. Get these files into the application root, either:
+     a) GitHub (recommended): hPanel -> Advanced -> Git -> connect your repo, and
+        set this app's "Application root" to the repo's "deploy" folder; OR
+     b) Manual upload: upload ALL files from this folder (app.js, index.mjs,
+        package.json, the pino-*.mjs / thread-stream-worker.mjs files, public/).
 8. Add environment variables (in the Node.js app's "Environment variables"):
      DATABASE_URL    = your external Postgres (Neon) connection string
      SESSION_SECRET  = a long random string

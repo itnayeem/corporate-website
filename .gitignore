@@ -2,9 +2,9 @@
 
 # compiled output
 dist
-deploy
 tmp
 out-tsc
+/*.zip
 *.tsbuildinfo
 .expo
 .expo-shared
