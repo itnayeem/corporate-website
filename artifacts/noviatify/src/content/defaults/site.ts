@@ -8,6 +8,14 @@ export const site = {
     // e.g. code.tidio.co/<KEY>.js). Empty = chat disabled.
     tidioKey: "",
   },
+  maintenance: {
+    // When true, public visitors see the maintenance page instead of the site.
+    // The admin (logged in) always bypasses it and sees the real site.
+    enabled: false,
+    title: "We'll be right back",
+    message:
+      "Noviatify is currently undergoing scheduled maintenance. We're working to improve your experience and will be back online shortly. Thank you for your patience.",
+  },
   nav: {
     home: "Home",
     howItWorks: "How It Works",

@@ -12,6 +12,7 @@ import {
   Palette,
   Upload,
   ImageIcon,
+  Wrench,
 } from "lucide-react";
 import {
   useChangeAdminPassword,
@@ -109,6 +110,8 @@ export default function AdminPages() {
             ))}
           </div>
         </section>
+
+        <MaintenanceCard />
 
         <BrandingCard />
 
@@ -234,6 +237,168 @@ function ChangePasswordCard() {
           )}
         </motion.button>
       </form>
+    </section>
+  );
+}
+
+function MaintenanceCard() {
+  const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const content = useContent();
+  const maintenance = content.site.maintenance;
+
+  const update = useUpdateContent();
+
+  const [title, setTitle] = useState(maintenance.title);
+  const [message, setMessage] = useState(maintenance.message);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  // Re-seed the form whenever the persisted maintenance content changes.
+  useEffect(() => {
+    setTitle(maintenance.title);
+    setMessage(maintenance.message);
+  }, [maintenance.title, maintenance.message]);
+
+  const handleAuthError = (err: unknown): boolean => {
+    if (err instanceof ApiError && err.status === 401) {
+      clearAdminToken();
+      navigate("/owner");
+      return true;
+    }
+    return false;
+  };
+
+  const persist = (next: typeof content, onOk?: () => void) => {
+    setError("");
+    setDone(false);
+    update.mutate(
+      { data: { data: next as unknown as Record<string, unknown> } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetContentQueryKey() });
+          onOk?.();
+        },
+        onError: (err) => {
+          if (handleAuthError(err)) return;
+          setError("Could not save. Please try again.");
+        },
+      },
+    );
+  };
+
+  const buildNext = (over: Partial<typeof maintenance>): typeof content => ({
+    ...content,
+    site: {
+      ...content.site,
+      maintenance: { ...content.site.maintenance, ...over },
+    },
+  });
+
+  const handleToggle = () => {
+    persist(buildNext({ enabled: !maintenance.enabled }));
+  };
+
+  const handleSaveText = () => {
+    persist(buildNext({ title: title.trim(), message: message.trim() }), () => {
+      setDone(true);
+      setTimeout(() => setDone(false), 4000);
+    });
+  };
+
+  const inputClass =
+    "w-full rounded-lg bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-primary";
+  const enabled = maintenance.enabled;
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-1">
+        <Wrench className="w-4 h-4 text-blue-400" />
+        <h2 className="text-base font-bold">Maintenance mode</h2>
+      </div>
+      <p className="text-white/45 text-sm mb-5">
+        When on, visitors see a “we'll be right back” page instead of your site.
+        You stay logged in and still see the real site, so you can keep working.
+      </p>
+
+      <div className="rounded-2xl bg-white/5 border border-white/10 p-6 max-w-md space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white">
+              {enabled ? "Maintenance mode is ON" : "Maintenance mode is off"}
+            </p>
+            <p className="text-xs text-white/45 mt-0.5">
+              {enabled
+                ? "Visitors currently see the maintenance page."
+                : "Your site is live for everyone."}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={enabled}
+            aria-label="Toggle maintenance mode"
+            onClick={handleToggle}
+            disabled={update.isPending}
+            className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition disabled:opacity-50 ${
+              enabled ? "bg-primary" : "bg-white/15"
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                enabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {enabled && (
+          <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
+            Your site is hidden from the public right now. Turn this off to make
+            it live again.
+          </div>
+        )}
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-white/60">Heading</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="We'll be right back"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-white/60">Message</label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Tell visitors what's happening…"
+            rows={4}
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+
+        {error && <p className="text-red-400 text-sm">{error}</p>}
+
+        <motion.button
+          type="button"
+          onClick={handleSaveText}
+          disabled={update.isPending || !title.trim() || !message.trim()}
+          whileTap={{ scale: 0.98 }}
+          className="inline-flex items-center justify-center gap-1.5 bg-primary text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-lg shadow-blue-900/30 hover:bg-blue-600 transition disabled:opacity-50"
+        >
+          {done ? (
+            <>
+              <Check className="w-4 h-4" /> Message saved
+            </>
+          ) : (
+            <>{update.isPending ? "Saving…" : "Save message"}</>
+          )}
+        </motion.button>
+      </div>
     </section>
   );
 }

@@ -52,6 +52,7 @@ A dark-themed, animated multi-page marketing website for Noviatify (a business f
 
 - Public site: Home, How It Works, Services, About, plus generic content pages — all dark-themed and animated.
 - Admin CMS at `/owner` (login) → `/owner/pages` (dashboard): owner logs in with the admin password, then edits site text in place (click any text on the public site) and manages branding; changes persist to the DB and render on the public site.
+- Maintenance mode: owner toggles it from the admin dashboard. When on, public visitors get a dark-themed "we'll be right back" page (`MaintenancePage`) with an owner-editable heading/message; the logged-in admin still sees the real site and `/owner*` stays reachable. State lives in `site.maintenance` (enabled/title/message) in the content JSONB — gating is client-side via `MaintenanceGate`, consistent with the existing client-side admin detection.
 
 ## User preferences
 

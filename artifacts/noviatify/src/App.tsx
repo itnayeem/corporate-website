@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ContentProvider } from "@/content/ContentContext";
 import { EditModeProvider } from "@/content/EditModeContext";
 import { EditToolbar } from "@/components/admin/EditToolbar";
+import MaintenanceGate from "@/components/MaintenanceGate";
 import BrandHead from "@/components/BrandHead";
 import TidioChat from "@/components/TidioChat";
 import Preloader from "@/components/Preloader";
@@ -98,7 +99,9 @@ function App() {
         <EditModeProvider>
           <TooltipProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
+              <MaintenanceGate>
+                <Router />
+              </MaintenanceGate>
               <EditToolbar />
             </WouterRouter>
             <Toaster />
