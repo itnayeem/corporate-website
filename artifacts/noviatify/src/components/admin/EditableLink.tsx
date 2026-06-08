@@ -19,12 +19,35 @@ interface EditableLinkProps {
 }
 
 /**
- * An href is "external" if it uses an explicit scheme (http, https, mailto,
- * tel, etc.) or is protocol-relative (//host). Those must use a native <a> so
- * the client-side router doesn't try to navigate to them as in-app routes.
+ * Classify an href and produce the URL to actually navigate to.
+ *
+ * External (rendered as a native <a target="_blank">) when it:
+ *  - has an explicit scheme (http:, https:, mailto:, tel:, ...), or
+ *  - is protocol-relative (//host), or
+ *  - looks like a bare domain / subdomain (e.g. "example.com",
+ *    "sub.example.com", "www.example.com/path") typed without a scheme —
+ *    these get "https://" prepended so the router doesn't treat them as an
+ *    in-app route and prefix them with "/".
+ *
+ * Internal (rendered via the wouter <Link>) when it starts with "/" or "#",
+ * or is a plain word with no dot.
  */
-function isExternalHref(href: string): boolean {
-  return /^([a-z][a-z0-9+.-]*:|\/\/)/i.test(href.trim());
+function resolveHref(href: string): { external: boolean; url: string } {
+  const trimmed = href.trim();
+  if (!trimmed) return { external: false, url: "" };
+  // Explicit scheme or protocol-relative — already a full external URL.
+  if (/^([a-z][a-z0-9+.-]*:|\/\/)/i.test(trimmed)) {
+    return { external: true, url: trimmed };
+  }
+  // Internal path or in-page anchor.
+  if (trimmed.startsWith("/") || trimmed.startsWith("#")) {
+    return { external: false, url: trimmed };
+  }
+  // Bare domain / subdomain (has a dot before any slash, no whitespace).
+  if (/^[^\s/?#]+\.[^\s/?#]+/.test(trimmed)) {
+    return { external: true, url: `https://${trimmed}` };
+  }
+  return { external: false, url: trimmed };
 }
 
 /**
@@ -39,15 +62,16 @@ export function EditableLink({ path, children, className, block }: EditableLinkP
   const [open, setOpen] = useState(false);
 
   if (!editMode) {
-    if (href && isExternalHref(href)) {
+    const { external, url } = resolveHref(href);
+    if (external) {
       return (
-        <a href={href} className={className} target="_blank" rel="noopener noreferrer">
+        <a href={url} className={className} target="_blank" rel="noopener noreferrer">
           {children}
         </a>
       );
     }
     return (
-      <Link href={href || "#"} className={className}>
+      <Link href={url || "#"} className={className}>
         {children}
       </Link>
     );
@@ -84,11 +108,13 @@ export function EditableLink({ path, children, className, block }: EditableLinkP
             autoFocus
             value={href}
             onChange={(e) => setValue(path, e.target.value)}
-            placeholder="/services or https://example.com"
+            placeholder="/services, example.com, or https://sub.example.com"
           />
           <p className="text-[11px] text-muted-foreground leading-snug">
-            Use a path like <code>/services</code> for an internal page, or a full{" "}
-            <code>https://</code> URL for an external site.
+            Use a path like <code>/services</code> for an internal page. For another
+            site, type a domain like <code>example.com</code> or{" "}
+            <code>sub.example.com</code> (or a full <code>https://</code> URL) and it
+            opens in a new tab.
           </p>
         </PopoverContent>
       </Popover>
