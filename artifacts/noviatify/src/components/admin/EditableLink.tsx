@@ -65,7 +65,7 @@ export function EditableLink({ path, children, className, block }: EditableLinkP
     const { external, url } = resolveHref(href);
     if (external) {
       return (
-        <a href={url} className={className} target="_blank" rel="noopener noreferrer">
+        <a href={url} className={className} rel="noopener noreferrer">
           {children}
         </a>
       );
@@ -111,10 +111,9 @@ export function EditableLink({ path, children, className, block }: EditableLinkP
             placeholder="/services, example.com, or https://sub.example.com"
           />
           <p className="text-[11px] text-muted-foreground leading-snug">
-            Use a path like <code>/services</code> for an internal page. For another
-            site, type a domain like <code>example.com</code> or{" "}
-            <code>sub.example.com</code> (or a full <code>https://</code> URL) and it
-            opens in a new tab.
+            Use a path like <code>/services</code> for an internal page, or type a
+            domain like <code>example.com</code> or <code>sub.example.com</code> (or a
+            full <code>https://</code> URL) for another site.
           </p>
         </PopoverContent>
       </Popover>
