@@ -38,10 +38,10 @@ export const about = {
     title: "The Team Behind Noviatify",
     subtitle: "Experienced entrepreneurs, lawyers, and engineers working for your success.",
     members: [
-      { name: "Alex Morgan", role: "Chief Executive Officer", initials: "AM", bio: "Serial entrepreneur with 3 successful exits. Founded Noviatify in 2020 with the mission of making business formation accessible to everyone." },
-      { name: "Jessica Lee", role: "Head of Legal Operations", initials: "JL", bio: "Former corporate attorney with 10+ years experience in business law. Ensures every filing is accurate and compliant." },
-      { name: "David Kim", role: "Chief Technology Officer", initials: "DK", bio: "Built the Noviatify platform from the ground up. Former engineer at two Fortune 500 companies." },
-      { name: "Sofia Martinez", role: "Head of Customer Success", initials: "SM", bio: "Passionate about helping founders succeed. Leads a team of experts dedicated to world-class customer support." },
+      { name: "Alex Morgan", role: "Chief Executive Officer", initials: "AM", imageUrl: "", bio: "Serial entrepreneur with 3 successful exits. Founded Noviatify in 2020 with the mission of making business formation accessible to everyone." },
+      { name: "Jessica Lee", role: "Head of Legal Operations", initials: "JL", imageUrl: "", bio: "Former corporate attorney with 10+ years experience in business law. Ensures every filing is accurate and compliant." },
+      { name: "David Kim", role: "Chief Technology Officer", initials: "DK", imageUrl: "", bio: "Built the Noviatify platform from the ground up. Former engineer at two Fortune 500 companies." },
+      { name: "Sofia Martinez", role: "Head of Customer Success", initials: "SM", imageUrl: "", bio: "Passionate about helping founders succeed. Leads a team of experts dedicated to world-class customer support." },
     ],
   },
   valuesSection: {

@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
 import { EditableLink } from "@/components/admin/EditableLink";
+import MemberAvatar from "@/components/admin/MemberAvatar";
 import SiteLogo from "@/components/SiteLogo";
 import AuthorizeNetSeal from "@/components/AuthorizeNetSeal";
 
@@ -145,9 +146,7 @@ export default function About() {
             {teamSection.members.map((member, i) => (
               <FadeUp key={member.name} delay={i * 0.12}>
                 <motion.div whileHover={{ y: -6 }} className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-400/30 transition-all text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/25">
-                    <Editable as="span" className="text-white font-extrabold text-lg" path={`about.teamSection.members.${i}.initials`} />
-                  </div>
+                  <MemberAvatar index={i} imageUrl={member.imageUrl} name={member.name} />
                   <Editable as="h3" className="font-bold text-white text-base mb-0.5" path={`about.teamSection.members.${i}.name`} />
                   <Editable as="p" className="text-blue-400 text-xs font-semibold mb-3" path={`about.teamSection.members.${i}.role`} />
                   <Editable as="p" className="text-white/55 text-xs leading-relaxed" path={`about.teamSection.members.${i}.bio`} multiline />

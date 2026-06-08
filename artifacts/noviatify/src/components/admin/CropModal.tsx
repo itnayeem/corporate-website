@@ -10,15 +10,28 @@ import { Check, X } from "lucide-react";
 
 type AspectOption = { label: string; value: number };
 
+type OutputMime = "image/png" | "image/jpeg" | "image/webp";
+
 interface CropModalProps {
   file: File | null;
   title: string;
   aspectOptions: AspectOption[];
   /** Longest output edge in px; the crop is scaled down to fit. */
   maxOutput?: number;
+  /**
+   * Output image format. PNG (default) preserves transparency (logos/favicons);
+   * JPEG produces much smaller files for photographs (team photos).
+   */
+  outputMime?: OutputMime;
   onCancel: () => void;
   onCropped: (file: File) => void;
 }
+
+const EXT_BY_MIME: Record<OutputMime, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
 
 function centeredAspectCrop(
   mediaWidth: number,
@@ -37,6 +50,7 @@ async function cropToFile(
   area: PixelCrop,
   fileName: string,
   maxOutput: number,
+  outputMime: OutputMime,
 ): Promise<File> {
   const scaleX = image.naturalWidth / image.width;
   const scaleY = image.naturalHeight / image.height;
@@ -55,15 +69,23 @@ async function cropToFile(
   canvas.height = outH;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("no canvas context");
+  // JPEG has no alpha channel; paint a solid backdrop so any transparent edge
+  // doesn't turn black.
+  if (outputMime === "image/jpeg") {
+    ctx.fillStyle = "#0b1638";
+    ctx.fillRect(0, 0, outW, outH);
+  }
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(image, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
 
+  const quality = outputMime === "image/png" ? 0.92 : 0.82;
   const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob((b) => resolve(b), "image/png", 0.92),
+    canvas.toBlob((b) => resolve(b), outputMime, quality),
   );
   if (!blob) throw new Error("crop failed");
+  const ext = EXT_BY_MIME[outputMime];
   const base = fileName.replace(/\.[^.]+$/, "") || "image";
-  return new File([blob], `${base}.png`, { type: "image/png" });
+  return new File([blob], `${base}.${ext}`, { type: outputMime });
 }
 
 export function CropModal({
@@ -71,6 +93,7 @@ export function CropModal({
   title,
   aspectOptions,
   maxOutput = 512,
+  outputMime = "image/png",
   onCancel,
   onCropped,
 }: CropModalProps) {
@@ -129,6 +152,7 @@ export function CropModal({
         completedCrop,
         file.name,
         maxOutput,
+        outputMime,
       );
       if (activeRef.current) onCropped(cropped);
     } finally {
