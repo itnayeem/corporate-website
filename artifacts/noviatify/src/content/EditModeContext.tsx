@@ -71,6 +71,18 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Edit mode can never outlive admin status. If the token is cleared from any
+  // path (toolbar logout, the /owner dashboard, another tab, or token expiry),
+  // force editing off so text stops being click-to-edit immediately.
+  useEffect(() => {
+    if (!isAdmin && editMode) {
+      setEditMode(false);
+      setDraft(null);
+      setDirty(false);
+      setError("");
+    }
+  }, [isAdmin, editMode]);
+
   const enterEdit = useCallback(() => {
     if (!isAdmin) return;
     setDraft(structuredClone(merged));
