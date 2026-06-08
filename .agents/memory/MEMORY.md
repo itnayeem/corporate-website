@@ -1,2 +1,1 @@
-- [Replit npm install quirks](replit-npm-install.md) — foreground installs orphan-survive shell timeouts; package proxy 502s on un-rewritten tarball URLs; mv to /tmp is a cross-FS copy.
-- [tsc --build stale tsbuildinfo](tsc-build-stale.md) — after clean install, stale tsconfig.tsbuildinfo skips lib dist emit → TS6305; fix with `tsc --build --force`.
+- [Content path keys](content-path-keys.md) — CMS Editable paths split on '.', so content keys must never contain a dot; slash route keys like /terms are safe.

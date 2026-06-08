@@ -260,19 +260,115 @@ export const site = {
         "Access your Noviatify dashboard to track filings, manage compliance, and update your business information.",
       cta: { label: "Back to Home", href: "/" },
     },
+  },
+  legalPages: {
     "/privacy": {
-      title: "Privacy Policy",
       subtitle: "Your Privacy",
-      description:
-        "Noviatify is committed to protecting your personal information. We never sell your data and comply with all applicable privacy laws.",
-      cta: { label: "Start Now — It's Free", href: "/start" },
+      title: "Privacy Policy",
+      lastUpdated: "Last updated: June 8, 2026",
+      intro:
+        "Noviatify is committed to protecting your personal information. This Privacy Policy explains what we collect, how we use it, and the choices you have. We never sell your data.",
+      sections: [
+        {
+          heading: "1. Information We Collect",
+          body:
+            "We collect information you provide directly — such as your name, email address, business details, and payment information — when you create an account or place an order. We also automatically collect limited technical data, like your IP address, browser type, and pages visited, to keep our service secure and working properly.",
+        },
+        {
+          heading: "2. How We Use Your Information",
+          body:
+            "We use your information to provide and improve our formation and compliance services, process payments, prepare and file documents on your behalf, communicate with you about your orders, and meet our legal obligations. We do not use your data for purposes you would not reasonably expect.",
+        },
+        {
+          heading: "3. How We Share Information",
+          body:
+            "We share information only as needed to deliver our services — for example, with government agencies to file your documents, and with trusted service providers who process payments or host our systems under strict confidentiality. We never sell your personal information to third parties.",
+        },
+        {
+          heading: "4. Data Security",
+          body:
+            "We use industry-standard safeguards to protect your information, including encryption in transit and access controls. No method of transmission or storage is completely secure, but we work continuously to protect your data against unauthorized access, loss, or misuse.",
+        },
+        {
+          heading: "5. Your Rights & Choices",
+          body:
+            "Depending on where you live, you may have the right to access, correct, or delete your personal information, or to object to certain processing. You can also opt out of marketing emails at any time. To exercise any of these rights, contact us using the details below.",
+        },
+        {
+          heading: "6. Cookies & Tracking",
+          body:
+            "We use cookies and similar technologies to keep you signed in, remember your preferences, and understand how our site is used. You can control cookies through your browser settings, though some features may not work properly if they are disabled.",
+        },
+        {
+          heading: "7. Changes to This Policy",
+          body:
+            "We may update this Privacy Policy from time to time. When we do, we will revise the date above and, where appropriate, notify you. Your continued use of Noviatify after changes take effect means you accept the updated policy.",
+        },
+      ],
+      contactHeading: "Contact Us",
+      contactBody:
+        "If you have questions about this Privacy Policy or how we handle your data, please reach out to our team and we will be happy to help.",
+      contactCtaLabel: "Contact Support",
+      contactCtaHref: "/about/contact",
     },
     "/terms": {
-      title: "Terms of Service",
       subtitle: "Terms & Conditions",
-      description:
-        "By using Noviatify, you agree to our terms of service. These terms govern your use of our platform and services.",
-      cta: { label: "Start Now — It's Free", href: "/start" },
+      title: "Terms of Service",
+      lastUpdated: "Last updated: June 8, 2026",
+      intro:
+        "These Terms of Service govern your use of Noviatify and the services we provide. By creating an account or placing an order, you agree to these terms. Please read them carefully.",
+      sections: [
+        {
+          heading: "1. Acceptance of Terms",
+          body:
+            "By accessing or using Noviatify, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, you should not use our services. If you are using Noviatify on behalf of a business, you represent that you are authorized to bind that business.",
+        },
+        {
+          heading: "2. Our Services",
+          body:
+            "Noviatify provides business formation, registered agent, compliance, and related filing services. We prepare and submit documents based on the information you provide. You are responsible for ensuring that the information you give us is accurate, complete, and up to date.",
+        },
+        {
+          heading: "3. Not Legal or Tax Advice",
+          body:
+            "Noviatify is not a law firm or an accounting firm, and we do not provide legal, tax, or financial advice. Our services are for informational and filing purposes only. For advice specific to your situation, you should consult a qualified attorney or accountant.",
+        },
+        {
+          heading: "4. Fees & Payments",
+          body:
+            "You agree to pay all fees associated with the services you order, including any applicable government and state filing fees. Fees are described at checkout and are generally non-refundable once a filing has been submitted. We may change our pricing for future orders at any time.",
+        },
+        {
+          heading: "5. Your Responsibilities",
+          body:
+            "You agree to use Noviatify only for lawful purposes, to keep your account credentials secure, and to provide accurate information. You are responsible for all activity that occurs under your account and for maintaining your business's ongoing legal and compliance obligations.",
+        },
+        {
+          heading: "6. Intellectual Property",
+          body:
+            "All content, branding, and software on Noviatify are owned by us or our licensors and are protected by applicable laws. You may not copy, modify, distribute, or reverse-engineer any part of our service without our prior written permission.",
+        },
+        {
+          heading: "7. Limitation of Liability",
+          body:
+            "To the fullest extent permitted by law, Noviatify is not liable for any indirect, incidental, or consequential damages arising from your use of our services. Our total liability for any claim is limited to the amount you paid us for the service giving rise to the claim.",
+        },
+        {
+          heading: "8. Termination",
+          body:
+            "We may suspend or terminate your access to Noviatify if you violate these terms or use our services in a way that could cause harm or legal exposure. You may stop using our services at any time. Certain provisions survive termination, including payment obligations and limitations of liability.",
+        },
+        {
+          heading: "9. Changes to These Terms",
+          body:
+            "We may update these Terms of Service from time to time. When we do, we will revise the date above. Your continued use of Noviatify after changes take effect constitutes acceptance of the updated terms.",
+        },
+      ],
+      contactHeading: "Questions About These Terms?",
+      contactBody:
+        "If anything in these terms is unclear, our team is here to help. Reach out and we will walk you through it.",
+      contactCtaLabel: "Contact Support",
+      contactCtaHref: "/about/contact",
     },
   },
 };

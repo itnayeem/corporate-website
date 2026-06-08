@@ -18,6 +18,7 @@ import Services from "@/pages/Services";
 import About from "@/pages/About";
 import Pricing from "@/pages/Pricing";
 import GenericPage from "@/pages/GenericPage";
+import LegalPage from "@/pages/LegalPage";
 import AdminLogin from "@/pages/admin/Login";
 import AdminPages from "@/pages/admin/Pages";
 
@@ -41,9 +42,9 @@ const genericRoutes = [
   "/research",
   "/start",
   "/login",
-  "/privacy",
-  "/terms",
 ];
+
+const legalRoutes = ["/privacy", "/terms"];
 
 function Router() {
   const [location] = useLocation();
@@ -71,6 +72,11 @@ function Router() {
           {genericRoutes.map((path) => (
             <Route key={path} path={path}>
               {() => <GenericPage pageKey={path} />}
+            </Route>
+          ))}
+          {legalRoutes.map((path) => (
+            <Route key={path} path={path}>
+              {() => <LegalPage pageKey={path} />}
             </Route>
           ))}
           <Route component={NotFound} />
