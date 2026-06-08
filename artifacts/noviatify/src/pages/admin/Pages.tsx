@@ -253,6 +253,7 @@ function BrandingCard() {
   const [slogan, setSlogan] = useState(brand.slogan ?? "");
   const [logoUrl, setLogoUrl] = useState(brand.logoUrl ?? "");
   const [faviconUrl, setFaviconUrl] = useState(brand.faviconUrl ?? "");
+  const [tidioKey, setTidioKey] = useState(brand.tidioKey ?? "");
   const [uploading, setUploading] = useState<"logo" | "favicon" | null>(null);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -267,7 +268,8 @@ function BrandingCard() {
     setSlogan(brand.slogan ?? "");
     setLogoUrl(brand.logoUrl ?? "");
     setFaviconUrl(brand.faviconUrl ?? "");
-  }, [brand.name, brand.slogan, brand.logoUrl, brand.faviconUrl]);
+    setTidioKey(brand.tidioKey ?? "");
+  }, [brand.name, brand.slogan, brand.logoUrl, brand.faviconUrl, brand.tidioKey]);
 
   const handleAuthError = (err: unknown): boolean => {
     if (err instanceof ApiError && err.status === 401) {
@@ -322,7 +324,7 @@ function BrandingCard() {
       ...content,
       site: {
         ...content.site,
-        brand: { ...content.site.brand, name, slogan, logoUrl, faviconUrl },
+        brand: { ...content.site.brand, name, slogan, logoUrl, faviconUrl, tidioKey: tidioKey.trim() },
       },
     };
     update.mutate(
@@ -444,6 +446,25 @@ function BrandingCard() {
               {uploading === "favicon" ? "Uploading…" : "Upload favicon"}
             </button>
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-white/60">
+            Live chat{" "}
+            <span className="font-normal text-white/35">(Tidio public key)</span>
+          </label>
+          <input
+            type="text"
+            value={tidioKey}
+            onChange={(e) => setTidioKey(e.target.value)}
+            placeholder="e.g. abc123yourkey"
+            className={inputClass}
+          />
+          <p className="text-[11px] text-white/35 leading-snug">
+            Paste the key from your Tidio install snippet (the part in{" "}
+            <code>code.tidio.co/&lt;key&gt;.js</code>). Leave empty to turn off live
+            chat. Changes apply after a page refresh.
+          </p>
         </div>
 
         {error && <p className="text-red-400 text-sm">{error}</p>}

@@ -4,6 +4,9 @@ export const site = {
     slogan: "Business formation, made effortless.",
     logoUrl: "",
     faviconUrl: "",
+    // Tidio live-chat public key (from your Tidio project URL,
+    // e.g. code.tidio.co/<KEY>.js). Empty = chat disabled.
+    tidioKey: "",
   },
   nav: {
     home: "Home",

@@ -7,6 +7,7 @@ import { ContentProvider } from "@/content/ContentContext";
 import { EditModeProvider } from "@/content/EditModeContext";
 import { EditToolbar } from "@/components/admin/EditToolbar";
 import BrandHead from "@/components/BrandHead";
+import TidioChat from "@/components/TidioChat";
 import Preloader from "@/components/Preloader";
 import ScrollProgress from "@/components/ScrollProgress";
 import PageTransition from "@/components/PageTransition";
@@ -91,6 +92,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ContentProvider>
         <BrandHead />
+        <TidioChat />
         <Preloader />
         <ScrollProgress />
         <EditModeProvider>
