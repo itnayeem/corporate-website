@@ -7,6 +7,7 @@ import { ContentProvider } from "@/content/ContentContext";
 import { EditModeProvider } from "@/content/EditModeContext";
 import { EditToolbar } from "@/components/admin/EditToolbar";
 import MaintenanceGate from "@/components/MaintenanceGate";
+import CodeProtection from "@/components/CodeProtection";
 import BrandHead from "@/components/BrandHead";
 import TidioChat from "@/components/TidioChat";
 import Preloader from "@/components/Preloader";
@@ -92,6 +93,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ContentProvider>
+        <CodeProtection />
         <BrandHead />
         <TidioChat />
         <Preloader />
