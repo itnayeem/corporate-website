@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowRight, Shield, Briefcase, Globe, CheckCircle2, Users, Building2, Award, FileText } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import SiteLogo from "@/components/SiteLogo";
+import AuthorizeNetSeal from "@/components/AuthorizeNetSeal";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
 import { EditableLink } from "@/components/admin/EditableLink";
@@ -176,6 +177,7 @@ export default function Services() {
               <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></EditableLink>
             ))}
           </div>
+          <AuthorizeNetSeal />
         </div>
       </footer>
     </div>

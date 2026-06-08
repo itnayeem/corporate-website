@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowRight, CheckCircle2, Plus, Trash2, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import SiteLogo from "@/components/SiteLogo";
+import AuthorizeNetSeal from "@/components/AuthorizeNetSeal";
 import { useContent } from "@/content/ContentContext";
 import { useEditMode } from "@/content/EditModeContext";
 import { Editable } from "@/components/admin/Editable";
@@ -246,6 +247,7 @@ export default function Pricing() {
               <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></EditableLink>
             ))}
           </div>
+          <AuthorizeNetSeal />
         </div>
       </footer>
     </div>

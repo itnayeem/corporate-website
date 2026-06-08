@@ -6,6 +6,7 @@ import {
   Building2, Globe, Briefcase, ChevronRight, Play
 } from "lucide-react";
 import SiteLogo from "@/components/SiteLogo";
+import AuthorizeNetSeal from "@/components/AuthorizeNetSeal";
 import Navbar from "@/components/Navbar";
 import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
@@ -718,6 +719,7 @@ export default function Home() {
               ))}
             </div>
             <Editable as="p" className="text-white/30 text-sm" path="home.footer.tagline" />
+            <AuthorizeNetSeal />
           </div>
         </div>
       </footer>

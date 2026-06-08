@@ -7,6 +7,7 @@ import { useContent } from "@/content/ContentContext";
 import { Editable } from "@/components/admin/Editable";
 import { EditableLink } from "@/components/admin/EditableLink";
 import SiteLogo from "@/components/SiteLogo";
+import AuthorizeNetSeal from "@/components/AuthorizeNetSeal";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
@@ -71,6 +72,7 @@ function MiniFooter() {
             <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors"><Editable as="span" path={`site.footer.links.${i}.label`} /></EditableLink>
           ))}
         </div>
+        <AuthorizeNetSeal />
       </div>
     </footer>
   );
