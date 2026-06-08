@@ -1,39 +1,48 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ShieldAlert } from "lucide-react";
+
+const MESSAGE = "Inspect, View Source and Developer Tools are disabled.";
 
 /**
- * Best-effort deterrents against casual "view source / inspect" attempts.
+ * Best-effort deterrents against casual "view source / inspect" attempts,
+ * applied globally on every page.
+ *
+ * Blocks: right-click context menu, F12, Ctrl/Cmd+Shift+I, Ctrl/Cmd+Shift+J,
+ * Ctrl/Cmd+Shift+C, and Ctrl/Cmd+U — and shows a custom on-screen message when
+ * a blocked action is attempted.
  *
  * IMPORTANT: this cannot truly hide front-end code — anything the browser
- * renders is ultimately readable. It only blocks the common shortcuts
- * (right-click, F12, Ctrl/Cmd+Shift+I/J/C, Ctrl/Cmd+U) to stop casual snooping.
- *
- * Only runs on the production build so it never interferes with development,
- * the dev preview, or the admin in-place editing workflow.
+ * renders is ultimately readable. It only deters casual snooping.
  */
 export default function CodeProtection() {
-  useEffect(() => {
-    if (!import.meta.env.PROD) return;
+  const [show, setShow] = useState(false);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const onContextMenu = (e: MouseEvent) => e.preventDefault();
+  useEffect(() => {
+    const flash = () => {
+      setShow(true);
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      hideTimer.current = setTimeout(() => setShow(false), 2600);
+    };
+
+    const onContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      flash();
+    };
 
     const onKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
       const ctrlOrCmd = e.ctrlKey || e.metaKey;
 
-      // F12 — open DevTools
-      if (key === "f12") {
+      const isF12 = key === "f12";
+      const isDevtoolsCombo =
+        ctrlOrCmd && e.shiftKey && (key === "i" || key === "j" || key === "c");
+      const isViewSource = ctrlOrCmd && key === "u";
+
+      if (isF12 || isDevtoolsCombo || isViewSource) {
         e.preventDefault();
-        return;
-      }
-      // Ctrl/Cmd+Shift+I / J / C — DevTools / console / element picker
-      if (ctrlOrCmd && e.shiftKey && (key === "i" || key === "j" || key === "c")) {
-        e.preventDefault();
-        return;
-      }
-      // Ctrl/Cmd+U — view source
-      if (ctrlOrCmd && key === "u") {
-        e.preventDefault();
-        return;
+        flash();
       }
     };
 
@@ -42,8 +51,27 @@ export default function CodeProtection() {
     return () => {
       document.removeEventListener("contextmenu", onContextMenu);
       document.removeEventListener("keydown", onKeyDown);
+      if (hideTimer.current) clearTimeout(hideTimer.current);
     };
   }, []);
 
-  return null;
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 16 }}
+          transition={{ duration: 0.2 }}
+          role="alert"
+          className="fixed bottom-6 left-1/2 z-[2147483647] -translate-x-1/2 pointer-events-none"
+        >
+          <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0b1638]/95 px-4 py-3 text-sm font-semibold text-white shadow-2xl shadow-black/50 backdrop-blur">
+            <ShieldAlert className="h-4 w-4 flex-shrink-0 text-amber-400" />
+            <span>{MESSAGE}</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }
