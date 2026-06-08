@@ -1,1 +1,2 @@
 - [Content path keys](content-path-keys.md) — CMS Editable paths split on '.', so content keys must never contain a dot; slash route keys like /terms are safe.
+- [Generic page per-page overrides](generic-page-overrides.md) — GenericPage body sections resolve per-page override (with edit path) else fall back to site.genericShared.
