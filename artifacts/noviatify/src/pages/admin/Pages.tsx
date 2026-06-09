@@ -111,6 +111,8 @@ export default function AdminPages() {
           </div>
         </section>
 
+        <ThemeCard />
+
         <MaintenanceCard />
 
         <BrandingCard />
@@ -237,6 +239,95 @@ function ChangePasswordCard() {
           )}
         </motion.button>
       </form>
+    </section>
+  );
+}
+
+function ThemeCard() {
+  const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const content = useContent();
+  const theme = content.site.theme === "light" ? "light" : "dark";
+
+  const update = useUpdateContent();
+  const [error, setError] = useState("");
+
+  const handleAuthError = (err: unknown): boolean => {
+    if (err instanceof ApiError && err.status === 401) {
+      clearAdminToken();
+      navigate("/owner");
+      return true;
+    }
+    return false;
+  };
+
+  const setTheme = (next: "dark" | "light") => {
+    if (next === theme) return;
+    setError("");
+    const nextContent = {
+      ...content,
+      site: { ...content.site, theme: next },
+    };
+    update.mutate(
+      { data: { data: nextContent as unknown as Record<string, unknown> } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetContentQueryKey() });
+        },
+        onError: (err) => {
+          if (handleAuthError(err)) return;
+          setError("Could not save. Please try again.");
+        },
+      },
+    );
+  };
+
+  const options: { value: "dark" | "light"; label: string; desc: string }[] = [
+    { value: "dark", label: "Dark", desc: "Deep navy background (default)." },
+    { value: "light", label: "Light", desc: "Bright white background." },
+  ];
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-1">
+        <Palette className="w-4 h-4 text-blue-400" />
+        <h2 className="text-base font-bold">Site theme</h2>
+      </div>
+      <p className="text-white/45 text-sm mb-5">
+        Choose how your whole public website looks to visitors. The change
+        applies instantly across every page.
+      </p>
+
+      <div className="rounded-2xl bg-white/5 border border-white/10 p-6 max-w-md space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          {options.map((opt) => {
+            const active = theme === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setTheme(opt.value)}
+                disabled={update.isPending}
+                aria-pressed={active}
+                className={`text-left rounded-xl border p-4 transition disabled:opacity-50 ${
+                  active
+                    ? "border-primary bg-primary/10"
+                    : "border-white/10 bg-white/5 hover:bg-white/10"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="text-sm font-semibold text-white">
+                    {opt.label}
+                  </span>
+                  {active && <Check className="w-4 h-4 text-primary" />}
+                </div>
+                <span className="block text-xs text-white/45">{opt.desc}</span>
+              </button>
+            );
+          })}
+        </div>
+        {error && <p className="text-red-400 text-sm">{error}</p>}
+      </div>
     </section>
   );
 }

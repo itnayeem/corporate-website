@@ -33,7 +33,7 @@ export default function Preloader() {
     <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed inset-0 z-[300] flex items-center justify-center bg-[#060d2b]"
+          className="fixed inset-0 z-[300] flex items-center justify-center bg-white dark:bg-[#060d2b]"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -52,7 +52,7 @@ export default function Preloader() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
             <SiteLogo className="h-12 w-auto" />
-            <div className="h-[2px] w-40 overflow-hidden rounded-full bg-white/10">
+            <div className="h-[2px] w-40 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
               <motion.div
                 className="h-full w-full bg-gradient-to-r from-transparent via-primary to-transparent"
                 initial={{ x: "-100%" }}

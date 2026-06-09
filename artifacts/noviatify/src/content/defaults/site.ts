@@ -1,4 +1,8 @@
 export const site = {
+  // Global appearance for the public site. "dark" is the default; the owner can
+  // switch the whole site to "light" from the admin dashboard. Applied by
+  // ThemeController (toggles the `dark` class on <html>).
+  theme: "dark",
   brand: {
     name: "Noviatify",
     slogan: "Business formation, made effortless.",

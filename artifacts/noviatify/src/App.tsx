@@ -7,6 +7,7 @@ import { ContentProvider } from "@/content/ContentContext";
 import { EditModeProvider } from "@/content/EditModeContext";
 import { EditToolbar } from "@/components/admin/EditToolbar";
 import MaintenanceGate from "@/components/MaintenanceGate";
+import ThemeController from "@/components/ThemeController";
 import CodeProtection from "@/components/CodeProtection";
 import BrandHead from "@/components/BrandHead";
 import TidioChat from "@/components/TidioChat";
@@ -93,6 +94,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ContentProvider>
+        <ThemeController />
         <CodeProtection />
         <BrandHead />
         <TidioChat />

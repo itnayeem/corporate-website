@@ -53,6 +53,7 @@ A dark-themed, animated multi-page marketing website for Noviatify (a business f
 
 - Public site: Home, How It Works, Services, About, plus generic content pages — all dark-themed and animated.
 - Admin CMS at `/owner` (login) → `/owner/pages` (dashboard): owner logs in with the admin password, then edits site text in place (click any text on the public site) and manages branding; changes persist to the DB and render on the public site.
+- Theme: owner switches the whole public site between dark (default) and light from the admin dashboard. State lives in `site.theme` ("dark"|"light") in the content JSONB. `ThemeController` (mounted first inside `ContentProvider` in `App.tsx`) toggles the `dark` class on `<html>`; `main.tsx` hardcodes dark on initial paint as the no-flash default. Public-facing pages/components use `light-default dark:original` Tailwind classes; admin chrome stays bare-dark in both themes (back-office tool).
 - Maintenance mode: owner toggles it from the admin dashboard. When on, public visitors get a dark-themed "we'll be right back" page (`MaintenancePage`) with an owner-editable heading/message; the logged-in admin still sees the real site and `/owner*` stays reachable. State lives in `site.maintenance` (enabled/title/message) in the content JSONB — gating is client-side via `MaintenanceGate`, consistent with the existing client-side admin detection.
 
 ## User preferences

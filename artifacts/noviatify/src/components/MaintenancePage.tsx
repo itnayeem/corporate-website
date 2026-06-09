@@ -13,7 +13,7 @@ export default function MaintenancePage() {
   const message = maintenance.message?.trim() || FALLBACK_MESSAGE;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#060d2b] text-white flex items-center justify-center px-6">
+    <div className="relative min-h-screen overflow-hidden bg-white dark:bg-[#060d2b] text-slate-900 dark:text-white flex items-center justify-center px-6">
       {/* Ambient glows to match the site's dark animated theme */}
       <div className="pointer-events-none absolute inset-0">
         <motion.div
@@ -39,7 +39,7 @@ export default function MaintenancePage() {
         </div>
 
         <motion.div
-          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/5"
+          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5"
           animate={{ rotate: [0, -12, 12, -8, 0] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -49,11 +49,11 @@ export default function MaintenancePage() {
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
           {title}
         </h1>
-        <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-white/60">
+        <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-slate-600 dark:text-white/60">
           {message}
         </p>
 
-        <div className="mx-auto mt-10 h-px w-24 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="mx-auto mt-10 h-px w-24 bg-gradient-to-r from-transparent via-slate-400/30 dark:via-white/20 to-transparent" />
       </motion.div>
     </div>
   );

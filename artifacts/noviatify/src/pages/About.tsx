@@ -42,36 +42,36 @@ export default function About() {
   const { mission, milestones, awardsSection, teamSection, valuesSection, cta } = content.about;
 
   return (
-    <div className="min-h-screen bg-[#060d2b] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#060d2b] text-slate-900 dark:text-white overflow-x-hidden">
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-32 pb-20 bg-[#060d2b] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#060d2b] via-[#0c1648] to-[#060d2b]" />
+      <section className="relative pt-32 pb-20 bg-white dark:bg-[#060d2b] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50 to-white dark:from-[#060d2b] dark:via-[#0c1648] dark:to-[#060d2b]" />
         <div className="absolute top-1/4 right-1/4 w-80 h-80 rounded-full bg-blue-500/20 blur-[100px]" />
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "60px 60px" }} />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
             <Editable as="span" className="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-4" path="about.hero.eyebrow" />
-            <Editable as="h1" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.hero.title" />
-            <Editable as="p" className="text-white/60 text-lg max-w-2xl leading-relaxed" path="about.hero.subtitle" multiline />
+            <Editable as="h1" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.hero.title" />
+            <Editable as="p" className="text-slate-600 dark:text-white/60 text-lg max-w-2xl leading-relaxed" path="about.hero.subtitle" multiline />
           </motion.div>
         </div>
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 60V30C360 0 720 0 1080 30C1260 45 1350 55 1440 30V60H0Z" fill="#060d2b" />
+            <path d="M0 60V30C360 0 720 0 1080 30C1260 45 1350 55 1440 30V60H0Z" className="fill-white dark:fill-[#060d2b]" />
           </svg>
         </div>
       </section>
 
       {/* Mission */}
-      <section className="py-20 bg-[#060d2b]">
+      <section className="py-20 bg-white dark:bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-14 items-center">
             <FadeUp>
-              <Editable as="h2" className="text-3xl sm:text-4xl font-extrabold text-white mb-6" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.mission.title" />
+              <Editable as="h2" className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-6" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.mission.title" />
               {mission.paragraphs.map((p, i) => (
-                <Editable key={i} as="p" className={`text-white/55 text-lg leading-relaxed ${i === mission.paragraphs.length - 1 ? "mb-8" : "mb-6"}`} path={`about.mission.paragraphs.${i}`} multiline />
+                <Editable key={i} as="p" className={`text-slate-600 dark:text-white/55 text-lg leading-relaxed ${i === mission.paragraphs.length - 1 ? "mb-8" : "mb-6"}`} path={`about.mission.paragraphs.${i}`} multiline />
               ))}
               <div className="grid grid-cols-2 gap-5">
                 {mission.stats.map((item, i) => {
@@ -80,9 +80,9 @@ export default function About() {
                   return (
                     <motion.div key={item.label} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
                       transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-3 rounded-2xl p-4 bg-white/5">
+                      className="flex items-center gap-3 rounded-2xl p-4 bg-white dark:bg-white/5">
                       <Icon className={`w-5 h-5 ${meta.color} flex-shrink-0`} />
-                      <Editable as="span" className="font-bold text-white text-sm" path={`about.mission.stats.${i}.label`} />
+                      <Editable as="span" className="font-bold text-slate-900 dark:text-white text-sm" path={`about.mission.stats.${i}.label`} />
                     </motion.div>
                   );
                 })}
@@ -99,8 +99,8 @@ export default function About() {
                       {i < milestones.length - 1 && <div className="w-px h-full bg-gradient-to-b from-primary/30 to-transparent mt-2" />}
                     </div>
                     <div className="pb-6">
-                      <Editable as="h3" className="font-bold text-white text-lg mb-1" path={`about.milestones.${i}.title`} />
-                      <Editable as="p" className="text-white/55 text-sm leading-relaxed" path={`about.milestones.${i}.desc`} multiline />
+                      <Editable as="h3" className="font-bold text-slate-900 dark:text-white text-lg mb-1" path={`about.milestones.${i}.title`} />
+                      <Editable as="p" className="text-slate-600 dark:text-white/55 text-sm leading-relaxed" path={`about.milestones.${i}.desc`} multiline />
                     </div>
                   </motion.div>
                 </FadeUp>
@@ -111,23 +111,23 @@ export default function About() {
       </section>
 
       {/* Awards */}
-      <section className="py-20 bg-[#0a1330]">
+      <section className="py-20 bg-slate-50 dark:bg-[#0a1330]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.awardsSection.title" />
-            <Editable as="p" className="text-white/55 text-lg mt-3" path="about.awardsSection.subtitle" multiline />
+            <Editable as="h2" className="text-3xl font-extrabold text-slate-900 dark:text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.awardsSection.title" />
+            <Editable as="p" className="text-slate-600 dark:text-white/55 text-lg mt-3" path="about.awardsSection.subtitle" multiline />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {awardsSection.awards.map((a, i) => (
               <FadeUp key={a.name} delay={i * 0.1}>
                 <motion.div whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(37,117,252,0.10)" }}
-                  className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:border-blue-400/30 transition-all text-center">
+                  className="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm hover:border-blue-400/30 transition-all text-center">
                   <div className="flex gap-0.5 justify-center mb-3">
                     {Array(5).fill(0).map((_, si) => <Star key={si} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
                   </div>
-                  <Editable as="h3" className="font-black text-2xl text-white mb-1" path={`about.awardsSection.awards.${i}.name`} />
+                  <Editable as="h3" className="font-black text-2xl text-slate-900 dark:text-white mb-1" path={`about.awardsSection.awards.${i}.name`} />
                   <Editable as="p" className="text-blue-400 text-xs font-bold mb-3" path={`about.awardsSection.awards.${i}.year`} />
-                  <Editable as="p" className="text-white/55 text-sm leading-relaxed" path={`about.awardsSection.awards.${i}.detail`} multiline />
+                  <Editable as="p" className="text-slate-600 dark:text-white/55 text-sm leading-relaxed" path={`about.awardsSection.awards.${i}.detail`} multiline />
                 </motion.div>
               </FadeUp>
             ))}
@@ -136,20 +136,20 @@ export default function About() {
       </section>
 
       {/* Team */}
-      <section className="py-20 bg-[#060d2b]">
+      <section className="py-20 bg-white dark:bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.teamSection.title" />
-            <Editable as="p" className="text-white/55 text-lg mt-3" path="about.teamSection.subtitle" multiline />
+            <Editable as="h2" className="text-3xl font-extrabold text-slate-900 dark:text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.teamSection.title" />
+            <Editable as="p" className="text-slate-600 dark:text-white/55 text-lg mt-3" path="about.teamSection.subtitle" multiline />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {teamSection.members.map((member, i) => (
               <FadeUp key={member.name} delay={i * 0.12}>
-                <motion.div whileHover={{ y: -6 }} className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-400/30 transition-all text-center">
+                <motion.div whileHover={{ y: -6 }} className="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-400/30 transition-all text-center">
                   <MemberAvatar index={i} imageUrl={member.imageUrl} name={member.name} />
-                  <Editable as="h3" className="font-bold text-white text-base mb-0.5" path={`about.teamSection.members.${i}.name`} />
+                  <Editable as="h3" className="font-bold text-slate-900 dark:text-white text-base mb-0.5" path={`about.teamSection.members.${i}.name`} />
                   <Editable as="p" className="text-blue-400 text-xs font-semibold mb-3" path={`about.teamSection.members.${i}.role`} />
-                  <Editable as="p" className="text-white/55 text-xs leading-relaxed" path={`about.teamSection.members.${i}.bio`} multiline />
+                  <Editable as="p" className="text-slate-600 dark:text-white/55 text-xs leading-relaxed" path={`about.teamSection.members.${i}.bio`} multiline />
                 </motion.div>
               </FadeUp>
             ))}
@@ -158,10 +158,10 @@ export default function About() {
       </section>
 
       {/* Values */}
-      <section className="py-20 bg-[#0a1330]">
+      <section className="py-20 bg-slate-50 dark:bg-[#0a1330]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">
-            <Editable as="h2" className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.valuesSection.title" />
+            <Editable as="h2" className="text-3xl font-extrabold text-slate-900 dark:text-white" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.valuesSection.title" />
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {valuesSection.values.map((v, i) => {
@@ -169,12 +169,12 @@ export default function About() {
               const Icon = meta.icon;
               return (
                 <FadeUp key={v.title} delay={i * 0.08}>
-                  <motion.div whileHover={{ y: -5 }} className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-400/30 transition-all">
+                  <motion.div whileHover={{ y: -5 }} className="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-400/30 transition-all">
                     <div className={`w-12 h-12 rounded-2xl ${meta.color} flex items-center justify-center mb-4`}>
                       <Icon className="w-6 h-6" />
                     </div>
-                    <Editable as="h3" className="font-bold text-white text-base mb-2" path={`about.valuesSection.values.${i}.title`} />
-                    <Editable as="p" className="text-white/55 text-sm leading-relaxed" path={`about.valuesSection.values.${i}.desc`} multiline />
+                    <Editable as="h3" className="font-bold text-slate-900 dark:text-white text-base mb-2" path={`about.valuesSection.values.${i}.title`} />
+                    <Editable as="p" className="text-slate-600 dark:text-white/55 text-sm leading-relaxed" path={`about.valuesSection.values.${i}.desc`} multiline />
                   </motion.div>
                 </FadeUp>
               );
@@ -184,12 +184,12 @@ export default function About() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-[#060d2b] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#060d2b] via-[#0c1648] to-[#060d2b]" />
+      <section className="py-20 bg-white dark:bg-[#060d2b] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-blue-50 to-white dark:from-[#060d2b] dark:via-[#0c1648] dark:to-[#060d2b]" />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeUp>
-            <Editable as="h2" className="text-4xl font-extrabold text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.cta.title" />
-            <Editable as="p" className="text-white/60 text-lg mb-8 max-w-xl mx-auto" path="about.cta.subtitle" multiline />
+            <Editable as="h2" className="text-4xl font-extrabold text-slate-900 dark:text-white mb-5" style={{ fontFamily: "'Inter Tight', sans-serif" }} path="about.cta.title" />
+            <Editable as="p" className="text-slate-600 dark:text-white/60 text-lg mb-8 max-w-xl mx-auto" path="about.cta.subtitle" multiline />
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <EditableLink path="about.cta.primary.href">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
@@ -199,7 +199,7 @@ export default function About() {
               </EditableLink>
               <EditableLink path="about.cta.secondary.href">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                  className="border-2 border-white/30 text-white font-bold px-10 py-4 rounded-full hover:border-white transition-colors inline-flex items-center gap-2">
+                  className="border-2 border-slate-200 dark:border-white/30 text-slate-900 dark:text-white font-bold px-10 py-4 rounded-full hover:border-slate-300 dark:hover:border-white transition-colors inline-flex items-center gap-2">
                   <Editable as="span" path="about.cta.secondary.label" />
                 </motion.button>
               </EditableLink>
@@ -208,13 +208,13 @@ export default function About() {
         </div>
       </section>
 
-      <footer className="bg-[#040918] text-white py-10">
+      <footer className="bg-slate-100 dark:bg-[#040918] text-slate-900 dark:text-white py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Link href="/"><SiteLogo className="h-7 w-auto opacity-80" /></Link>
-          <p className="text-white/30 text-sm">{content.site.footer.copyright}</p>
-          <div className="flex gap-5 text-sm text-white/40">
+          <p className="text-slate-500 dark:text-white/30 text-sm">{content.site.footer.copyright}</p>
+          <div className="flex gap-5 text-sm text-slate-500 dark:text-white/40">
             {content.site.footer.links.map((link, i) => (
-              <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-white transition-colors">{link.label}</EditableLink>
+              <EditableLink key={link.href} path={`site.footer.links.${i}.href`} className="hover:text-slate-900 dark:hover:text-white transition-colors">{link.label}</EditableLink>
             ))}
           </div>
           <AuthorizeNetSeal />
