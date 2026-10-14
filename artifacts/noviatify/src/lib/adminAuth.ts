@@ -1,6 +1,6 @@
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 
-const TOKEN_KEY = "noviatify_admin_token";
+const TOKEN_KEY = "itnayeem_admin_token";
 
 export function getAdminToken(): string | null {
   try {
@@ -12,12 +12,12 @@ export function getAdminToken(): string | null {
 
 export function setAdminToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
-  window.dispatchEvent(new Event("noviatify-auth"));
+  window.dispatchEvent(new Event("itnayeem-auth"));
 }
 
 export function clearAdminToken(): void {
   localStorage.removeItem(TOKEN_KEY);
-  window.dispatchEvent(new Event("noviatify-auth"));
+  window.dispatchEvent(new Event("itnayeem-auth"));
 }
 
 export function isAdminAuthed(): boolean {

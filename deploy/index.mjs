@@ -1804,7 +1804,7 @@ var require_utf32 = __commonJS({
     }
     Utf32Encoder.prototype.write = function(str) {
       var src = Buffer2.from(str, "ucs2");
-      var dst = Buffer2.alloc(src.length * 2);
+      var dst = Buffer2.alloc(src.length * 2 + 4);
       var write32 = this.isLE ? dst.writeUInt32LE : dst.writeUInt32BE;
       var offset = 0;
       for (var i = 0; i < src.length; i += 2) {
@@ -1871,9 +1871,9 @@ var require_utf32 = __commonJS({
         }
         if (overflow.length === 4) {
           if (isLE) {
-            codepoint = overflow[i] | overflow[i + 1] << 8 | overflow[i + 2] << 16 | overflow[i + 3] << 24;
+            codepoint = overflow[0] | overflow[1] << 8 | overflow[2] << 16 | overflow[3] << 24;
           } else {
-            codepoint = overflow[i + 3] | overflow[i + 2] << 8 | overflow[i + 1] << 16 | overflow[i] << 24;
+            codepoint = overflow[3] | overflow[2] << 8 | overflow[1] << 16 | overflow[0] << 24;
           }
           overflow.length = 0;
           offset = _writeCodepoint(dst, offset, codepoint, badChar);
@@ -1908,7 +1908,11 @@ var require_utf32 = __commonJS({
       return offset;
     }
     Utf32Decoder.prototype.end = function() {
+      if (this.overflow.length === 0) {
+        return;
+      }
       this.overflow.length = 0;
+      return String.fromCharCode(this.badChar);
     };
     exports.utf32 = Utf32AutoCodec;
     exports.ucs4 = "utf32";
@@ -2533,6 +2537,8 @@ var require_sbcs_data = __commonJS({
       elot928: "iso88597",
       hebrew: "iso88598",
       hebrew8: "iso88598",
+      iso88598i: "iso88598",
+      iso88598e: "iso88598",
       turkish: "iso88599",
       turkish8: "iso88599",
       thai: "iso885911",
@@ -5639,9 +5645,9 @@ var require_on_finished = __commonJS({
   }
 });
 
-// ../../node_modules/type-is/node_modules/content-type/dist/index.js
+// ../../node_modules/content-type/dist/index.js
 var require_dist = __commonJS({
-  "../../node_modules/type-is/node_modules/content-type/dist/index.js"(exports) {
+  "../../node_modules/content-type/dist/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.format = format;
@@ -5673,14 +5679,17 @@ var require_dist = __commonJS({
       return result;
     }
     function parse3(header, options) {
+      const stopChar = options?.comma === true ? COMMA : 65536;
       const len = header.length;
-      let index = skipOWS(header, 0, len);
+      let index = skipOWS(header, options?.start ?? 0, len);
       const valueStart = index;
-      index = skipValue(header, index, len);
+      index = skipValue(header, index, len, stopChar);
       const valueEnd = trailingOWS(header, valueStart, index);
       const type = header.slice(valueStart, valueEnd).toLowerCase();
-      const parameters = options?.parameters === false ? new NullObject() : parseParameters(header, index, len);
-      return { type, parameters };
+      if (options?.parameters === false) {
+        return { type, index, parameters: new NullObject() };
+      }
+      return parseParameters(header, type, index, len, stopChar);
     }
     var SP = 32;
     var HTAB = 9;
@@ -5688,13 +5697,18 @@ var require_dist = __commonJS({
     var EQ = 61;
     var DQUOTE = 34;
     var BSLASH = 92;
-    function parseParameters(header, index, len) {
+    var COMMA = 44;
+    function parseParameters(header, type, index, len, stopChar) {
       const parameters = new NullObject();
       parameter: while (index < len) {
+        if (header.charCodeAt(index) === stopChar)
+          break;
         index = skipOWS(header, index + 1, len);
         const keyStart = index;
         while (index < len) {
           const code = header.charCodeAt(index);
+          if (code === stopChar)
+            break parameter;
           if (code === SEMI)
             continue parameter;
           if (code === EQ) {
@@ -5707,7 +5721,7 @@ var require_dist = __commonJS({
               while (index < len) {
                 const code2 = header.charCodeAt(index++);
                 if (code2 === DQUOTE) {
-                  index = skipValue(header, index, len);
+                  index = skipValue(header, index, len, stopChar);
                   if (parameters[key] === void 0)
                     parameters[key] = value;
                   break;
@@ -5721,7 +5735,7 @@ var require_dist = __commonJS({
               continue parameter;
             }
             const valueStart = index;
-            index = skipValue(header, index, len);
+            index = skipValue(header, index, len, stopChar);
             if (parameters[key] === void 0) {
               const valueEnd = trailingOWS(header, valueStart, index);
               parameters[key] = header.slice(valueStart, valueEnd);
@@ -5731,12 +5745,12 @@ var require_dist = __commonJS({
           index++;
         }
       }
-      return parameters;
+      return { type, index, parameters };
     }
-    function skipValue(str, index, len) {
+    function skipValue(str, index, len, stopChar) {
       while (index < len) {
-        const char2 = str.charCodeAt(index);
-        if (char2 === SEMI)
+        const code = str.charCodeAt(index);
+        if (code === SEMI || code === stopChar)
           break;
         index++;
       }
@@ -15308,18 +15322,12 @@ var require_media_typer = __commonJS({
       return string4;
     }
     function test(string4) {
-      if (!string4) {
-        throw new TypeError("argument string is required");
-      }
       if (typeof string4 !== "string") {
         throw new TypeError("argument string is required to be a string");
       }
       return TYPE_REGEXP.test(string4.toLowerCase());
     }
     function parse3(string4) {
-      if (!string4) {
-        throw new TypeError("argument string is required");
-      }
       if (typeof string4 !== "string") {
         throw new TypeError("argument string is required to be a string");
       }
@@ -15436,116 +15444,12 @@ var require_type_is = __commonJS({
   }
 });
 
-// ../../node_modules/content-type/index.js
-var require_content_type = __commonJS({
-  "../../node_modules/content-type/index.js"(exports) {
-    "use strict";
-    var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g;
-    var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/;
-    var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
-    var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g;
-    var QUOTE_REGEXP = /([\\"])/g;
-    var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
-    exports.format = format;
-    exports.parse = parse3;
-    function format(obj) {
-      if (!obj || typeof obj !== "object") {
-        throw new TypeError("argument obj is required");
-      }
-      var parameters = obj.parameters;
-      var type = obj.type;
-      if (!type || !TYPE_REGEXP.test(type)) {
-        throw new TypeError("invalid type");
-      }
-      var string4 = type;
-      if (parameters && typeof parameters === "object") {
-        var param;
-        var params = Object.keys(parameters).sort();
-        for (var i = 0; i < params.length; i++) {
-          param = params[i];
-          if (!TOKEN_REGEXP.test(param)) {
-            throw new TypeError("invalid parameter name");
-          }
-          string4 += "; " + param + "=" + qstring(parameters[param]);
-        }
-      }
-      return string4;
-    }
-    function parse3(string4) {
-      if (!string4) {
-        throw new TypeError("argument string is required");
-      }
-      var header = typeof string4 === "object" ? getcontenttype(string4) : string4;
-      if (typeof header !== "string") {
-        throw new TypeError("argument string is required to be a string");
-      }
-      var index = header.indexOf(";");
-      var type = index !== -1 ? header.slice(0, index).trim() : header.trim();
-      if (!TYPE_REGEXP.test(type)) {
-        throw new TypeError("invalid media type");
-      }
-      var obj = new ContentType(type.toLowerCase());
-      if (index !== -1) {
-        var key;
-        var match;
-        var value;
-        PARAM_REGEXP.lastIndex = index;
-        while (match = PARAM_REGEXP.exec(header)) {
-          if (match.index !== index) {
-            throw new TypeError("invalid parameter format");
-          }
-          index += match[0].length;
-          key = match[1].toLowerCase();
-          value = match[2];
-          if (value.charCodeAt(0) === 34) {
-            value = value.slice(1, -1);
-            if (value.indexOf("\\") !== -1) {
-              value = value.replace(QESC_REGEXP, "$1");
-            }
-          }
-          obj.parameters[key] = value;
-        }
-        if (index !== header.length) {
-          throw new TypeError("invalid parameter format");
-        }
-      }
-      return obj;
-    }
-    function getcontenttype(obj) {
-      var header;
-      if (typeof obj.getHeader === "function") {
-        header = obj.getHeader("content-type");
-      } else if (typeof obj.headers === "object") {
-        header = obj.headers && obj.headers["content-type"];
-      }
-      if (typeof header !== "string") {
-        throw new TypeError("content-type header is missing from object");
-      }
-      return header;
-    }
-    function qstring(val) {
-      var str = String(val);
-      if (TOKEN_REGEXP.test(str)) {
-        return str;
-      }
-      if (str.length > 0 && !TEXT_REGEXP.test(str)) {
-        throw new TypeError("invalid parameter value");
-      }
-      return '"' + str.replace(QUOTE_REGEXP, "\\$1") + '"';
-    }
-    function ContentType(type) {
-      this.parameters = /* @__PURE__ */ Object.create(null);
-      this.type = type;
-    }
-  }
-});
-
 // ../../node_modules/body-parser/lib/utils.js
 var require_utils = __commonJS({
   "../../node_modules/body-parser/lib/utils.js"(exports, module) {
     "use strict";
     var bytes = require_bytes();
-    var contentType = require_content_type();
+    var contentType = require_dist();
     var typeis = require_type_is();
     module.exports = {
       getCharset,
@@ -15553,11 +15457,9 @@ var require_utils = __commonJS({
       passthrough
     };
     function getCharset(req) {
-      try {
-        return (contentType.parse(req).parameters.charset || "").toLowerCase();
-      } catch {
-        return void 0;
-      }
+      const header = req.headers["content-type"];
+      if (!header) return void 0;
+      return contentType.parse(header).parameters.charset?.toLowerCase();
     }
     function typeChecker(type) {
       return function checkType(req) {
@@ -15568,15 +15470,18 @@ var require_utils = __commonJS({
       if (!defaultType) {
         throw new TypeError("defaultType must be provided");
       }
-      var inflate = options?.inflate !== false;
-      var limit = typeof options?.limit !== "number" ? bytes.parse(options?.limit || "100kb") : options?.limit;
-      var type = options?.type || defaultType;
-      var verify = options?.verify || false;
-      var defaultCharset = options?.defaultCharset || "utf-8";
+      const inflate = options?.inflate !== false;
+      const limit = typeof options?.limit === "undefined" || options?.limit === null ? 102400 : bytes.parse(options.limit);
+      const type = options?.type || defaultType;
+      const verify = options?.verify || false;
+      const defaultCharset = options?.defaultCharset || "utf-8";
+      if (limit === null) {
+        throw new TypeError(`option limit "${String(options.limit)}" is invalid`);
+      }
       if (verify !== false && typeof verify !== "function") {
         throw new TypeError("option verify must be function");
       }
-      var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
+      const shouldParse = typeof type !== "function" ? typeChecker(type) : type;
       return {
         inflate,
         limit,
@@ -15623,7 +15528,7 @@ var require_read = __commonJS({
         next();
         return;
       }
-      var encoding = null;
+      let encoding = null;
       if (options?.skipCharset !== true) {
         encoding = getCharset(req) || options.defaultCharset;
         if (!!options?.isValidCharset && !options.isValidCharset(encoding)) {
@@ -15635,10 +15540,10 @@ var require_read = __commonJS({
           return;
         }
       }
-      var length;
-      var opts = options;
-      var stream;
-      var verify = opts.verify;
+      let length;
+      const opts = options;
+      let stream;
+      const verify = opts.verify;
       try {
         stream = contentstream(req, debug, opts.inflate);
         length = stream.length;
@@ -15657,7 +15562,7 @@ var require_read = __commonJS({
       debug("read body");
       getBody(stream, opts, function(error40, body) {
         if (error40) {
-          var _error;
+          let _error;
           if (error40.type === "encoding.unsupported") {
             _error = createError(415, 'unsupported charset "' + encoding.toUpperCase() + '"', {
               charset: encoding.toLowerCase(),
@@ -15687,7 +15592,7 @@ var require_read = __commonJS({
             return;
           }
         }
-        var str = body;
+        let str = body;
         try {
           debug("parse body");
           str = typeof body !== "string" && encoding !== null ? iconv.decode(body, encoding) : body;
@@ -15703,8 +15608,8 @@ var require_read = __commonJS({
       });
     }
     function contentstream(req, debug, inflate) {
-      var encoding = (req.headers["content-encoding"] || "identity").toLowerCase();
-      var length = req.headers["content-length"];
+      const encoding = (req.headers["content-encoding"] || "identity").toLowerCase();
+      const length = req.headers["content-length"];
       debug('content-encoding "%s"', encoding);
       if (inflate === false && encoding !== "identity") {
         throw createError(415, "content encoding unsupported", {
@@ -15716,7 +15621,7 @@ var require_read = __commonJS({
         req.length = length;
         return req;
       }
-      var stream = createDecompressionStream(encoding, debug);
+      const stream = createDecompressionStream(encoding, debug);
       req.pipe(stream);
       return stream;
     }
@@ -15762,18 +15667,43 @@ var require_json = __commonJS({
     var JSON_SYNTAX_REGEXP = /#+/g;
     function json3(options) {
       const normalizedOptions = normalizeOptions(options, "application/json");
-      var reviver = options?.reviver;
-      var strict = options?.strict !== false;
-      function parse3(body) {
-        if (body.length === 0) {
-          return {};
-        }
-        if (strict) {
-          var first = firstchar(body);
+      const parse3 = createJsonParser(options);
+      const readOptions = {
+        ...normalizedOptions,
+        // assert charset per RFC 7159 sec 8.1
+        isValidCharset: (charset) => charset.slice(0, 4) === "utf-"
+      };
+      return function jsonParser(req, res, next) {
+        read(req, res, next, parse3, debug, readOptions);
+      };
+    }
+    function createJsonParser(options) {
+      const reviver = options?.reviver;
+      const strict = options?.strict !== false;
+      if (strict) {
+        return function parse3(body) {
+          if (body.length === 0) {
+            return {};
+          }
+          const first = firstchar(body);
           if (first !== "{" && first !== "[") {
             debug("strict violation");
             throw createStrictSyntaxError(body, first);
           }
+          try {
+            debug("parse json");
+            return JSON.parse(body, reviver);
+          } catch (e) {
+            throw normalizeJsonSyntaxError(e, {
+              message: e.message,
+              stack: e.stack
+            });
+          }
+        };
+      }
+      return function parse3(body) {
+        if (body.length === 0) {
+          return {};
         }
         try {
           debug("parse json");
@@ -15784,19 +15714,11 @@ var require_json = __commonJS({
             stack: e.stack
           });
         }
-      }
-      const readOptions = {
-        ...normalizedOptions,
-        // assert charset per RFC 7159 sec 8.1
-        isValidCharset: (charset) => charset.slice(0, 4) === "utf-"
-      };
-      return function jsonParser(req, res, next) {
-        read(req, res, next, parse3, debug, readOptions);
       };
     }
     function createStrictSyntaxError(str, char2) {
-      var index = str.indexOf(char2);
-      var partial2 = "";
+      const index = str.indexOf(char2);
+      let partial2 = "";
       if (index !== -1) {
         partial2 = str.substring(0, index) + JSON_SYNTAX_CHAR.repeat(str.length - index);
       }
@@ -15813,13 +15735,13 @@ var require_json = __commonJS({
       }
     }
     function firstchar(str) {
-      var match = FIRST_CHAR_REGEXP.exec(str);
+      const match = FIRST_CHAR_REGEXP.exec(str);
       return match ? match[1] : void 0;
     }
     function normalizeJsonSyntaxError(error40, obj) {
-      var keys = Object.getOwnPropertyNames(error40);
-      for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
+      const keys = Object.getOwnPropertyNames(error40);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
         if (key !== "stack" && key !== "message") {
           delete error40[key];
         }
@@ -17471,7 +17393,8 @@ var require_side_channel = __commonJS({
       var channel = {
         assert: function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect(key));
+            var keyDesc = key && Object(key) === key ? "the given object key" : inspect(key);
+            throw new $TypeError("Side channel does not contain " + keyDesc);
           }
         },
         "delete": function(key) {
@@ -17527,6 +17450,7 @@ var require_utils2 = __commonJS({
     "use strict";
     var formats = require_formats();
     var getSideChannel = require_side_channel();
+    var defineProperty = require_es_define_property();
     var has = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
     var overflowChannel = getSideChannel();
@@ -17574,6 +17498,18 @@ var require_utils2 = __commonJS({
       }
       return obj;
     };
+    var setProperty = function setProperty2(obj, key, value) {
+      if (key === "__proto__" && defineProperty) {
+        defineProperty(obj, key, {
+          configurable: true,
+          enumerable: true,
+          value,
+          writable: true
+        });
+      } else {
+        obj[key] = value;
+      }
+    };
     var merge2 = function merge3(target, source, options) {
       if (!source) {
         return target;
@@ -17581,7 +17517,10 @@ var require_utils2 = __commonJS({
       if (typeof source !== "object" && typeof source !== "function") {
         if (isArray(target)) {
           var nextIndex = target.length;
-          if (options && typeof options.arrayLimit === "number" && nextIndex > options.arrayLimit) {
+          if (options && typeof options.arrayLimit === "number" && nextIndex >= options.arrayLimit) {
+            if (options.throwOnLimitExceeded) {
+              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+            }
             return markOverflow(arrayToObject(target.concat(source), options), nextIndex);
           }
           target[nextIndex] = source;
@@ -17612,6 +17551,9 @@ var require_utils2 = __commonJS({
         }
         var combined = [target].concat(source);
         if (options && typeof options.arrayLimit === "number" && combined.length > options.arrayLimit) {
+          if (options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+          }
           return markOverflow(arrayToObject(combined, options), combined.length - 1);
         }
         return combined;
@@ -17633,14 +17575,20 @@ var require_utils2 = __commonJS({
             target[i] = item;
           }
         });
+        if (options && typeof options.arrayLimit === "number" && target.length > options.arrayLimit) {
+          if (options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+          }
+          return markOverflow(arrayToObject(target, options), target.length - 1);
+        }
         return target;
       }
       return Object.keys(source).reduce(function(acc, key) {
         var value = source[key];
         if (has.call(acc, key)) {
-          acc[key] = merge3(acc[key], value, options);
+          setProperty(acc, key, merge3(acc[key], value, options));
         } else {
-          acc[key] = value;
+          setProperty(acc, key, value);
         }
         if (isOverflow(source) && !isOverflow(acc)) {
           markOverflow(acc, getMaxIndex(source));
@@ -17656,7 +17604,7 @@ var require_utils2 = __commonJS({
     };
     var assign = function assignSingleSource(target, source) {
       return Object.keys(source).reduce(function(acc, key) {
-        acc[key] = source[key];
+        setProperty(acc, key, source[key]);
         return acc;
       }, target);
     };
@@ -17690,6 +17638,13 @@ var require_utils2 = __commonJS({
       var out = "";
       for (var j = 0; j < string4.length; j += limit) {
         var segment = string4.length >= limit ? string4.slice(j, j + limit) : string4;
+        if (j + limit < string4.length) {
+          var last = segment.charCodeAt(segment.length - 1);
+          if (last >= 55296 && last <= 56319) {
+            segment = segment.slice(0, -1);
+            j -= 1;
+          }
+        }
         var arr = [];
         for (var i = 0; i < segment.length; ++i) {
           var c = segment.charCodeAt(i);
@@ -17719,7 +17674,7 @@ var require_utils2 = __commonJS({
     };
     var compact = function compact2(value) {
       var queue = [{ obj: { o: value }, prop: "o" }];
-      var refs = [];
+      var refs = getSideChannel();
       for (var i = 0; i < queue.length; ++i) {
         var item = queue[i];
         var obj = item.obj[item.prop];
@@ -17727,9 +17682,9 @@ var require_utils2 = __commonJS({
         for (var j = 0; j < keys.length; ++j) {
           var key = keys[j];
           var val = obj[key];
-          if (typeof val === "object" && val !== null && refs.indexOf(val) === -1) {
+          if (typeof val === "object" && val !== null && !refs.has(val)) {
             queue[queue.length] = { obj, prop: key };
-            refs[refs.length] = val;
+            refs.set(val, true);
           }
         }
       }
@@ -17743,17 +17698,27 @@ var require_utils2 = __commonJS({
       if (!obj || typeof obj !== "object") {
         return false;
       }
-      return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+      return !!(obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj));
     };
-    var combine = function combine2(a, b, arrayLimit, plainObjects) {
+    var combine = function combine2(a, b, arrayLimit, plainObjects, throwOnLimitExceeded) {
       if (isOverflow(a)) {
-        var newIndex = getMaxIndex(a) + 1;
-        a[newIndex] = b;
+        if (throwOnLimitExceeded) {
+          throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+        }
+        var bValues = isArray(b) ? b : [b];
+        var newIndex = getMaxIndex(a);
+        for (var i = 0; i < bValues.length; ++i) {
+          newIndex += 1;
+          a[newIndex] = bValues[i];
+        }
         setMaxIndex(a, newIndex);
         return a;
       }
       var result = [].concat(a, b);
       if (result.length > arrayLimit) {
+        if (throwOnLimitExceeded) {
+          throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+        }
         return markOverflow(arrayToObject(result, { plainObjects }), result.length - 1);
       }
       return result;
@@ -17821,6 +17786,7 @@ var require_stringify = __commonJS({
       charsetSentinel: false,
       commaRoundTrip: false,
       delimiter: "&",
+      depth: Infinity,
       encode: true,
       encodeDotInKeys: false,
       encoder: utils.encode,
@@ -17840,8 +17806,11 @@ var require_stringify = __commonJS({
       return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
     };
     var sentinel = {};
-    var stringify = function stringify2(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
+    var stringify = function stringify2(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel, depth, currentDepth) {
       var obj = object2;
+      if (currentDepth > depth) {
+        throw new RangeError("Input depth exceeded depth option of " + depth);
+      }
       var tmpSc = sideChannel;
       var step = 0;
       var findFlag = false;
@@ -17859,9 +17828,8 @@ var require_stringify = __commonJS({
           step = 0;
         }
       }
-      if (typeof filter === "function") {
-        obj = filter(prefix, obj);
-      } else if (obj instanceof Date) {
+      obj = typeof filter === "function" ? filter(prefix, obj) : obj;
+      if (obj instanceof Date) {
         obj = serializeDate(obj);
       } else if (generateArrayPrefix === "comma" && isArray(obj)) {
         obj = utils.maybeMap(obj, function(value2) {
@@ -17904,7 +17872,7 @@ var require_stringify = __commonJS({
       }
       var encodedPrefix = encodeDotInKeys ? String(prefix).replace(/\./g, "%2E") : String(prefix);
       var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
-      if (allowEmptyArrays && isArray(obj) && obj.length === 0) {
+      if (allowEmptyArrays && isArray(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
       }
       for (var j = 0; j < objKeys.length; ++j) {
@@ -17936,7 +17904,9 @@ var require_stringify = __commonJS({
           formatter,
           encodeValuesOnly,
           charset,
-          valueSideChannel
+          valueSideChannel,
+          depth,
+          currentDepth + 1
         ));
       }
       return values;
@@ -17991,6 +17961,7 @@ var require_stringify = __commonJS({
         charsetSentinel: typeof opts.charsetSentinel === "boolean" ? opts.charsetSentinel : defaults2.charsetSentinel,
         commaRoundTrip: !!opts.commaRoundTrip,
         delimiter: typeof opts.delimiter === "undefined" ? defaults2.delimiter : opts.delimiter,
+        depth: typeof opts.depth === "number" ? opts.depth : defaults2.depth,
         encode: typeof opts.encode === "boolean" ? opts.encode : defaults2.encode,
         encodeDotInKeys: typeof opts.encodeDotInKeys === "boolean" ? opts.encodeDotInKeys : defaults2.encodeDotInKeys,
         encoder: typeof opts.encoder === "function" ? opts.encoder : defaults2.encoder,
@@ -18038,9 +18009,10 @@ var require_stringify = __commonJS({
         if (options.skipNulls && value === null) {
           continue;
         }
+        var encodedKey = options.encodeDotInKeys ? String(key).replace(/\./g, "%2E") : String(key);
         pushToArray(keys, stringify(
           value,
-          key,
+          encodedKey,
           generateArrayPrefix,
           commaRoundTrip,
           options.allowEmptyArrays,
@@ -18056,7 +18028,9 @@ var require_stringify = __commonJS({
           options.formatter,
           options.encodeValuesOnly,
           options.charset,
-          sideChannel
+          sideChannel,
+          options.depth,
+          0
         ));
       }
       var joined = keys.join(options.delimiter);
@@ -18111,6 +18085,17 @@ var require_parse = __commonJS({
     };
     var parseArrayValue = function(val, options, currentArrayLength) {
       if (val && typeof val === "string" && options.comma && val.indexOf(",") > -1) {
+        if (options.throwOnLimitExceeded) {
+          var commaCount = 0;
+          var commaIndex = val.indexOf(",");
+          while (commaIndex > -1) {
+            commaCount += 1;
+            if (commaCount >= options.arrayLimit) {
+              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+            }
+            commaIndex = val.indexOf(",", commaIndex + 1);
+          }
+        }
         return val.split(",");
       }
       if (options.throwOnLimitExceeded && currentArrayLength >= options.arrayLimit) {
@@ -18182,10 +18167,7 @@ var require_parse = __commonJS({
           val = isArray(val) ? [val] : val;
         }
         if (options.comma && isArray(val) && val.length > options.arrayLimit) {
-          if (options.throwOnLimitExceeded) {
-            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-          }
-          val = utils.combine([], val, options.arrayLimit, options.plainObjects);
+          val = utils.combine([], val, options.arrayLimit, options.plainObjects, options.throwOnLimitExceeded);
         }
         if (key !== null) {
           var existing = has.call(obj, key);
@@ -18194,7 +18176,8 @@ var require_parse = __commonJS({
               obj[key],
               val,
               options.arrayLimit,
-              options.plainObjects
+              options.plainObjects,
+              options.throwOnLimitExceeded
             );
           } else if (!existing || options.duplicates === "last") {
             obj[key] = val;
@@ -18221,7 +18204,8 @@ var require_parse = __commonJS({
               [],
               leaf,
               options.arrayLimit,
-              options.plainObjects
+              options.plainObjects,
+              options.throwOnLimitExceeded
             );
           }
         } else {
@@ -18421,10 +18405,7 @@ var require_urlencoded = __commonJS({
       if (normalizedOptions.defaultCharset !== "utf-8" && normalizedOptions.defaultCharset !== "iso-8859-1") {
         throw new TypeError("option defaultCharset must be either utf-8 or iso-8859-1");
       }
-      var queryparse = createQueryParser(options);
-      function parse3(body, encoding) {
-        return body.length ? queryparse(body, encoding) : {};
-      }
+      const parse3 = createQueryParser(options);
       const readOptions = {
         ...normalizedOptions,
         // assert charset
@@ -18435,11 +18416,11 @@ var require_urlencoded = __commonJS({
       };
     }
     function createQueryParser(options) {
-      var extended = Boolean(options?.extended);
-      var parameterLimit = options?.parameterLimit !== void 0 ? options?.parameterLimit : 1e3;
-      var charsetSentinel = options?.charsetSentinel;
-      var interpretNumericEntities = options?.interpretNumericEntities;
-      var depth = extended ? options?.depth !== void 0 ? options?.depth : 32 : 0;
+      const extended = Boolean(options?.extended);
+      let parameterLimit = options?.parameterLimit !== void 0 ? options?.parameterLimit : 1e3;
+      const charsetSentinel = options?.charsetSentinel;
+      const interpretNumericEntities = options?.interpretNumericEntities;
+      const depth = extended ? options?.depth !== void 0 ? options?.depth : 32 : 0;
       if (isNaN(parameterLimit) || parameterLimit < 1) {
         throw new TypeError("option parameterLimit must be a positive number");
       }
@@ -18449,15 +18430,16 @@ var require_urlencoded = __commonJS({
       if (isFinite(parameterLimit)) {
         parameterLimit = parameterLimit | 0;
       }
-      return function queryparse(body, encoding) {
-        var paramCount = parameterCount(body, parameterLimit);
+      return function parse3(body, encoding) {
+        if (!body.length) return {};
+        const paramCount = parameterCount(body, parameterLimit);
         if (paramCount === void 0) {
           debug("too many parameters");
           throw createError(413, "too many parameters", {
             type: "parameters.too.many"
           });
         }
-        var arrayLimit = extended ? Math.max(100, paramCount) : paramCount;
+        const arrayLimit = extended ? Math.max(100, paramCount) : paramCount;
         debug("parse " + (extended ? "extended " : "") + "urlencoding");
         try {
           return qs.parse(body, {
@@ -18499,26 +18481,10 @@ var require_body_parser = __commonJS({
   "../../node_modules/body-parser/index.js"(exports, module) {
     "use strict";
     exports = module.exports = bodyParser;
-    Object.defineProperty(exports, "json", {
-      configurable: true,
-      enumerable: true,
-      get: () => require_json()
-    });
-    Object.defineProperty(exports, "raw", {
-      configurable: true,
-      enumerable: true,
-      get: () => require_raw()
-    });
-    Object.defineProperty(exports, "text", {
-      configurable: true,
-      enumerable: true,
-      get: () => require_text()
-    });
-    Object.defineProperty(exports, "urlencoded", {
-      configurable: true,
-      enumerable: true,
-      get: () => require_urlencoded()
-    });
+    exports.json = require_json();
+    exports.raw = require_raw();
+    exports.text = require_text();
+    exports.urlencoded = require_urlencoded();
     function bodyParser() {
       throw new Error("The bodyParser() generic has been split into individual middleware to use instead.");
     }
@@ -19740,6 +19706,9 @@ var require_proxy_addr = __commonJS({
       return function trust(addr) {
         if (!isip(addr)) return false;
         var ip = parseip(addr);
+        if (ip.kind() === "ipv6" && ip.isIPv4MappedAddress()) {
+          ip = ip.toIPv4Address();
+        }
         var ipconv;
         var kind = ip.kind();
         for (var i = 0; i < subnets.length; i++) {
@@ -19752,10 +19721,15 @@ var require_proxy_addr = __commonJS({
             if (subnetkind === "ipv4" && !ip.isIPv4MappedAddress()) {
               continue;
             }
+            if (subnetkind !== "ipv4" && !(subnetrange >= 96 && subnetip.isIPv4MappedAddress())) {
+              continue;
+            }
             if (!ipconv) {
               ipconv = subnetkind === "ipv4" ? ip.toIPv4Address() : ip.toIPv4MappedAddress();
             }
             trusted = ipconv;
+          } else if (kind === "ipv6" && subnetip.isIPv4MappedAddress()) {
+            continue;
           }
           if (trusted.match(subnetip, subnetrange)) {
             return true;
@@ -19772,12 +19746,20 @@ var require_proxy_addr = __commonJS({
       return function trust(addr) {
         if (!isip(addr)) return false;
         var ip = parseip(addr);
+        if (ip.kind() === "ipv6" && ip.isIPv4MappedAddress()) {
+          ip = ip.toIPv4Address();
+        }
         var kind = ip.kind();
         if (kind !== subnetkind) {
           if (subnetisipv4 && !ip.isIPv4MappedAddress()) {
             return false;
           }
+          if (!subnetisipv4 && !(subnetrange >= 96 && subnetip.isIPv4MappedAddress())) {
+            return false;
+          }
           ip = subnetisipv4 ? ip.toIPv4Address() : ip.toIPv4MappedAddress();
+        } else if (kind === "ipv6" && subnetip.isIPv4MappedAddress()) {
+          return false;
         }
         return ip.match(subnetip, subnetrange);
       };
@@ -19790,7 +19772,7 @@ var require_utils3 = __commonJS({
   "../../node_modules/express/lib/utils.js"(exports) {
     "use strict";
     var { METHODS } = __require("node:http");
-    var contentType = require_content_type();
+    var contentType = require_dist();
     var etag = require_etag();
     var mime = require_mime_types();
     var proxyaddr = require_proxy_addr();
@@ -21241,7 +21223,7 @@ var require_application = __commonJS({
       var cache = this.cache;
       var done = callback;
       var engines = this.engines;
-      var opts = options;
+      var opts = options || {};
       var view;
       if (typeof options === "function") {
         done = options;
@@ -21283,7 +21265,7 @@ var require_application = __commonJS({
       return server.listen.apply(server, args);
     };
     function logerror(err) {
-      if (this.get("env") !== "test") console.error(err.stack || err.toString());
+      if (this.get("env") !== "test") console.error(err);
     }
     function tryRender(view, options, callback) {
       try {
@@ -21295,42 +21277,55 @@ var require_application = __commonJS({
   }
 });
 
+// ../../node_modules/negotiator/lib/accept.js
+var require_accept = __commonJS({
+  "../../node_modules/negotiator/lib/accept.js"(exports, module) {
+    "use strict";
+    var contentType = require_dist();
+    module.exports = parseAccept;
+    function parseAccept(header) {
+      var values = [];
+      var index = 0;
+      while (index < header.length) {
+        var start = skipOptionalWhitespace(header, index);
+        var parsed = contentType.parse(header, { comma: true, start });
+        parsed.type = header.slice(start, start + parsed.type.length);
+        values.push(parsed);
+        index = parsed.index + 1;
+      }
+      return values;
+    }
+    function skipOptionalWhitespace(header, index) {
+      var cursor = index;
+      while (header.charCodeAt(cursor) === 32 || header.charCodeAt(cursor) === 9) {
+        cursor++;
+      }
+      return cursor;
+    }
+  }
+});
+
 // ../../node_modules/negotiator/lib/charset.js
 var require_charset = __commonJS({
   "../../node_modules/negotiator/lib/charset.js"(exports, module) {
     "use strict";
+    var parseAccept = require_accept();
     module.exports = preferredCharsets;
     module.exports.preferredCharsets = preferredCharsets;
-    var simpleCharsetRegExp = /^\s*([^\s;]+)\s*(?:;(.*))?$/;
     function parseAcceptCharset(accept) {
-      var accepts = accept.split(",");
+      var accepts = parseAccept(accept);
       for (var i = 0, j = 0; i < accepts.length; i++) {
-        var charset = parseCharset(accepts[i].trim(), i);
-        if (charset) {
-          accepts[j++] = charset;
-        }
+        var charset = formatCharset(accepts[i], i);
+        if (charset) accepts[j++] = charset;
       }
       accepts.length = j;
       return accepts;
     }
-    function parseCharset(str, i) {
-      var match = simpleCharsetRegExp.exec(str);
-      if (!match) return null;
-      var charset = match[1];
-      var q = 1;
-      if (match[2]) {
-        var params = match[2].split(";");
-        for (var j = 0; j < params.length; j++) {
-          var p = params[j].trim().split("=");
-          if (p[0] === "q") {
-            q = parseFloat(p[1]);
-            break;
-          }
-        }
-      }
+    function formatCharset(parsed, i) {
+      if (!parsed.type) return null;
       return {
-        charset,
-        q,
+        charset: parsed.type,
+        q: parsed.parameters.q ? parseFloat(parsed.parameters.q) : 1,
         i
       };
     }
@@ -21386,15 +21381,15 @@ var require_charset = __commonJS({
 var require_encoding = __commonJS({
   "../../node_modules/negotiator/lib/encoding.js"(exports, module) {
     "use strict";
+    var parseAccept = require_accept();
     module.exports = preferredEncodings;
     module.exports.preferredEncodings = preferredEncodings;
-    var simpleEncodingRegExp = /^\s*([^\s;]+)\s*(?:;(.*))?$/;
     function parseAcceptEncoding(accept) {
-      var accepts = accept.split(",");
+      var accepts = parseAccept(accept);
       var hasIdentity = false;
       var minQuality = 1;
       for (var i = 0, j = 0; i < accepts.length; i++) {
-        var encoding = parseEncoding(accepts[i].trim(), i);
+        var encoding = formatEncoding(accepts[i], i);
         if (encoding) {
           accepts[j++] = encoding;
           hasIdentity = hasIdentity || specify("identity", encoding);
@@ -21411,24 +21406,11 @@ var require_encoding = __commonJS({
       accepts.length = j;
       return accepts;
     }
-    function parseEncoding(str, i) {
-      var match = simpleEncodingRegExp.exec(str);
-      if (!match) return null;
-      var encoding = match[1];
-      var q = 1;
-      if (match[2]) {
-        var params = match[2].split(";");
-        for (var j = 0; j < params.length; j++) {
-          var p = params[j].trim().split("=");
-          if (p[0] === "q") {
-            q = parseFloat(p[1]);
-            break;
-          }
-        }
-      }
+    function formatEncoding(parsed, i) {
+      if (!parsed.type) return null;
       return {
-        encoding,
-        q,
+        encoding: parsed.type,
+        q: parsed.parameters.q ? parseFloat(parsed.parameters.q) : 1,
         i
       };
     }
@@ -21499,41 +21481,30 @@ var require_encoding = __commonJS({
 var require_language = __commonJS({
   "../../node_modules/negotiator/lib/language.js"(exports, module) {
     "use strict";
+    var contentType = require_dist();
+    var parseAccept = require_accept();
     module.exports = preferredLanguages;
     module.exports.preferredLanguages = preferredLanguages;
-    var simpleLanguageRegExp = /^\s*([^\s\-;]+)(?:-([^\s;]+))?\s*(?:;(.*))?$/;
     function parseAcceptLanguage(accept) {
-      var accepts = accept.split(",");
+      var accepts = parseAccept(accept);
       for (var i = 0, j = 0; i < accepts.length; i++) {
-        var language = parseLanguage(accepts[i].trim(), i);
-        if (language) {
-          accepts[j++] = language;
-        }
+        var language = formatLanguage(accepts[i], i);
+        if (language) accepts[j++] = language;
       }
       accepts.length = j;
       return accepts;
     }
-    function parseLanguage(str, i) {
-      var match = simpleLanguageRegExp.exec(str);
-      if (!match) return null;
-      var prefix = match[1];
-      var suffix = match[2];
-      var full = prefix;
-      if (suffix) full += "-" + suffix;
-      var q = 1;
-      if (match[3]) {
-        var params = match[3].split(";");
-        for (var j = 0; j < params.length; j++) {
-          var p = params[j].split("=");
-          if (p[0] === "q") q = parseFloat(p[1]);
-        }
-      }
+    function formatLanguage(parsed, i) {
+      if (!parsed.type) return null;
+      var hyphen = parsed.type.indexOf("-");
+      var prefix = hyphen === -1 ? parsed.type : parsed.type.slice(0, hyphen);
+      var suffix = hyphen === -1 ? void 0 : parsed.type.slice(hyphen + 1);
       return {
         prefix,
         suffix,
-        q,
+        q: parsed.parameters.q ? parseFloat(parsed.parameters.q) : 1,
         i,
-        full
+        full: parsed.type
       };
     }
     function getLanguagePriority(language, accepted, index) {
@@ -21547,7 +21518,7 @@ var require_language = __commonJS({
       return priority;
     }
     function specify(language, spec, index) {
-      var p = parseLanguage(language);
+      var p = formatLanguage(contentType.parse(language), 0);
       if (!p) return null;
       var s = 0;
       if (spec.full.toLowerCase() === p.full.toLowerCase()) {
@@ -21594,45 +21565,28 @@ var require_language = __commonJS({
 var require_mediaType = __commonJS({
   "../../node_modules/negotiator/lib/mediaType.js"(exports, module) {
     "use strict";
+    var contentType = require_dist();
+    var parseAcceptHeader = require_accept();
     module.exports = preferredMediaTypes;
     module.exports.preferredMediaTypes = preferredMediaTypes;
-    var simpleMediaTypeRegExp = /^\s*([^\s\/;]+)\/([^;\s]+)\s*(?:;(.*))?$/;
     function parseAccept(accept) {
-      var accepts = splitMediaTypes(accept);
+      var accepts = parseAcceptHeader(accept);
       for (var i = 0, j = 0; i < accepts.length; i++) {
-        var mediaType = parseMediaType(accepts[i].trim(), i);
-        if (mediaType) {
-          accepts[j++] = mediaType;
-        }
+        var mediaType = formatMediaType(accepts[i], i);
+        if (mediaType) accepts[j++] = mediaType;
       }
       accepts.length = j;
       return accepts;
     }
-    function parseMediaType(str, i) {
-      var match = simpleMediaTypeRegExp.exec(str);
-      if (!match) return null;
-      var params = /* @__PURE__ */ Object.create(null);
-      var q = 1;
-      var subtype = match[2];
-      var type = match[1];
-      if (match[3]) {
-        var kvps = splitParameters(match[3]).map(splitKeyValuePair);
-        for (var j = 0; j < kvps.length; j++) {
-          var pair = kvps[j];
-          var key = pair[0].toLowerCase();
-          var val = pair[1];
-          var value = val && val[0] === '"' && val[val.length - 1] === '"' ? val.slice(1, -1) : val;
-          if (key === "q") {
-            q = parseFloat(value);
-            break;
-          }
-          params[key] = value;
-        }
-      }
+    function formatMediaType(parsed, i) {
+      var slash = parsed.type.indexOf("/");
+      if (slash === -1) return null;
+      var q = parsed.parameters.q ? parseFloat(parsed.parameters.q) : 1;
+      delete parsed.parameters.q;
       return {
-        type,
-        subtype,
-        params,
+        type: parsed.type.slice(0, slash),
+        subtype: parsed.type.slice(slash + 1),
+        params: parsed.parameters,
         q,
         i
       };
@@ -21648,7 +21602,7 @@ var require_mediaType = __commonJS({
       return priority;
     }
     function specify(type, spec, index) {
-      var p = parseMediaType(type);
+      var p = formatMediaType(contentType.parse(type), 0);
       var s = 0;
       if (!p) {
         return null;
@@ -21700,54 +21654,6 @@ var require_mediaType = __commonJS({
     }
     function isQuality(spec) {
       return spec.q > 0;
-    }
-    function quoteCount(string4) {
-      var count = 0;
-      var index = 0;
-      while ((index = string4.indexOf('"', index)) !== -1) {
-        count++;
-        index++;
-      }
-      return count;
-    }
-    function splitKeyValuePair(str) {
-      var index = str.indexOf("=");
-      var key;
-      var val;
-      if (index === -1) {
-        key = str;
-      } else {
-        key = str.slice(0, index);
-        val = str.slice(index + 1);
-      }
-      return [key, val];
-    }
-    function splitMediaTypes(accept) {
-      var accepts = accept.split(",");
-      for (var i = 1, j = 0; i < accepts.length; i++) {
-        if (quoteCount(accepts[j]) % 2 == 0) {
-          accepts[++j] = accepts[i];
-        } else {
-          accepts[j] += "," + accepts[i];
-        }
-      }
-      accepts.length = j + 1;
-      return accepts;
-    }
-    function splitParameters(str) {
-      var parameters = str.split(";");
-      for (var i = 1, j = 0; i < parameters.length; i++) {
-        if (quoteCount(parameters[j]) % 2 == 0) {
-          parameters[++j] = parameters[i];
-        } else {
-          parameters[j] += ";" + parameters[i];
-        }
-      }
-      parameters.length = j + 1;
-      for (var i = 0; i < parameters.length; i++) {
-        parameters[i] = parameters[i].trim();
-      }
-      return parameters;
     }
   }
 });
@@ -21978,19 +21884,27 @@ var require_range_parser = __commonJS({
       var ranges = [];
       ranges.type = str.slice(0, index);
       for (var i = 0; i < arr.length; i++) {
-        var range = arr[i].split("-");
-        var start = parseInt(range[0], 10);
-        var end = parseInt(range[1], 10);
-        if (isNaN(start)) {
+        var indexOf = arr[i].indexOf("-");
+        if (indexOf === -1) {
+          return -2;
+        }
+        var startStr = arr[i].slice(0, indexOf).trim();
+        var endStr = arr[i].slice(indexOf + 1).trim();
+        var start = parsePos(startStr);
+        var end = parsePos(endStr);
+        if (startStr.length === 0) {
           start = size - end;
           end = size - 1;
-        } else if (isNaN(end)) {
+        } else if (endStr.length === 0) {
           end = size - 1;
         }
         if (end > size - 1) {
           end = size - 1;
         }
-        if (isNaN(start) || isNaN(end) || start > end || start < 0) {
+        if (isNaN(start) || isNaN(end)) {
+          return -2;
+        }
+        if (start > end || start < 0) {
           continue;
         }
         ranges.push({
@@ -22002,6 +21916,10 @@ var require_range_parser = __commonJS({
         return -1;
       }
       return options && options.combine ? combineRanges(ranges) : ranges;
+    }
+    function parsePos(str) {
+      if (/^\d+$/.test(str)) return Number(str);
+      return NaN;
     }
     function combineRanges(ranges) {
       var ordered = ranges.map(mapWithIndex).sort(sortByRangeStart);
@@ -22080,9 +21998,9 @@ var require_request = __commonJS({
       var accept = accepts(this);
       return accept.encodings.apply(accept, arguments);
     };
-    req.acceptsCharsets = function() {
-      var accept = accepts(this);
-      return accept.charsets.apply(accept, arguments);
+    req.acceptsCharsets = function(...charsets) {
+      const accept = accepts(this);
+      return accept.charsets(...charsets);
     };
     req.acceptsLanguages = function(...languages) {
       return accepts(this).languages(...languages);
@@ -22149,7 +22067,7 @@ var require_request = __commonJS({
       if (!val || !trust(this.socket.remoteAddress, 0)) {
         val = this.get("Host");
       } else if (val.indexOf(",") !== -1) {
-        val = val.substring(0, val.indexOf(",")).trimRight();
+        val = val.substring(0, val.indexOf(",")).trimEnd();
       }
       return val || void 0;
     });
@@ -22164,7 +22082,7 @@ var require_request = __commonJS({
       var method = this.method;
       var res = this.res;
       var status = res.statusCode;
-      if ("GET" !== method && "HEAD" !== method) return false;
+      if ("GET" !== method && "HEAD" !== method && "QUERY" !== method) return false;
       if (status >= 200 && status < 300 || 304 === status) {
         return fresh(this.headers, {
           "etag": res.get("ETag"),
@@ -22190,181 +22108,270 @@ var require_request = __commonJS({
   }
 });
 
-// ../../node_modules/content-disposition/index.js
-var require_content_disposition = __commonJS({
-  "../../node_modules/content-disposition/index.js"(exports, module) {
+// ../../node_modules/content-disposition/dist/index.js
+var require_dist3 = __commonJS({
+  "../../node_modules/content-disposition/dist/index.js"(exports) {
     "use strict";
-    module.exports = contentDisposition;
-    module.exports.parse = parse3;
-    var utf8Decoder = new TextDecoder("utf-8");
-    var ENCODE_URL_ATTR_CHAR_REGEXP = /[\x00-\x20"'()*,/:;<=>?@[\\\]{}\x7f]/g;
-    var NON_LATIN1_REGEXP = /[^\x20-\x7e\xa0-\xff]/g;
-    var QESC_REGEXP = /\\([\u0000-\u007f])/g;
-    var QUOTE_REGEXP = /([\\"])/g;
-    var PARAM_REGEXP = /;[\x09\x20]*([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*=[\x09\x20]*("(?:[\x20!\x23-\x5b\x5d-\x7e\x80-\xff]|\\[\x20-\x7e])*"|[!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*/g;
-    var TEXT_REGEXP = /^[\x20-\x7e\x80-\xff]+$/;
-    var TOKEN_REGEXP = /^[!#$%&'*+.0-9A-Z^_`a-z|~-]+$/;
-    var EXT_VALUE_REGEXP = /^([A-Za-z0-9!#$%&+\-^_`{}~]+)'(?:[A-Za-z]{2,3}(?:-[A-Za-z]{3}){0,3}|[A-Za-z]{4,8}|)'((?:%[0-9A-Fa-f]{2}|[A-Za-z0-9!#$&+.^_`|~-])+)$/;
-    var DISPOSITION_TYPE_REGEXP = /^([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*(?:$|;)/;
-    function contentDisposition(filename, options) {
-      var opts = options || {};
-      var type = opts.type || "attachment";
-      var params = createparams(filename, opts.fallback);
-      return format(new ContentDisposition(type, params));
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.create = create;
+    exports.parse = parse3;
+    exports.decodeExtended = decodeExtended;
+    exports.format = format;
+    exports.encodeExtended = encodeExtended;
+    var NullObject = /* @__PURE__ */ (() => {
+      const C = function() {
+      };
+      C.prototype = /* @__PURE__ */ Object.create(null);
+      return C;
+    })();
+    function create(filename, options) {
+      const type = options?.type || "attachment";
+      const parameters = createParameters(filename, options?.fallback);
+      return format({ type, parameters }, { extended: false });
     }
-    function createparams(filename, fallback) {
-      if (filename === void 0) {
-        return;
-      }
-      var params = {};
-      if (typeof filename !== "string") {
-        throw new TypeError("filename must be a string");
-      }
-      if (fallback === void 0) {
-        fallback = true;
-      }
-      if (typeof fallback !== "string" && typeof fallback !== "boolean") {
-        throw new TypeError("fallback must be a string or boolean");
-      }
-      if (typeof fallback === "string" && NON_LATIN1_REGEXP.test(fallback)) {
-        throw new TypeError("fallback must be ISO-8859-1 string");
-      }
-      var name = basename(filename);
-      var isQuotedString = TEXT_REGEXP.test(name);
-      var fallbackName = typeof fallback !== "string" ? fallback && getlatin1(name) : basename(fallback);
-      var hasFallback = typeof fallbackName === "string" && fallbackName !== name;
-      if (hasFallback || !isQuotedString || hasHexEscape(name)) {
-        params["filename*"] = name;
-      }
-      if (isQuotedString || hasFallback) {
-        params.filename = hasFallback ? fallbackName : name;
-      }
-      return params;
-    }
-    function format(obj) {
-      var parameters = obj.parameters;
-      var type = obj.type;
-      if (!type || typeof type !== "string" || !TOKEN_REGEXP.test(type)) {
-        throw new TypeError("invalid type");
-      }
-      var string4 = String(type).toLowerCase();
-      if (parameters && typeof parameters === "object") {
-        var param;
-        var params = Object.keys(parameters).sort();
-        for (var i = 0; i < params.length; i++) {
-          param = params[i];
-          var val = param.slice(-1) === "*" ? ustring(parameters[param]) : qstring(parameters[param]);
-          string4 += "; " + param + "=" + val;
+    var SP = 32;
+    var HTAB = 9;
+    var SEMI = 59;
+    var EQ = 61;
+    var DQUOTE = 34;
+    var BSLASH = 92;
+    var ASTERISK = 42;
+    function parse3(header, options) {
+      const len = header.length;
+      const multipart = options?.multipart === true;
+      const extended = options?.extended !== false;
+      let index = skipOWS(header, 0, header.length);
+      const typeStart = index;
+      index = parseToken(header, index, len);
+      const typeEnd = trailingOWS(header, typeStart, index);
+      const type = header.slice(typeStart, typeEnd).toLowerCase();
+      const parameters = new NullObject();
+      parameter: while (index < len) {
+        index = skipOWS(header, index + 1, len);
+        const keyStart = index;
+        while (index < len) {
+          const char2 = header.charCodeAt(index);
+          if (char2 === SEMI)
+            continue parameter;
+          if (char2 === EQ) {
+            const keyEnd = trailingOWS(header, keyStart, index);
+            const key = header.slice(keyStart, keyEnd).toLowerCase();
+            index = skipOWS(header, index + 1, len);
+            if (index < len && header.charCodeAt(index) === DQUOTE) {
+              index++;
+              let value2 = "";
+              if (multipart) {
+                while (index < len) {
+                  const code = header.charCodeAt(index++);
+                  if (code === DQUOTE) {
+                    index = parseToken(header, index, len);
+                    if (parameters[key] === void 0)
+                      parameters[key] = value2;
+                    break;
+                  }
+                  if (code === /* % */
+                  37 && index + 1 < len) {
+                    const code2 = header.charCodeAt(index);
+                    const code3 = header.charCodeAt(index + 1);
+                    if (code2 === 50 && code3 === 50) {
+                      value2 += '"';
+                      index += 2;
+                      continue;
+                    }
+                    if (code2 === 48) {
+                      if (code3 === 100 || code3 === 68) {
+                        value2 += "\r";
+                        index += 2;
+                        continue;
+                      }
+                      if (code3 === 97 || code3 === 65) {
+                        value2 += "\n";
+                        index += 2;
+                        continue;
+                      }
+                    }
+                  }
+                  value2 += String.fromCharCode(code);
+                }
+              } else {
+                while (index < len) {
+                  const code = header.charCodeAt(index++);
+                  if (code === DQUOTE) {
+                    index = parseToken(header, index, len);
+                    if (parameters[key] === void 0)
+                      parameters[key] = value2;
+                    break;
+                  }
+                  if (code === BSLASH && index < len) {
+                    value2 += header[index++];
+                    continue;
+                  }
+                  value2 += String.fromCharCode(code);
+                }
+              }
+              continue parameter;
+            }
+            const valueStart = index;
+            index = parseToken(header, index, len);
+            const valueEnd = trailingOWS(header, valueStart, index);
+            const value = header.slice(valueStart, valueEnd);
+            if (parameters[key] === void 0) {
+              parameters[key] = value;
+              if (extended && key.charCodeAt(key.length - 1) === ASTERISK) {
+                const normalizedKey = key.slice(0, -1);
+                const decoded = decodeExtended(value);
+                if (decoded !== void 0)
+                  parameters[normalizedKey] = decoded;
+              }
+            }
+            continue parameter;
+          }
+          index++;
         }
       }
-      return string4;
+      return { type, parameters };
     }
-    function decodefield(str) {
-      const match = EXT_VALUE_REGEXP.exec(str);
-      if (!match) {
-        throw new TypeError("invalid extended field value");
+    var ENCODE_URL_ATTR_CHAR_REGEXP = /[\x00-\x20"'()*,/:;<=>?@[\\\]{}\x7f]/g;
+    var NON_ASCII_REGEXP = /[^\x20-\x7e]/g;
+    var QUOTE_REGEXP = /[\\"]/g;
+    var INVALID_FILENAME_REGEXP = /%[0-9A-Fa-f]{2}/;
+    var TEXT_REGEXP = /^[\x20-\x7e\x80-\xff]*$/;
+    var ASCII_TEXT_REGEXP = /^[\x20-\x7e]*$/;
+    var TOKEN_REGEXP = /^[!#$%&'*+.0-9A-Z^_`a-z|~-]+$/;
+    function createParameters(filename, fallback = true) {
+      if (filename === void 0)
+        return;
+      if (typeof fallback === "string") {
+        if (!ASCII_TEXT_REGEXP.test(fallback)) {
+          throw new TypeError("Fallback must be valid US-ASCII: " + fallback);
+        }
+        if (fallback === filename)
+          return { filename };
+        return { filename: fallback, "filename*": encodeExtended(filename) };
       }
-      const charset = match[1].toLowerCase();
-      const encoded = match[2];
+      if (ASCII_TEXT_REGEXP.test(filename) && !INVALID_FILENAME_REGEXP.test(filename)) {
+        return { filename };
+      }
+      if (fallback === false) {
+        return { "filename*": encodeExtended(filename) };
+      }
+      return {
+        filename: getAscii(filename),
+        "filename*": encodeExtended(filename)
+      };
+    }
+    function decodeExtended(str) {
+      const charsetEnd = str.indexOf("'");
+      if (charsetEnd <= 0) {
+        return void 0;
+      }
+      const languageEnd = str.indexOf("'", charsetEnd + 1);
+      if (languageEnd === -1) {
+        return void 0;
+      }
+      const charset = str.slice(0, charsetEnd).toLowerCase();
+      const encoded = str.slice(languageEnd + 1);
       switch (charset) {
         case "iso-8859-1": {
-          const binary = decodeHexEscapes(encoded);
-          return getlatin1(binary);
+          return decodeHexEscapes(encoded);
         }
         case "utf-8":
         case "utf8": {
-          try {
-            return decodeURIComponent(encoded);
-          } catch {
-            const binary = decodeHexEscapes(encoded);
-            const bytes = new Uint8Array(binary.length);
-            for (let idx = 0; idx < binary.length; idx++) {
-              bytes[idx] = binary.charCodeAt(idx);
-            }
-            return utf8Decoder.decode(bytes);
-          }
+          return tryDecodeURIComponent(encoded);
         }
       }
-      throw new TypeError("unsupported charset in extended field");
+      return void 0;
     }
-    function getlatin1(val) {
-      return String(val).replace(NON_LATIN1_REGEXP, "?");
-    }
-    function parse3(string4) {
-      if (!string4 || typeof string4 !== "string") {
-        throw new TypeError("argument string is required");
+    function tryDecodeURIComponent(str) {
+      try {
+        return decodeURIComponent(str);
+      } catch {
+        return void 0;
       }
-      var match = DISPOSITION_TYPE_REGEXP.exec(string4);
-      if (!match) {
-        throw new TypeError("invalid type format");
+    }
+    function parseToken(str, index, len) {
+      while (index < len) {
+        const char2 = str.charCodeAt(index);
+        if (char2 === SEMI)
+          break;
+        index++;
       }
-      var index = match[0].length;
-      var type = match[1].toLowerCase();
-      var key;
-      var names = [];
-      var params = {};
-      var value;
-      index = PARAM_REGEXP.lastIndex = match[0].slice(-1) === ";" ? index - 1 : index;
-      while (match = PARAM_REGEXP.exec(string4)) {
-        if (match.index !== index) {
-          throw new TypeError("invalid parameter format");
-        }
-        index += match[0].length;
-        key = match[1].toLowerCase();
-        value = match[2];
-        if (names.indexOf(key) !== -1) {
-          throw new TypeError("invalid duplicate parameter");
-        }
-        names.push(key);
-        if (key.indexOf("*") + 1 === key.length) {
-          key = key.slice(0, -1);
-          value = decodefield(value);
-          params[key] = value;
-          continue;
-        }
-        if (typeof params[key] === "string") {
-          continue;
-        }
-        if (value[0] === '"') {
-          value = value.slice(1, -1).replace(QESC_REGEXP, "$1");
-        }
-        params[key] = value;
+      return index;
+    }
+    function skipOWS(str, index, len) {
+      while (index < len) {
+        const char2 = str.charCodeAt(index);
+        if (char2 !== SP && char2 !== HTAB)
+          break;
+        index++;
       }
-      if (index !== -1 && index !== string4.length) {
-        throw new TypeError("invalid parameter format");
-      }
-      return new ContentDisposition(type, params);
+      return index;
     }
-    function pencode(char2) {
-      return "%" + String(char2).charCodeAt(0).toString(16).toUpperCase();
-    }
-    function qstring(val) {
-      var str = String(val);
-      return '"' + str.replace(QUOTE_REGEXP, "\\$1") + '"';
-    }
-    function ustring(val) {
-      var str = String(val);
-      var encoded = encodeURIComponent(str).replace(ENCODE_URL_ATTR_CHAR_REGEXP, pencode);
-      return "UTF-8''" + encoded;
-    }
-    function ContentDisposition(type, parameters) {
-      this.type = type;
-      this.parameters = parameters;
-    }
-    function basename(path3) {
-      const normalized = path3.replaceAll("\\", "/");
-      let end = normalized.length;
-      while (end > 0 && normalized[end - 1] === "/") {
+    function trailingOWS(str, start, end) {
+      while (end > start) {
+        const char2 = str.charCodeAt(end - 1);
+        if (char2 !== SP && char2 !== HTAB)
+          break;
         end--;
       }
-      if (end === 0) {
-        return "";
+      return end;
+    }
+    function format(obj, options) {
+      const { type, parameters } = obj;
+      const multipart = options?.multipart === true;
+      const extended = options?.extended !== false;
+      if (!type || !TOKEN_REGEXP.test(type)) {
+        throw new TypeError("Invalid type: " + type);
       }
-      let start = end - 1;
-      while (start >= 0 && normalized[start] !== "/") {
-        start--;
+      let result = type;
+      if (parameters) {
+        for (const param of Object.keys(parameters)) {
+          const value = parameters[param];
+          if (!TOKEN_REGEXP.test(param)) {
+            throw new TypeError("Invalid parameter name: " + param);
+          }
+          if (multipart) {
+            result += "; " + param + "=" + qmultipart(value);
+            continue;
+          }
+          if (TOKEN_REGEXP.test(value)) {
+            result += "; " + param + "=" + value;
+            continue;
+          }
+          if (TEXT_REGEXP.test(value)) {
+            result += "; " + param + "=" + qstring(value);
+            continue;
+          }
+          if (!extended) {
+            throw new TypeError("Invalid parameter value: " + value);
+          }
+          result += "; " + param + "*=" + encodeExtended(value);
+        }
       }
-      return normalized.slice(start + 1, end);
+      return result;
+    }
+    function getAscii(val) {
+      return val.replace(NON_ASCII_REGEXP, "?");
+    }
+    function pencode(char2) {
+      return "%" + char2.charCodeAt(0).toString(16).toUpperCase();
+    }
+    function qstring(str) {
+      return '"' + str.replace(QUOTE_REGEXP, "\\$&") + '"';
+    }
+    function qmultipart(str) {
+      return '"' + str.replace(/[\n\r"]/g, multipartEscape) + '"';
+    }
+    function multipartEscape(char2) {
+      if (char2 === "\n")
+        return "%0A";
+      if (char2 === "\r")
+        return "%0D";
+      return "%22";
+    }
+    function encodeExtended(str) {
+      const encoded = encodeURIComponent(str).replace(ENCODE_URL_ATTR_CHAR_REGEXP, pencode);
+      return "UTF-8''" + encoded;
     }
     function isHexDigit(char2) {
       const code = char2.charCodeAt(0);
@@ -22372,19 +22379,10 @@ var require_content_disposition = __commonJS({
       code >= 65 && code <= 70 || // A-F
       code >= 97 && code <= 102;
     }
-    function hasHexEscape(str) {
-      const maxIndex = str.length - 3;
-      let lastIndex = -1;
-      while ((lastIndex = str.indexOf("%", lastIndex + 1)) !== -1 && lastIndex <= maxIndex) {
-        if (isHexDigit(str[lastIndex + 1]) && isHexDigit(str[lastIndex + 2])) {
-          return true;
-        }
-      }
-      return false;
-    }
     function decodeHexEscapes(str) {
       const firstEscape = str.indexOf("%");
-      if (firstEscape === -1) return str;
+      if (firstEscape === -1)
+        return str;
       let result = str.slice(0, firstEscape);
       for (let idx = firstEscape; idx < str.length; idx++) {
         if (str[idx] === "%" && idx + 2 < str.length && isHexDigit(str[idx + 1]) && isHexDigit(str[idx + 2])) {
@@ -23143,7 +23141,7 @@ var require_vary = __commonJS({
 var require_response = __commonJS({
   "../../node_modules/express/lib/response.js"(exports, module) {
     "use strict";
-    var contentDisposition = require_content_disposition();
+    var contentDisposition = require_dist3();
     var createError = require_http_errors();
     var deprecate = require_depd()("express");
     var encodeUrl = require_encodeurl();
@@ -23162,6 +23160,7 @@ var require_response = __commonJS({
     var send = require_send();
     var extname = path3.extname;
     var resolve = path3.resolve;
+    var basename = path3.basename;
     var vary = require_vary();
     var { Buffer: Buffer2 } = __require("node:buffer");
     var res = Object.create(http.ServerResponse.prototype);
@@ -23193,12 +23192,15 @@ var require_response = __commonJS({
       var chunk = body;
       var encoding;
       var req = this.req;
-      var type;
       var app2 = this.app;
       switch (typeof chunk) {
         // string defaulting to html
         case "string":
-          if (!this.get("Content-Type")) {
+          encoding = "utf8";
+          const type = this.get("Content-Type");
+          if (typeof type === "string") {
+            this.set("Content-Type", setCharset(type, "utf-8"));
+          } else {
             this.type("html");
           }
           break;
@@ -23216,13 +23218,6 @@ var require_response = __commonJS({
           }
           break;
       }
-      if (typeof chunk === "string") {
-        encoding = "utf8";
-        type = this.get("Content-Type");
-        if (typeof type === "string") {
-          this.set("Content-Type", setCharset(type, "utf-8"));
-        }
-      }
       var etagFn = app2.get("etag fn");
       var generateETag = !this.get("ETag") && typeof etagFn === "function";
       var len;
@@ -23236,7 +23231,9 @@ var require_response = __commonJS({
           encoding = void 0;
           len = chunk.length;
         }
-        this.set("Content-Length", len);
+        if (!this.get("Transfer-Encoding")) {
+          this.set("Content-Length", len);
+        }
       }
       var etag;
       if (generateETag && len !== void 0) {
@@ -23354,7 +23351,7 @@ var require_response = __commonJS({
         opts = filename;
       }
       var headers = {
-        "Content-Disposition": contentDisposition(name || path4)
+        "Content-Disposition": contentDisposition.create(basename(name || path4))
       };
       if (opts && opts.headers) {
         var keys = Object.keys(opts.headers);
@@ -23397,10 +23394,11 @@ var require_response = __commonJS({
       return this;
     };
     res.attachment = function attachment(filename) {
-      if (filename) {
-        this.type(extname(filename));
+      const name = filename !== void 0 ? basename(filename) : void 0;
+      if (name) {
+        this.type(extname(name));
       }
-      this.set("Content-Disposition", contentDisposition(filename));
+      this.set("Content-Disposition", contentDisposition.create(name));
       return this;
     };
     res.append = function append(field, val) {
@@ -23487,7 +23485,7 @@ var require_response = __commonJS({
         },
         html: function() {
           var u = escapeHtml(address);
-          body = "<p>" + statuses.message[status] + ". Redirecting to " + u + "</p>";
+          body = "<!DOCTYPE html><head><title>" + statuses.message[status] + "</title></head><body><p>" + statuses.message[status] + ". Redirecting to " + u + "</p></body>";
         },
         default: function() {
           body = "";
@@ -28140,7 +28138,7 @@ var require_pino = __commonJS({
     function pinoBundlerAbsolutePath(p) {
       try {
         const path3 = __require("path");
-        const outputDir = "/home/runner/workspace/artifacts/api-server/dist";
+        const outputDir = "/Users/nayeem/Desktop/GIT PUSH /noviatify/artifacts/api-server/dist";
         return path3.resolve(outputDir, p.replace(/^\.\//, ""));
       } catch (e) {
         const f = new Function("p", "return new URL(p, import.meta.url).pathname");
@@ -29572,6 +29570,8 @@ var require_defaults = __commonJS({
       idleTimeoutMillis: 3e4,
       client_encoding: "",
       ssl: false,
+      // SSL negotiation style: 'postgres' (traditional SSLRequest) or 'direct'
+      sslnegotiation: void 0,
       application_name: void 0,
       fallback_application_name: void 0,
       options: void 0,
@@ -29606,7 +29606,14 @@ var require_utils4 = __commonJS({
   "../../node_modules/pg/lib/utils.js"(exports, module) {
     "use strict";
     var defaults2 = require_defaults();
+    var nodeUtils = __require("util");
     var { isDate } = __require("util/types");
+    var invalidDateDeprecationNotice = nodeUtils.deprecate(
+      () => {
+      },
+      "Sending an invalid date to Postgres is deprecated and will throw an error in the next major version of pg. Ensure any Date object passed as a query parameter is valid.",
+      "PG_INVALID_DATE"
+    );
     function escapeElement(elementRepresentation) {
       const escaped = elementRepresentation.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
       return '"' + escaped + '"';
@@ -29646,6 +29653,9 @@ var require_utils4 = __commonJS({
           return Buffer.from(val.buffer, val.byteOffset, val.byteLength);
         }
         if (isDate(val)) {
+          if (isNaN(val.getTime())) {
+            invalidDateDeprecationNotice();
+          }
           if (defaults2.parseInputDatesAsUTC) {
             return dateToStringUTC(val);
           } else {
@@ -29696,7 +29706,7 @@ var require_utils4 = __commonJS({
       return ret;
     }
     function normalizeQueryConfig(config2, values, callback) {
-      config2 = typeof config2 === "string" ? { text: config2 } : config2;
+      config2 = typeof config2 === "string" ? { text: config2 } : cloneQueryConfig(config2);
       if (values) {
         if (typeof values === "function") {
           config2.callback = values;
@@ -29708,6 +29718,12 @@ var require_utils4 = __commonJS({
         config2.callback = callback;
       }
       return config2;
+    }
+    function cloneQueryConfig(config2) {
+      if (config2 == null) {
+        return config2;
+      }
+      return Object.defineProperties(Object.create(Object.getPrototypeOf(config2)), Object.getOwnPropertyDescriptors(config2));
     }
     var escapeIdentifier2 = function(str) {
       return '"' + str.replace(/"/g, '""') + '"';
@@ -29898,7 +29914,7 @@ var require_cert_signatures = __commonJS({
           }
           throw x509Error("unknown hash OID " + hashOID, data);
         }
-        // Ed25519 -- see https: return//github.com/openssl/openssl/issues/15477
+        // Ed25519 -- see https://github.com/openssl/openssl/issues/15477
         case "1.3.101.110":
         case "1.3.101.112":
           return "SHA-512";
@@ -29985,10 +30001,10 @@ var require_sasl = __commonJS({
       const authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       const saltBytes = Buffer.from(sv.salt, "base64");
       const saltedPassword = await crypto3.deriveKey(saslprep(password), saltBytes, sv.iteration);
-      const clientKey = await crypto3.hmacSha256(saltedPassword, "Client Key");
-      const storedKey = await crypto3.sha256(clientKey);
+      const clientKey2 = await crypto3.hmacSha256(saltedPassword, "Client Key");
+      const storedKey = await crypto3.sha256(clientKey2);
       const clientSignature = await crypto3.hmacSha256(storedKey, authMessage);
-      const clientProof = xorBuffers(Buffer.from(clientKey), Buffer.from(clientSignature)).toString("base64");
+      const clientProof = xorBuffers(Buffer.from(clientKey2), Buffer.from(clientSignature)).toString("base64");
       const serverKey = await crypto3.hmacSha256(saltedPassword, "Server Key");
       const serverSignatureBytes = await crypto3.hmacSha256(serverKey, authMessage);
       session.message = "SASLResponse";
@@ -30170,7 +30186,7 @@ var require_pg_connection_string = __commonJS({
         config2.client_encoding = result.searchParams.get("encoding");
         return config2;
       }
-      const hostname2 = dummyHost ? "" : result.hostname;
+      const hostname2 = (dummyHost ? "" : result.hostname).replace(/^\[(.+)\]$/, "$1");
       if (!config2.host) {
         config2.host = decodeURIComponent(hostname2);
       } else if (hostname2 && /^%2f/i.test(hostname2)) {
@@ -30189,6 +30205,9 @@ var require_pg_connection_string = __commonJS({
       }
       if (config2.sslcert || config2.sslkey || config2.sslrootcert || config2.sslmode) {
         config2.ssl = {};
+      }
+      if (config2.sslnegotiation === "direct" && config2.ssl === void 0) {
+        config2.ssl = true;
       }
       const fs2 = config2.sslcert || config2.sslkey || config2.sslrootcert ? __require("fs") : null;
       if (config2.sslcert) {
@@ -30395,6 +30414,15 @@ var require_connection_parameters = __commonJS({
             enumerable: false
           });
         }
+        this.sslnegotiation = val("sslnegotiation", config2, "PGSSLNEGOTIATION");
+        if (this.sslnegotiation !== void 0 && this.sslnegotiation !== "postgres" && this.sslnegotiation !== "direct") {
+          throw new Error(
+            `Invalid sslnegotiation value: "${this.sslnegotiation}". Valid values are "postgres" and "direct".`
+          );
+        }
+        if (this.sslnegotiation === "direct" && !this.ssl) {
+          throw new Error("sslnegotiation=direct requires SSL to be enabled");
+        }
         this.client_encoding = val("client_encoding", config2);
         this.replication = val("replication", config2);
         this.isDomainSocket = !(this.host || "").indexOf("/");
@@ -30433,6 +30461,7 @@ var require_connection_parameters = __commonJS({
         add(params, ssl, "sslkey");
         add(params, ssl, "sslcert");
         add(params, ssl, "sslrootcert");
+        add(params, this, "sslnegotiation");
         if (this.database) {
           params.push("dbname=" + quoteParamValue(this.database));
         }
@@ -30674,7 +30703,7 @@ var require_query = __commonJS({
         if (typeof this.text !== "string" && typeof this.name !== "string") {
           return new Error("A query must have either text or a name. Supplying neither is unsupported.");
         }
-        const previous = connection.parsedStatements[this.name];
+        const previous = connection.parsedStatements[this.name] || connection.submittedNamedStatements[this.name];
         if (this.text && previous && this.text !== previous) {
           return new Error(`Prepared statements must be unique - '${this.name}' was used for a different statement`);
         }
@@ -30694,7 +30723,7 @@ var require_query = __commonJS({
         return null;
       }
       hasBeenParsed(connection) {
-        return this.name && connection.parsedStatements[this.name];
+        return this.name && (connection.parsedStatements[this.name] !== void 0 || connection.submittedNamedStatements[this.name] !== void 0);
       }
       handlePortalSuspended(connection) {
         this._getRows(connection, this.rows);
@@ -30718,6 +30747,9 @@ var require_query = __commonJS({
             name: this.name,
             types: this.types
           });
+          if (this.name) {
+            connection.submittedNamedStatements[this.name] = this.text;
+          }
         }
         try {
           connection.bind({
@@ -30728,6 +30760,8 @@ var require_query = __commonJS({
             valueMapper: utils.prepareValue
           });
         } catch (err) {
+          connection.close({ type: "S", name: this.name });
+          connection.sync();
           this.handleError(err, connection);
           return;
         }
@@ -30931,7 +30965,7 @@ var require_buffer_writer = __commonJS({
           const oldBuffer = this.buffer;
           const newSize = oldBuffer.length + (oldBuffer.length >> 1) + size;
           this.buffer = Buffer.allocUnsafe(newSize);
-          oldBuffer.copy(this.buffer);
+          oldBuffer.copy(this.buffer, 0, 0, this.offset);
         }
       }
       addInt32(num) {
@@ -30967,11 +31001,39 @@ var require_buffer_writer = __commonJS({
         this.offset += len;
         return this;
       }
+      // Write an Int32 byte-length prefix immediately followed by the string's UTF-8
+      // bytes. Postgres' Bind wire format prefixes every parameter with its length,
+      // and doing it in one method computes Buffer.byteLength ONCE — the previous
+      // `addInt32(Buffer.byteLength(s)).addString(s)` pairing scanned the string
+      // three times (byteLength for the prefix, byteLength again inside addString,
+      // then the encode), which is costly for large text parameters.
+      addInt32PrefixedString(string4) {
+        const len = Buffer.byteLength(string4);
+        this.ensure(4 + len);
+        const buffer = this.buffer;
+        let offset = this.offset;
+        buffer[offset++] = len >>> 24 & 255;
+        buffer[offset++] = len >>> 16 & 255;
+        buffer[offset++] = len >>> 8 & 255;
+        buffer[offset++] = len >>> 0 & 255;
+        buffer.write(string4, offset, "utf-8");
+        this.offset = offset + len;
+        return this;
+      }
       add(otherBuffer) {
         this.ensure(otherBuffer.length);
         otherBuffer.copy(this.buffer, this.offset);
         this.offset += otherBuffer.length;
         return this;
+      }
+      /**
+       * Appends an uninitialized block of {@link size} bytes to the buffer and returns its offset.
+       */
+      reserveUnsafe(size) {
+        const offset = this.offset;
+        this.ensure(size);
+        this.offset += size;
+        return offset;
       }
       join(code) {
         if (code) {
@@ -30987,6 +31049,10 @@ var require_buffer_writer = __commonJS({
         this.headerPosition = 0;
         this.buffer = Buffer.allocUnsafe(this.size);
         return result;
+      }
+      clear() {
+        this.offset = 5;
+        this.headerPosition = 0;
       }
     };
     exports.Writer = Writer;
@@ -31024,7 +31090,7 @@ var require_serializer = __commonJS({
       );
     };
     var sendSASLInitialResponseMessage = function(mechanism, initialResponse) {
-      writer.addCString(mechanism).addInt32(Buffer.byteLength(initialResponse)).addString(initialResponse);
+      writer.addCString(mechanism).addInt32PrefixedString(initialResponse);
       return writer.flush(
         112
         /* code.startup */
@@ -31061,31 +31127,23 @@ var require_serializer = __commonJS({
         /* code.parse */
       );
     };
-    var paramWriter = new buffer_writer_1.Writer();
-    var writeValues = function(values, valueMapper) {
-      for (let i = 0; i < values.length; i++) {
+    var writeValues = function(values, valueMapper, formatsOffset) {
+      const len = values.length;
+      for (let i = 0; i < len; i++) {
         const mappedVal = valueMapper ? valueMapper(values[i], i) : values[i];
+        let formatByte = 0;
         if (mappedVal == null) {
-          writer.addInt16(
-            0
-            /* ParamType.STRING */
-          );
-          paramWriter.addInt32(-1);
+          writer.addInt32(-1);
         } else if (mappedVal instanceof Buffer) {
-          writer.addInt16(
-            1
-            /* ParamType.BINARY */
-          );
-          paramWriter.addInt32(mappedVal.length);
-          paramWriter.add(mappedVal);
+          formatByte = 1;
+          writer.addInt32(mappedVal.length);
+          writer.add(mappedVal);
         } else {
-          writer.addInt16(
-            0
-            /* ParamType.STRING */
-          );
-          paramWriter.addInt32(Buffer.byteLength(mappedVal));
-          paramWriter.addString(mappedVal);
+          writer.addInt32PrefixedString(mappedVal);
         }
+        const buf = writer.buffer;
+        buf[formatsOffset++] = 0;
+        buf[formatsOffset++] = formatByte;
       }
     };
     var bind = (config2 = {}) => {
@@ -31096,9 +31154,14 @@ var require_serializer = __commonJS({
       const len = values.length;
       writer.addCString(portal).addCString(statement);
       writer.addInt16(len);
-      writeValues(values, config2.valueMapper);
+      const formatsOffset = writer.reserveUnsafe(len * 2);
       writer.addInt16(len);
-      writer.add(paramWriter.flush());
+      try {
+        writeValues(values, config2.valueMapper, formatsOffset);
+      } catch (err) {
+        writer.clear();
+        throw err;
+      }
       writer.addInt16(1);
       writer.addInt16(
         binary ? 1 : 0
@@ -31254,7 +31317,7 @@ var require_buffer_reader = __commonJS({
       cstring() {
         const start = this.offset;
         let end = start;
-        while (this.buffer[end++] !== 0) {
+        while (this.buffer[end++]) {
         }
         this.offset = end;
         return this.buffer.toString(this.encoding, start, end - 1);
@@ -31476,7 +31539,7 @@ var require_parser = __commonJS({
       const parameterCount = reader.int16();
       const message = new messages_1.ParameterDescriptionMessage(LATEINIT_LENGTH, parameterCount);
       for (let i = 0; i < parameterCount; i++) {
-        message.dataTypeIDs[i] = reader.int32();
+        message.dataTypeIDs[i] = reader.uint32();
       }
       return message;
     };
@@ -31577,11 +31640,12 @@ var require_parser = __commonJS({
 });
 
 // ../../node_modules/pg-protocol/dist/index.js
-var require_dist3 = __commonJS({
+var require_dist4 = __commonJS({
   "../../node_modules/pg-protocol/dist/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.DatabaseError = exports.serialize = exports.parse = void 0;
+    exports.DatabaseError = exports.serialize = void 0;
+    exports.parse = parse3;
     var messages_1 = require_messages();
     Object.defineProperty(exports, "DatabaseError", { enumerable: true, get: function() {
       return messages_1.DatabaseError;
@@ -31596,7 +31660,6 @@ var require_dist3 = __commonJS({
       stream.on("data", (buffer) => parser.parse(buffer, callback));
       return new Promise((resolve) => stream.on("end", () => resolve()));
     }
-    exports.parse = parse3;
   }
 });
 
@@ -31680,8 +31743,9 @@ var require_connection = __commonJS({
   "../../node_modules/pg/lib/connection.js"(exports, module) {
     "use strict";
     var EventEmitter = __require("events").EventEmitter;
-    var { parse: parse3, serialize } = require_dist3();
-    var { getStream, getSecureStream } = require_stream();
+    var { parse: parse3, serialize } = require_dist4();
+    var stream = require_stream();
+    var { getStream } = stream;
     var flushBuffer = serialize.flush();
     var syncBuffer = serialize.sync();
     var endBuffer = serialize.end();
@@ -31696,7 +31760,9 @@ var require_connection = __commonJS({
         this._keepAlive = config2.keepAlive;
         this._keepAliveInitialDelayMillis = config2.keepAliveInitialDelayMillis;
         this.parsedStatements = {};
+        this.submittedNamedStatements = {};
         this.ssl = config2.ssl || false;
+        this.sslNegotiation = config2.sslNegotiation || "postgres";
         this._ending = false;
         this._emitMessage = false;
         const self = this;
@@ -31730,6 +31796,11 @@ var require_connection = __commonJS({
         if (!this.ssl) {
           return this.attachListeners(this.stream);
         }
+        if (this.sslNegotiation === "direct") {
+          return this.stream.once("connect", function() {
+            self.upgradeToSSL(host, reportStreamError);
+          });
+        }
         this.stream.once("data", function(buffer) {
           const responseCode = buffer.toString("utf8");
           switch (responseCode) {
@@ -31742,31 +31813,43 @@ var require_connection = __commonJS({
               self.stream.end();
               return self.emit("error", new Error("There was an error establishing an SSL connection"));
           }
-          const options = {
-            socket: self.stream
-          };
-          if (self.ssl !== true) {
-            Object.assign(options, self.ssl);
-            if ("key" in self.ssl) {
-              options.key = self.ssl.key;
-            }
-          }
-          const net = __require("net");
-          if (net.isIP && net.isIP(host) === 0) {
-            options.servername = host;
-          }
-          try {
-            self.stream = getSecureStream(options);
-          } catch (err) {
-            return self.emit("error", err);
-          }
-          self.attachListeners(self.stream);
-          self.stream.on("error", reportStreamError);
-          self.emit("sslconnect");
+          self.upgradeToSSL(host, reportStreamError);
         });
       }
-      attachListeners(stream) {
-        parse3(stream, (msg) => {
+      upgradeToSSL(host, reportStreamError) {
+        const self = this;
+        const options = {
+          socket: self.stream,
+          // tls.connect checks the server identity against `servername`, falling
+          // back to `host` and then to 'localhost'. `servername` must stay unset
+          // for IP addresses (see below), so `host` is needed to keep certificate
+          // validation working when connecting to an IP address.
+          host
+        };
+        if (self.ssl !== true) {
+          Object.assign(options, self.ssl);
+          if ("key" in self.ssl) {
+            options.key = self.ssl.key;
+          }
+        }
+        if (self.sslNegotiation === "direct") {
+          options.ALPNProtocols = ["postgresql"];
+        }
+        const net = __require("net");
+        if (net.isIP && net.isIP(host) === 0) {
+          options.servername = host;
+        }
+        try {
+          self.stream = stream.getSecureStream(options);
+        } catch (err) {
+          return self.emit("error", err);
+        }
+        self.attachListeners(self.stream);
+        self.stream.on("error", reportStreamError);
+        self.emit("sslconnect");
+      }
+      attachListeners(stream2) {
+        parse3(stream2, (msg) => {
           const eventName = msg.name === "error" ? "errorMessage" : msg.name;
           if (this._emitMessage) {
             this.emit("message", msg);
@@ -31819,7 +31902,6 @@ var require_connection = __commonJS({
         }
       }
       sync() {
-        this._ending = true;
         this._send(syncBuffer);
       }
       ref() {
@@ -32233,15 +32315,19 @@ var require_client = __commonJS({
         this.connection = c.connection || new Connection2({
           stream: c.stream,
           ssl: this.connectionParameters.ssl,
+          sslNegotiation: this.connectionParameters.sslnegotiation,
           keepAlive: c.keepAlive || false,
           keepAliveInitialDelayMillis: c.keepAliveInitialDelayMillis || 0,
           encoding: this.connectionParameters.client_encoding || "utf8"
         });
         this._queryQueue = [];
+        this._sentQueryQueue = [];
+        this.pipeline = Boolean(c.pipeline);
         this.binary = c.binary || defaults2.binary;
         this.processID = null;
         this.secretKey = null;
         this.ssl = this.connectionParameters.ssl || false;
+        this.sslNegotiation = this.connectionParameters.sslnegotiation || "postgres";
         if (this.ssl && this.ssl.key) {
           Object.defineProperty(this.ssl, "key", {
             enumerable: false
@@ -32271,6 +32357,8 @@ var require_client = __commonJS({
           enqueueError(activeQuery);
           this._activeQuery = null;
         }
+        this._sentQueryQueue.forEach(enqueueError);
+        this._sentQueryQueue.length = 0;
         this._queryQueue.forEach(enqueueError);
         this._queryQueue.length = 0;
       }
@@ -32302,7 +32390,9 @@ var require_client = __commonJS({
         }
         con.on("connect", function() {
           if (self.ssl) {
-            con.requestSsl();
+            if (self.sslNegotiation !== "direct") {
+              con.requestSsl();
+            }
           } else {
             con.startup(self.getStartupConf());
           }
@@ -32511,6 +32601,9 @@ var require_client = __commonJS({
           return;
         }
         this._activeQuery = null;
+        if (activeQuery.name) {
+          delete this.connection.submittedNamedStatements[activeQuery.name];
+        }
         activeQuery.handleError(msg, this.connection);
       }
       _handleRowDescription(msg) {
@@ -32567,6 +32660,7 @@ var require_client = __commonJS({
         }
         if (activeQuery.name) {
           this.connection.parsedStatements[activeQuery.name] = activeQuery.text;
+          delete this.connection.submittedNamedStatements[activeQuery.name];
         }
       }
       _handleCopyInResponse(msg) {
@@ -32633,6 +32727,9 @@ var require_client = __commonJS({
           });
         } else if (client._queryQueue.indexOf(query) !== -1) {
           client._queryQueue.splice(client._queryQueue.indexOf(query), 1);
+        } else if (client._sentQueryQueue.indexOf(query) !== -1) {
+          query.callback = () => {
+          };
         }
       }
       setTypeParser(oid, format, parseFn) {
@@ -32651,6 +32748,10 @@ var require_client = __commonJS({
         return utils.escapeLiteral(str);
       }
       _pulseQueryQueue() {
+        if (this.pipeline) {
+          this._pulsePipelinedQueryQueue();
+          return;
+        }
         if (this.readyForQuery === true) {
           this._activeQuery = this._queryQueue.shift();
           const activeQuery = this._getActiveQuery();
@@ -32669,6 +32770,30 @@ var require_client = __commonJS({
             this._activeQuery = null;
             this.emit("drain");
           }
+        }
+      }
+      _pulsePipelinedQueryQueue() {
+        if (!this._connected || !this._queryable) {
+          return;
+        }
+        while (this._queryQueue.length > 0) {
+          const query = this._queryQueue.shift();
+          this.hasExecuted = true;
+          const queryError = query.submit(this.connection);
+          if (queryError) {
+            process.nextTick(() => {
+              query.handleError(queryError, this.connection);
+            });
+            continue;
+          }
+          this._sentQueryQueue.push(query);
+        }
+        if (this.readyForQuery && !this._activeQuery && this._sentQueryQueue.length > 0) {
+          this._activeQuery = this._sentQueryQueue.shift();
+          this.readyForQuery = false;
+        }
+        if (!this._activeQuery && this._sentQueryQueue.length === 0 && this._queryQueue.length === 0 && this.hasExecuted) {
+          this.emit("drain");
         }
       }
       query(config2, values, callback) {
@@ -32714,6 +32839,9 @@ var require_client = __commonJS({
             const index = this._queryQueue.indexOf(query);
             if (index > -1) {
               this._queryQueue.splice(index, 1);
+            } else if (this.pipeline) {
+              this.connection.stream.destroy();
+              return;
             }
             this._pulseQueryQueue();
           }, readTimeout);
@@ -32728,6 +32856,15 @@ var require_client = __commonJS({
         if (query._result && !query._result._types) {
           query._result._types = this._types;
         }
+        if (this.pipeline) {
+          const portalQuery = typeof config2.submit === "function" && !(query instanceof Query2) ? "Custom query classes such as pg-cursor and pg-query-stream are" : query.rows ? "The `rows` option is" : null;
+          if (portalQuery) {
+            process.nextTick(() => {
+              query.handleError(new Error(`${portalQuery} not supported in pipeline mode`), this.connection);
+            });
+            return result;
+          }
+        }
         if (!this._queryable) {
           process.nextTick(() => {
             query.handleError(new Error("Client has encountered a connection error and is not queryable"), this.connection);
@@ -32740,7 +32877,7 @@ var require_client = __commonJS({
           });
           return result;
         }
-        if (this._queryQueue.length > 0) {
+        if (this._queryQueue.length > 0 && !this.pipeline) {
           queryQueueLengthDeprecationNotice();
         }
         this._queryQueue.push(query);
@@ -32766,7 +32903,11 @@ var require_client = __commonJS({
             return this._Promise.resolve();
           }
         }
-        if (this._getActiveQuery() || !this._queryable) {
+        if (!this._queryable) {
+          this.connection.stream.destroy();
+        } else if (this.pipeline && (this._getActiveQuery() || this._sentQueryQueue.length > 0 || this._queryQueue.length > 0)) {
+          this.once("drain", () => this.connection.end());
+        } else if (this._getActiveQuery()) {
           this.connection.stream.destroy();
         } else {
           this.connection.end();
@@ -33245,6 +33386,8 @@ var require_query2 = __commonJS({
       sqlState: "code",
       statementPosition: "position",
       messagePrimary: "message",
+      messageDetail: "detail",
+      messageHint: "hint",
       context: "where",
       schemaName: "schema",
       tableName: "table",
@@ -33256,7 +33399,7 @@ var require_query2 = __commonJS({
       sourceFunction: "routine"
     };
     NativeQuery.prototype.handleError = function(err) {
-      const fields = this.native.pq.resultErrorFields();
+      const fields = this.native && this.native.pq.resultErrorFields();
       if (fields) {
         for (const key in fields) {
           const normalizedFieldName = errorFieldMap[key] || key;
@@ -33328,7 +33471,7 @@ var require_query2 = __commonJS({
           console.error("This can cause conflicts and silent errors executing queries");
         }
         const values = (this.values || []).map(utils.prepareValue);
-        if (client.namedQueries[this.name]) {
+        if (client.namedQueries[this.name] !== void 0) {
           if (this.text && client.namedQueries[this.name] !== this.text) {
             const err = new Error(`Prepared statements must be unique - '${this.name}' was used for a different statement`);
             return after(err);
@@ -33389,6 +33532,8 @@ var require_client2 = __commonJS({
       this._connecting = false;
       this._connected = false;
       this._queryable = true;
+      this.pipeline = Boolean(config2.pipeline);
+      this._pipelineInFlight = false;
       const cp = this.connectionParameters = new ConnectionParameters(config2);
       if (config2.nativeConnectionString) cp.nativeConnectionString = config2.nativeConnectionString;
       this.user = cp.user;
@@ -33532,7 +33677,7 @@ var require_client2 = __commonJS({
         });
         return result;
       }
-      if (this._queryQueue.length > 0) {
+      if (this._queryQueue.length > 0 && !this.pipeline) {
         queryQueueLengthDeprecationNotice();
       }
       this._queryQueue.push(query);
@@ -33554,14 +33699,21 @@ var require_client2 = __commonJS({
           cb = (err) => err ? reject(err) : resolve();
         });
       }
-      this.native.end(function() {
-        self._connected = false;
-        self._errorAllQueries(new Error("Connection terminated"));
-        process.nextTick(() => {
-          self.emit("end");
-          if (cb) cb();
+      const doEnd = function() {
+        self.native.end(function() {
+          self._connected = false;
+          self._errorAllQueries(new Error("Connection terminated"));
+          process.nextTick(() => {
+            self.emit("end");
+            if (cb) cb();
+          });
         });
-      });
+      };
+      if (this.pipeline && (this._pipelineInFlight || this._queryQueue.length > 0)) {
+        this.once("drain", doEnd);
+      } else {
+        doEnd();
+      }
       return result;
     };
     Client2.prototype._hasActiveQuery = function() {
@@ -33570,6 +33722,9 @@ var require_client2 = __commonJS({
     Client2.prototype._pulseQueryQueue = function(initialConnection) {
       if (!this._connected) {
         return;
+      }
+      if (this.pipeline && !initialConnection) {
+        return this._pulsePipelinedQueryQueue();
       }
       if (this._hasActiveQuery()) {
         return;
@@ -33586,6 +33741,73 @@ var require_client2 = __commonJS({
       const self = this;
       query.once("_done", function() {
         self._pulseQueryQueue();
+      });
+    };
+    Client2.prototype._pulsePipelinedQueryQueue = function() {
+      if (!this._connected || this._pipelineInFlight) {
+        return;
+      }
+      if (this._queryQueue.length === 0) {
+        if (this.hasExecuted) {
+          this.emit("drain");
+        }
+        return;
+      }
+      this._pipelineInFlight = true;
+      const self = this;
+      const queries = [];
+      const nativeQueries = [];
+      const utils = require_utils4();
+      while (this._queryQueue.length > 0) {
+        const query = this._queryQueue.shift();
+        this.hasExecuted = true;
+        nativeQueries.push(query);
+        const values = query.values ? query.values.map(utils.prepareValue) : null;
+        const pipelineEntry = { text: query.text, name: query.name, arrayMode: query._arrayMode };
+        if (values) {
+          pipelineEntry.values = values;
+        }
+        if (query.name && this.namedQueries[query.name]) {
+          pipelineEntry._alreadyPrepared = true;
+        }
+        queries.push(pipelineEntry);
+      }
+      this.native.pipeline(queries, function(err, results) {
+        self._pipelineInFlight = false;
+        if (err) {
+          self._connected = false;
+          self._queryable = false;
+          for (let i = 0; i < nativeQueries.length; i++) {
+            const q = nativeQueries[i];
+            q.native = self.native;
+            q.handleError(err);
+          }
+          self._errorAllQueries(err);
+          self.emit("error", err);
+          self.emit("end");
+          return;
+        }
+        for (let i = 0; i < nativeQueries.length; i++) {
+          const q = nativeQueries[i];
+          const r = results[i];
+          q.native = self.native;
+          if (r.err) {
+            q.handleError(r.err);
+          } else {
+            if (q.name) {
+              self.namedQueries[q.name] = q.text;
+            }
+            q.state = "end";
+            q.emit("end", r.result);
+            if (q.callback) {
+              q.callback(null, r.result);
+            }
+          }
+          setImmediate(function() {
+            q.emit("_done");
+          });
+        }
+        self._pulsePipelinedQueryQueue();
       });
     };
     Client2.prototype.cancel = function(query) {
@@ -33634,7 +33856,7 @@ var require_lib5 = __commonJS({
     var utils = require_utils4();
     var Pool4 = require_pg_pool();
     var TypeOverrides2 = require_type_overrides();
-    var { DatabaseError: DatabaseError2 } = require_dist3();
+    var { DatabaseError: DatabaseError2 } = require_dist4();
     var { escapeIdentifier: escapeIdentifier2, escapeLiteral: escapeLiteral2 } = require_utils4();
     var poolFactory = (Client3) => {
       return class BoundPool extends Pool4 {
@@ -38278,7 +38500,7 @@ var WithSubquery = class extends Subquery {
 };
 
 // ../../node_modules/drizzle-orm/version.js
-var version = "0.45.2";
+var version = "0.45.4";
 
 // ../../node_modules/drizzle-orm/tracing.js
 var otel;
@@ -56025,22 +56247,33 @@ var adminSettingsTable = pgTable("admin_settings", {
 // ../../lib/db/src/index.ts
 var { Pool: Pool3 } = esm_default;
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?"
-  );
+  try {
+    process.loadEnvFile?.();
+  } catch {
+  }
+  try {
+    process.loadEnvFile?.(new URL("../../../.env", import.meta.url));
+  } catch {
+  }
 }
-var pool = new Pool3({ connectionString: process.env.DATABASE_URL });
+var connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/itnayeem";
+var pool = new Pool3({ connectionString });
 var db = drizzle(pool, { schema: schema_exports });
 
 // src/lib/auth.ts
 import crypto2 from "node:crypto";
 var PASSWORD_KEY = "password_hash";
 if (!process.env.SESSION_SECRET) {
-  throw new Error(
-    "SESSION_SECRET is required but not set. Configure it before starting the server."
-  );
+  try {
+    process.loadEnvFile?.();
+  } catch {
+  }
+  try {
+    process.loadEnvFile?.(new URL("../../../../.env", import.meta.url));
+  } catch {
+  }
 }
-var SECRET = process.env.SESSION_SECRET;
+var SECRET = process.env.SESSION_SECRET || "itnayeem_super_secret_session_key_2026_xyz";
 var TOKEN_TTL_MS = 1e3 * 60 * 60 * 12;
 function hashPassword(password) {
   const salt = crypto2.randomBytes(16);
@@ -56067,8 +56300,7 @@ async function getStoredPasswordHash() {
 async function checkPassword(password) {
   const stored = await getStoredPasswordHash();
   if (stored) return verifyHash(password, stored);
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return false;
+  const expected = process.env.ADMIN_PASSWORD || "admin123";
   const a = Buffer.from(password);
   const b = Buffer.from(expected);
   if (a.length !== b.length) return false;
@@ -56151,8 +56383,84 @@ var content_default = router2;
 
 // src/routes/admin.ts
 var import_express3 = __toESM(require_express2(), 1);
+
+// src/lib/rateLimit.ts
+function clientKey(ip, fallback) {
+  return ip || fallback || "unknown";
+}
+function createRateLimiter(options) {
+  const {
+    windowMs,
+    max,
+    message = "Too many requests. Please try again later.",
+    countFailuresOnly = false
+  } = options;
+  const buckets = /* @__PURE__ */ new Map();
+  const sweeper = setInterval(() => {
+    const now = Date.now();
+    for (const [key, bucket] of buckets) {
+      if (bucket.resetAt <= now && bucket.pending <= 0) buckets.delete(key);
+    }
+  }, windowMs);
+  sweeper.unref?.();
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = clientKey(req.ip, req.socket.remoteAddress ?? void 0);
+    let bucket = buckets.get(key);
+    if (!bucket || bucket.resetAt <= now) {
+      const pending = bucket && bucket.resetAt <= now ? bucket.pending : 0;
+      bucket = { count: 0, pending, resetAt: now + windowMs };
+      buckets.set(key, bucket);
+    }
+    const used = bucket.count + bucket.pending;
+    const remaining = Math.max(0, max - used);
+    res.setHeader("RateLimit-Limit", String(max));
+    res.setHeader("RateLimit-Reset", String(Math.max(1, Math.ceil((bucket.resetAt - now) / 1e3))));
+    if (used >= max) {
+      const retryAfterSec = Math.max(1, Math.ceil((bucket.resetAt - now) / 1e3));
+      res.setHeader("RateLimit-Remaining", "0");
+      res.setHeader("Retry-After", String(retryAfterSec));
+      req.log?.warn({ ip: key, path: req.path }, "Rate limit exceeded");
+      res.status(429).json({ error: message });
+      return;
+    }
+    res.setHeader("RateLimit-Remaining", String(Math.max(0, remaining - 1)));
+    if (countFailuresOnly) {
+      bucket.pending += 1;
+      let settled = false;
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        bucket.pending -= 1;
+        if (res.statusCode >= 400) bucket.count += 1;
+      };
+      res.on("finish", settle);
+      res.on("close", settle);
+    } else {
+      bucket.count += 1;
+    }
+    next();
+  };
+}
+var loginLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1e3,
+  // 15 minutes
+  max: 10,
+  // 10 failed attempts per IP per window
+  message: "Too many login attempts. Please wait a few minutes and try again.",
+  countFailuresOnly: true
+});
+var apiLimiter = createRateLimiter({
+  windowMs: 60 * 1e3,
+  // 1 minute
+  max: 240,
+  // 240 requests per IP per minute
+  message: "Too many requests. Please slow down."
+});
+
+// src/routes/admin.ts
 var router3 = (0, import_express3.Router)();
-router3.post("/admin/login", async (req, res) => {
+router3.post("/admin/login", loginLimiter, async (req, res) => {
   const parsed = AdminLoginBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -56364,6 +56672,19 @@ var logger = (0, import_pino.default)({
 
 // src/app.ts
 var app = (0, import_express6.default)();
+var trustProxyHops = Number(process.env.TRUST_PROXY_HOPS);
+app.set(
+  "trust proxy",
+  Number.isInteger(trustProxyHops) && trustProxyHops >= 0 ? trustProxyHops : 1
+);
+app.disable("x-powered-by");
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("X-DNS-Prefetch-Control", "off");
+  next();
+});
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -56386,7 +56707,7 @@ app.use(
 app.use((0, import_cors.default)());
 app.use(import_express6.default.json());
 app.use(import_express6.default.urlencoded({ extended: true }));
-app.use("/api", routes_default);
+app.use("/api", apiLimiter, routes_default);
 if (process.env.NODE_ENV === "production") {
   const staticDir = process.env.STATIC_DIR ? path2.resolve(process.env.STATIC_DIR) : path2.resolve(path2.dirname(fileURLToPath(import.meta.url)), "public");
   app.use(import_express6.default.static(staticDir));
@@ -56399,12 +56720,15 @@ if (process.env.NODE_ENV === "production") {
 var app_default = app;
 
 // src/index.ts
-var rawPort = process.env["PORT"];
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided."
-  );
+try {
+  process.loadEnvFile?.();
+} catch {
 }
+try {
+  process.loadEnvFile?.(new URL("../../../.env", import.meta.url));
+} catch {
+}
+var rawPort = process.env["PORT"] || "5050";
 var port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
@@ -56487,7 +56811,6 @@ on-finished/index.js:
    *)
 
 content-type/dist/index.js:
-content-type/index.js:
   (*!
    * content-type
    * Copyright(c) 2015 Douglas Christopher Wilson
@@ -56628,6 +56951,13 @@ router/index.js:
    * MIT Licensed
    *)
 
+negotiator/lib/accept.js:
+  (*!
+   * negotiator
+   * Copyright(c) 2026 Blake Embrey
+   * MIT Licensed
+   *)
+
 negotiator/index.js:
   (*!
    * negotiator
@@ -56661,7 +56991,7 @@ range-parser/index.js:
    * MIT Licensed
    *)
 
-content-disposition/index.js:
+content-disposition/dist/index.js:
   (*!
    * content-disposition
    * Copyright(c) 2014-2017 Douglas Christopher Wilson

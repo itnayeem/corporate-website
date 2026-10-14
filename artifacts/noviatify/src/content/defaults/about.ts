@@ -1,14 +1,14 @@
 export const about = {
   hero: {
-    eyebrow: "About Noviatify",
+    eyebrow: "About IT Nayeem",
     title: "Your business partner.",
     subtitle:
-      "Noviatify was founded in 2020 with a single mission: make starting and running a business as simple as possible for every entrepreneur, regardless of experience or background.",
+      "IT Nayeem was founded in 2020 with a single mission: make starting and running a business as simple as possible for every entrepreneur, regardless of experience or background.",
   },
   mission: {
     title: "Our mission: remove every barrier to entrepreneurship",
     paragraphs: [
-      "Starting a business should be exciting — not buried in paperwork, state bureaucracy, and legal confusion. Noviatify was built to eliminate every friction point so entrepreneurs can focus on what matters: building great companies.",
+      "Starting a business should be exciting — not buried in paperwork, state bureaucracy, and legal confusion. IT Nayeem was built to eliminate every friction point so entrepreneurs can focus on what matters: building great companies.",
       "We handle the filings, the deadlines, the registered agents, and the compliance — so you never have to think about it. From day one to year ten, we're your partner.",
     ],
     stats: [
@@ -19,7 +19,7 @@ export const about = {
     ],
   },
   milestones: [
-    { year: "2020", title: "Founded", desc: "Noviatify launched with a mission to eliminate friction from business formation." },
+    { year: "2020", title: "Founded", desc: "IT Nayeem launched with a mission to eliminate friction from business formation." },
     { year: "2021", title: "500 Businesses", desc: "Reached our first 500 businesses formed and expanded to all 50 states." },
     { year: "2022", title: "Award Recognition", desc: "Featured in Forbes, Entrepreneur 360, and Going From Broke for our impact." },
     { year: "2023", title: "1,000+ Businesses", desc: "Crossed 1,000 businesses served and launched our compliance suite." },
@@ -35,12 +35,12 @@ export const about = {
     ],
   },
   teamSection: {
-    title: "The Team Behind Noviatify",
+    title: "The Team Behind IT Nayeem",
     subtitle: "Experienced entrepreneurs, lawyers, and engineers working for your success.",
     members: [
-      { name: "Alex Morgan", role: "Chief Executive Officer", initials: "AM", imageUrl: "", bio: "Serial entrepreneur with 3 successful exits. Founded Noviatify in 2020 with the mission of making business formation accessible to everyone." },
+      { name: "Alex Morgan", role: "Chief Executive Officer", initials: "AM", imageUrl: "", bio: "Serial entrepreneur with 3 successful exits. Founded IT Nayeem in 2020 with the mission of making business formation accessible to everyone." },
       { name: "Jessica Lee", role: "Head of Legal Operations", initials: "JL", imageUrl: "", bio: "Former corporate attorney with 10+ years experience in business law. Ensures every filing is accurate and compliant." },
-      { name: "David Kim", role: "Chief Technology Officer", initials: "DK", imageUrl: "", bio: "Built the Noviatify platform from the ground up. Former engineer at two Fortune 500 companies." },
+      { name: "David Kim", role: "Chief Technology Officer", initials: "DK", imageUrl: "", bio: "Built the IT Nayeem platform from the ground up. Former engineer at two Fortune 500 companies." },
       { name: "Sofia Martinez", role: "Head of Customer Success", initials: "SM", imageUrl: "", bio: "Passionate about helping founders succeed. Leads a team of experts dedicated to world-class customer support." },
     ],
   },
@@ -49,7 +49,7 @@ export const about = {
     values: [
       { title: "Transparency", desc: "No hidden fees. No confusing fine print. You always know what you're getting and what it costs." },
       { title: "Speed", desc: "We know time is your most valuable asset. We move as fast as the state allows — often faster." },
-      { title: "Accessibility", desc: "Business formation shouldn't be only for the wealthy. Noviatify is built for everyone, everywhere." },
+      { title: "Accessibility", desc: "Business formation shouldn't be only for the wealthy. IT Nayeem is built for everyone, everywhere." },
       { title: "Excellence", desc: "We're recognized by Forbes, Entrepreneur 360, and our customers for doing things right, every time." },
       { title: "Reach", desc: "All 50 states. International structures. We go where you need to go." },
       { title: "Customer First", desc: "Our 99% satisfaction rate isn't an accident. We obsess over making every interaction exceptional." },
@@ -57,7 +57,7 @@ export const about = {
   },
   cta: {
     title: "Ready to start your journey?",
-    subtitle: "Join 1,000+ entrepreneurs who trusted Noviatify to form their business quickly and correctly.",
+    subtitle: "Join 1,000+ entrepreneurs who trusted IT Nayeem to form their business quickly and correctly.",
     primary: { label: "Start Now — It's Free", href: "/start" },
     secondary: { label: "Contact Us", href: "/about/contact" },
   },

@@ -849,21 +849,38 @@ var require_atomic_sleep = __commonJS({
   }
 });
 
-// ../../node_modules/sonic-boom/index.js
+// ../../node_modules/pino-pretty/node_modules/sonic-boom/index.js
 var require_sonic_boom = __commonJS({
-  "../../node_modules/sonic-boom/index.js"(exports, module) {
+  "../../node_modules/pino-pretty/node_modules/sonic-boom/index.js"(exports, module) {
     "use strict";
-    var fs = __require("fs");
-    var EventEmitter = __require("events");
-    var inherits = __require("util").inherits;
-    var path = __require("path");
+    var fs = __require("node:fs");
+    var EventEmitter = __require("node:events");
+    var inherits = __require("node:util").inherits;
+    var path = __require("node:path");
+    var assert = __require("node:assert");
     var sleep = require_atomic_sleep();
-    var assert = __require("assert");
     var BUSY_WRITE_TIMEOUT = 100;
     var kEmptyBuffer = Buffer.allocUnsafe(0);
     var MAX_WRITE = 16 * 1024;
     var kContentModeBuffer = "buffer";
     var kContentModeUtf8 = "utf8";
+    var kFlush = /* @__PURE__ */ Symbol("kFlush");
+    var kFlushSyncIdle = 0;
+    var kFlushSyncRetry = 1;
+    var kFlushSyncInWriteEvent = 2;
+    var kFlushSyncInFlight = 3;
+    function isIgnorableFsyncError(err) {
+      switch (err?.code) {
+        case "EBADF":
+        case "EINVAL":
+        case "ENOTSUP":
+        case "EOPNOTSUPP":
+        case "EROFS":
+          return true;
+        default:
+          return false;
+      }
+    }
     var [major, minor] = (process.versions.node || "0.0").split(".").map(Number);
     var kCopyBuffer = major >= 22 && minor >= 7;
     function openFile(file, sonic) {
@@ -900,10 +917,10 @@ var require_sonic_boom = __commonJS({
         if (sonic.destroyed) {
           return;
         }
-        if (!sonic._writing && sonic._len > sonic.minLength || sonic._flushPending) {
+        if (!sonic._writing && (sonic._len > sonic.minLength || sonic._flushPending)) {
           sonic._actualWrite();
-        } else if (reopening) {
-          process.nextTick(() => sonic.emit("drain"));
+        } else if (reopening && !sonic._writing) {
+          process.nextTick(emitDrain, sonic);
         }
       }
       const flags = sonic.append ? "a" : "w";
@@ -930,7 +947,7 @@ var require_sonic_boom = __commonJS({
       if (!(this instanceof SonicBoom)) {
         return new SonicBoom(opts);
       }
-      let { fd, dest, minLength, maxLength, maxWrite, periodicFlush, sync, append = true, mkdir, retryEAGAIN, fsync, contentMode, mode } = opts || {};
+      let { fd, dest, minLength, maxLength, maxWrite, periodicFlush, sync, append = true, mkdir, retryEAGAIN, maxWriteRetries, fsync, contentMode, mode } = opts || {};
       fd = fd || dest;
       this._len = 0;
       this.fd = -1;
@@ -940,7 +957,11 @@ var require_sonic_boom = __commonJS({
       this._ending = false;
       this._reopening = false;
       this._asyncDrainScheduled = false;
-      this._flushPending = false;
+      this._flushPending = 0;
+      this._flushInProgress = 0;
+      this._emittingFlush = false;
+      this._emittingWrite = false;
+      this._retryTimer = null;
       this._hwm = Math.max(minLength || 0, 16387);
       this.file = null;
       this.destroyed = false;
@@ -955,6 +976,8 @@ var require_sonic_boom = __commonJS({
       this.append = append || false;
       this.mode = mode;
       this.retryEAGAIN = retryEAGAIN || (() => true);
+      this.maxWriteRetries = maxWriteRetries || 0;
+      this._writeRetries = 0;
       this.mkdir = mkdir || false;
       let fsWriteSync;
       let fsWrite;
@@ -1000,7 +1023,12 @@ var require_sonic_boom = __commonJS({
       }
       this.release = (err, n) => {
         if (err) {
-          if ((err.code === "EAGAIN" || err.code === "EBUSY") && this.retryEAGAIN(err, this._writingBuf.length, this._len - this._writingBuf.length)) {
+          const isRetryableErr = err.code === "EAGAIN" || err.code === "EBUSY";
+          if (isRetryableErr) {
+            this._writeRetries++;
+          }
+          const retriesExhausted = this.maxWriteRetries > 0 && this._writeRetries > this.maxWriteRetries;
+          if (isRetryableErr && !retriesExhausted && this.retryEAGAIN(err, this._writingBuf.length, this._len - this._writingBuf.length)) {
             if (this.sync) {
               try {
                 sleep(BUSY_WRITE_TIMEOUT);
@@ -1009,7 +1037,10 @@ var require_sonic_boom = __commonJS({
                 this.release(err2);
               }
             } else {
-              setTimeout(fsWrite, BUSY_WRITE_TIMEOUT);
+              this._retryTimer = setTimeout(() => {
+                this._retryTimer = null;
+                fsWrite();
+              }, BUSY_WRITE_TIMEOUT);
             }
           } else {
             this._writing = false;
@@ -1017,10 +1048,29 @@ var require_sonic_boom = __commonJS({
           }
           return;
         }
-        this.emit("write", n);
+        if (n > 0) {
+          this._writeRetries = 0;
+        }
         const releasedBufObj = releaseWritingBuf(this._writingBuf, this._len, n);
         this._len = releasedBufObj.len;
         this._writingBuf = releasedBufObj.writingBuf;
+        this._emittingWrite = true;
+        try {
+          this.emit("write", n);
+        } finally {
+          this._emittingWrite = false;
+        }
+        if (this.destroyed) {
+          this._writing = false;
+          if (this._flushPending > 0) {
+            if (this._len === 0) {
+              scheduleDrain(this);
+            } else {
+              this.emit(kFlush, new Error("SonicBoom destroyed"));
+            }
+          }
+          return;
+        }
         if (this._writingBuf.length) {
           if (!this.sync) {
             fsWrite();
@@ -1046,34 +1096,31 @@ var require_sonic_boom = __commonJS({
           this._writing = false;
           this._reopening = false;
           this.reopen();
-        } else if (len > this.minLength) {
+        } else if (len > 0 && (len > this.minLength || this._flushPending)) {
           this._actualWrite();
         } else if (this._ending) {
           if (len > 0) {
             this._actualWrite();
           } else {
             this._writing = false;
-            actualClose(this);
+            finishEnding(this);
           }
         } else {
           this._writing = false;
-          if (this.sync) {
-            if (!this._asyncDrainScheduled) {
-              this._asyncDrainScheduled = true;
-              process.nextTick(emitDrain, this);
-            }
-          } else {
-            this.emit("drain");
-          }
+          scheduleDrain(this);
         }
       };
       this.on("newListener", function(name) {
-        if (name === "drain") {
+        if (name === "drain" || name === kFlush) {
           this._asyncDrainScheduled = false;
         }
       });
       if (this._periodicFlush !== 0) {
-        this._periodicFlushTimer = setInterval(() => this.flush(null), this._periodicFlush);
+        this._periodicFlushTimer = setInterval(() => {
+          if (this._flushPending === 0 && this._flushInProgress === 0) {
+            this.flush(null);
+          }
+        }, this._periodicFlush);
         this._periodicFlushTimer.unref();
       }
     }
@@ -1085,11 +1132,46 @@ var require_sonic_boom = __commonJS({
       writingBuf = writingBuf.subarray(n);
       return { writingBuf, len };
     }
+    function scheduleDrain(sonic) {
+      if (sonic.sync) {
+        if (!sonic._asyncDrainScheduled) {
+          sonic._asyncDrainScheduled = true;
+          process.nextTick(emitDrain, sonic);
+        }
+      } else {
+        emitDrain(sonic);
+      }
+    }
     function emitDrain(sonic) {
-      const hasListeners = sonic.listenerCount("drain") > 0;
+      const hasListeners = sonic.listenerCount("drain") > 0 || sonic.listenerCount(kFlush) > 0;
       if (!hasListeners) return;
       sonic._asyncDrainScheduled = false;
-      sonic.emit("drain");
+      if (sonic._writing) return;
+      emitFlush(sonic);
+      if (sonic._writing || sonic.destroyed) return;
+      if (sonic.listenerCount("drain") > 0) {
+        sonic.emit("drain");
+      }
+    }
+    function emitFlush(sonic) {
+      if (sonic._emittingFlush) return;
+      sonic._emittingFlush = true;
+      try {
+        sonic.emit(kFlush);
+      } finally {
+        sonic._emittingFlush = false;
+      }
+    }
+    function finishEnding(sonic) {
+      if (!sonic._ending || sonic._writing || sonic.destroyed) return;
+      if (sonic._len > 0) {
+        sonic._actualWrite();
+        return;
+      }
+      if (sonic._flushPending > 0) emitFlush(sonic);
+      if (sonic._flushPending === 0 && sonic._flushInProgress === 0 && !sonic._writing && sonic._len === 0) {
+        actualClose(sonic);
+      }
     }
     inherits(SonicBoom, EventEmitter);
     function mergeBuf(bufs, len) {
@@ -1149,29 +1231,58 @@ var require_sonic_boom = __commonJS({
       return this._len < this._hwm;
     }
     function callFlushCallbackOnDrain(cb) {
-      this._flushPending = true;
-      const onDrain = () => {
-        if (!this._fsync) {
+      this._flushPending++;
+      let waiting = true;
+      let completed = false;
+      let flushing = false;
+      const stopWaiting = () => {
+        if (!waiting) return false;
+        waiting = false;
+        this.off(kFlush, onDrain);
+        this.off("error", onError);
+        return true;
+      };
+      const complete = (err, finish = true) => {
+        if (completed) return;
+        completed = true;
+        if (flushing) this._flushInProgress--;
+        try {
+          cb(err);
+        } finally {
+          if (finish) finishEnding(this);
+        }
+      };
+      const onDrain = (err) => {
+        if (!stopWaiting()) return;
+        this._flushPending--;
+        if (err) {
+          complete(err, false);
+          return;
+        }
+        this._flushInProgress++;
+        flushing = true;
+        if (!this._fsync && !this.destroyed) {
           try {
-            fs.fsync(this.fd, (err) => {
-              this._flushPending = false;
-              cb(err);
+            fs.fsync(this.fd, (err2) => {
+              if (isIgnorableFsyncError(err2)) {
+                complete();
+                return;
+              }
+              complete(err2);
             });
-          } catch (err) {
-            cb(err);
+          } catch (err2) {
+            complete(err2);
           }
         } else {
-          this._flushPending = false;
-          cb();
+          complete();
         }
-        this.off("error", onError);
       };
       const onError = (err) => {
-        this._flushPending = false;
-        cb(err);
-        this.off("drain", onDrain);
+        if (!stopWaiting()) return;
+        this._flushPending--;
+        complete(err, false);
       };
-      this.once("drain", onDrain);
+      this.once(kFlush, onDrain);
       this.once("error", onError);
     }
     function flush(cb) {
@@ -1186,7 +1297,7 @@ var require_sonic_boom = __commonJS({
         }
         throw error;
       }
-      if (this.minLength <= 0) {
+      if (this.minLength <= 0 && !this._writing && this._len === 0) {
         cb?.();
         return;
       }
@@ -1213,7 +1324,7 @@ var require_sonic_boom = __commonJS({
         }
         throw error;
       }
-      if (this.minLength <= 0) {
+      if (this.minLength <= 0 && !this._writing && this._len === 0) {
         cb?.();
         return;
       }
@@ -1235,7 +1346,7 @@ var require_sonic_boom = __commonJS({
       }
       if (this._opening) {
         this.once("ready", () => {
-          this.reopen(file);
+          if (!this.destroyed) this.reopen(file);
         });
         return;
       }
@@ -1270,7 +1381,7 @@ var require_sonic_boom = __commonJS({
       }
       if (this._opening) {
         this.once("ready", () => {
-          this.end();
+          if (!this.destroyed) this.end();
         });
         return;
       }
@@ -1284,40 +1395,80 @@ var require_sonic_boom = __commonJS({
       if (this._len > 0 && this.fd >= 0) {
         this._actualWrite();
       } else {
-        actualClose(this);
+        finishEnding(this);
       }
     };
-    function flushSync() {
-      if (this.destroyed) {
+    function beginFlushSync(sonic) {
+      if (sonic.destroyed) {
         throw new Error("SonicBoom destroyed");
       }
-      if (this.fd < 0) {
+      if (sonic.fd < 0) {
         throw new Error("sonic boom is not ready yet");
       }
-      if (!this._writing && this._writingBuf.length > 0) {
-        this._bufs.unshift(this._writingBuf);
-        this._writingBuf = "";
+      if (!sonic._writing || sonic._opening) {
+        return kFlushSyncIdle;
       }
-      let buf = "";
-      while (this._bufs.length || buf.length) {
-        if (buf.length <= 0) {
-          buf = this._bufs[0];
+      if (sonic._retryTimer !== null) {
+        clearTimeout(sonic._retryTimer);
+        sonic._retryTimer = null;
+        return kFlushSyncRetry;
+      }
+      if (sonic._emittingWrite) {
+        return kFlushSyncInWriteEvent;
+      }
+      return kFlushSyncInFlight;
+    }
+    function endFlushSyncRetry(sonic) {
+      sonic._writing = false;
+      process.nextTick(() => {
+        if (sonic.destroyed || sonic._writing) return;
+        if (sonic._reopening) {
+          sonic._reopening = false;
+          sonic.reopen();
+        } else if (sonic._ending) {
+          finishEnding(sonic);
+        } else if (sonic._len > 0 && (sonic._len > sonic.minLength || sonic._flushPending)) {
+          sonic._actualWrite();
+        } else {
+          emitDrain(sonic);
         }
-        try {
-          const n = Buffer.isBuffer(buf) ? fs.writeSync(this.fd, buf) : fs.writeSync(this.fd, buf, "utf8");
-          const releasedBufObj = releaseWritingBuf(buf, this._len, n);
-          buf = releasedBufObj.writingBuf;
-          this._len = releasedBufObj.len;
+      });
+    }
+    function flushSync() {
+      const state = beginFlushSync(this);
+      try {
+        if (state !== kFlushSyncInFlight && this._writingBuf.length > 0) {
+          this._bufs.unshift(this._writingBuf);
+          this._writingBuf = "";
+        }
+        let buf = "";
+        while (this._bufs.length || buf.length) {
           if (buf.length <= 0) {
-            this._bufs.shift();
+            buf = this._bufs[0];
           }
-        } catch (err) {
-          const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
-          if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
-            throw err;
+          try {
+            const n = Buffer.isBuffer(buf) ? fs.writeSync(this.fd, buf) : fs.writeSync(this.fd, buf, "utf8");
+            this._writeRetries = 0;
+            const releasedBufObj = releaseWritingBuf(buf, this._len, n);
+            buf = releasedBufObj.writingBuf;
+            this._len = releasedBufObj.len;
+            if (buf.length <= 0) {
+              this._bufs.shift();
+            }
+          } catch (err) {
+            const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
+            if (shouldRetry) {
+              this._writeRetries++;
+            }
+            const retriesExhausted = this.maxWriteRetries > 0 && this._writeRetries > this.maxWriteRetries;
+            if (!shouldRetry || retriesExhausted || !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
+              throw err;
+            }
+            sleep(BUSY_WRITE_TIMEOUT);
           }
-          sleep(BUSY_WRITE_TIMEOUT);
         }
+      } finally {
+        if (state === kFlushSyncRetry) endFlushSyncRetry(this);
       }
       try {
         fs.fsyncSync(this.fd);
@@ -1325,43 +1476,52 @@ var require_sonic_boom = __commonJS({
       }
     }
     function flushBufferSync() {
-      if (this.destroyed) {
-        throw new Error("SonicBoom destroyed");
-      }
-      if (this.fd < 0) {
-        throw new Error("sonic boom is not ready yet");
-      }
-      if (!this._writing && this._writingBuf.length > 0) {
-        this._bufs.unshift([this._writingBuf]);
-        this._writingBuf = kEmptyBuffer;
-      }
-      let buf = kEmptyBuffer;
-      while (this._bufs.length || buf.length) {
-        if (buf.length <= 0) {
-          buf = mergeBuf(this._bufs[0], this._lens[0]);
+      const state = beginFlushSync(this);
+      try {
+        if (state !== kFlushSyncInFlight && this._writingBuf.length > 0) {
+          this._bufs.unshift([this._writingBuf]);
+          this._lens.unshift(this._writingBuf.length);
+          this._writingBuf = kEmptyBuffer;
         }
-        try {
-          const n = fs.writeSync(this.fd, buf);
-          buf = buf.subarray(n);
-          this._len = Math.max(this._len - n, 0);
+        let buf = kEmptyBuffer;
+        while (this._bufs.length || buf.length) {
           if (buf.length <= 0) {
-            this._bufs.shift();
-            this._lens.shift();
+            buf = mergeBuf(this._bufs[0], this._lens[0]);
           }
-        } catch (err) {
-          const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
-          if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
-            throw err;
+          try {
+            const n = fs.writeSync(this.fd, buf);
+            this._writeRetries = 0;
+            buf = buf.subarray(n);
+            this._len = Math.max(this._len - n, 0);
+            if (buf.length <= 0) {
+              this._bufs.shift();
+              this._lens.shift();
+            }
+          } catch (err) {
+            const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
+            if (shouldRetry) {
+              this._writeRetries++;
+            }
+            const retriesExhausted = this.maxWriteRetries > 0 && this._writeRetries > this.maxWriteRetries;
+            if (!shouldRetry || retriesExhausted || !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
+              throw err;
+            }
+            sleep(BUSY_WRITE_TIMEOUT);
           }
-          sleep(BUSY_WRITE_TIMEOUT);
         }
+      } finally {
+        if (state === kFlushSyncRetry) endFlushSyncRetry(this);
       }
     }
     SonicBoom.prototype.destroy = function() {
       if (this.destroyed) {
         return;
       }
+      const opening = this._opening;
       actualClose(this);
+      if (opening && this._flushPending > 0) {
+        this.emit("error", new Error("SonicBoom destroyed"));
+      }
     };
     function actualWrite() {
       const release = this.release;
@@ -1397,8 +1557,15 @@ var require_sonic_boom = __commonJS({
       }
     }
     function actualClose(sonic) {
+      if (sonic.destroyed) {
+        return;
+      }
       if (sonic.fd === -1) {
-        sonic.once("ready", actualClose.bind(null, sonic));
+        sonic.destroyed = true;
+        sonic.once("ready", () => {
+          sonic.destroyed = false;
+          actualClose(sonic);
+        });
         return;
       }
       if (sonic._periodicFlushTimer !== void 0) {
@@ -1407,6 +1574,14 @@ var require_sonic_boom = __commonJS({
       sonic.destroyed = true;
       sonic._bufs = [];
       sonic._lens = [];
+      if (sonic._retryTimer !== null) {
+        clearTimeout(sonic._retryTimer);
+        sonic._retryTimer = null;
+        sonic._writing = false;
+      }
+      if (sonic._flushPending > 0 && !sonic._writing) {
+        sonic.emit(kFlush, new Error("SonicBoom destroyed"));
+      }
       assert(typeof sonic.fd === "number", `sonic.fd must be a number, got ${typeof sonic.fd}`);
       try {
         fs.fsync(sonic.fd, closeWrapped);
@@ -1694,6 +1869,13 @@ var require_delete_log_property = __commonJS({
 var require_cjs = __commonJS({
   "../../node_modules/fast-copy/dist/cjs/index.cjs"(exports) {
     "use strict";
+    var MaxDepthExceededError = class extends RangeError {
+      constructor(maxDepth) {
+        super(`Maximum copy depth of ${String(maxDepth)} exceeded; the value copied is nested too deeply.`);
+        this.maxDepth = maxDepth;
+        this.name = "MaxDepthExceededError";
+      }
+    };
     var toStringFunction = Function.prototype.toString;
     var toStringObject = Object.prototype.toString;
     function getCleanClone(prototype) {
@@ -1704,7 +1886,7 @@ var require_cjs = __commonJS({
       if (Constructor === Object) {
         return prototype === Object.prototype ? {} : Object.create(prototype);
       }
-      if (Constructor && ~toStringFunction.call(Constructor).indexOf("[native code]")) {
+      if (typeof Constructor === "function" && ~toStringFunction.call(Constructor).indexOf("[native code]")) {
         try {
           return new Constructor();
         } catch (_a) {
@@ -1720,7 +1902,8 @@ var require_cjs = __commonJS({
       const type = toStringObject.call(value);
       return type.substring(8, type.length - 1);
     }
-    var { hasOwnProperty, propertyIsEnumerable } = Object.prototype;
+    var { propertyIsEnumerable } = Object.prototype;
+    var sliceTypedArray = Object.getPrototypeOf(Int8Array.prototype).slice;
     function copyOwnDescriptor(original, clone, property, state) {
       const ownDescriptor = Object.getOwnPropertyDescriptor(original, property) || {
         configurable: true,
@@ -1741,13 +1924,11 @@ var require_cjs = __commonJS({
       }
     }
     function copyOwnPropertiesStrict(value, clone, state) {
-      const names = Object.getOwnPropertyNames(value);
-      for (let index = 0; index < names.length; ++index) {
-        copyOwnDescriptor(value, clone, names[index], state);
+      for (const name of Object.getOwnPropertyNames(value)) {
+        copyOwnDescriptor(value, clone, name, state);
       }
-      const symbols = Object.getOwnPropertySymbols(value);
-      for (let index = 0; index < symbols.length; ++index) {
-        copyOwnDescriptor(value, clone, symbols[index], state);
+      for (const symbol of Object.getOwnPropertySymbols(value)) {
+        copyOwnDescriptor(value, clone, symbol, state);
       }
       return clone;
     }
@@ -1765,23 +1946,28 @@ var require_cjs = __commonJS({
       return copyOwnPropertiesStrict(array, clone, state);
     }
     function copyArrayBuffer(arrayBuffer, _state) {
-      return arrayBuffer.slice(0);
+      return ArrayBuffer.isView(arrayBuffer) ? sliceTypedArray.call(arrayBuffer, 0) : arrayBuffer.slice(0);
     }
     function copyBlob(blob, _state) {
       return blob.slice(0, blob.size, blob.type);
     }
     function copyDataView(dataView, state) {
-      return new state.Constructor(copyArrayBuffer(dataView.buffer));
+      return new state.Constructor(copyArrayBuffer(dataView.buffer), dataView.byteOffset, dataView.byteLength);
     }
     function copyDate(date, state) {
       return new state.Constructor(date.getTime());
     }
+    function copyDateStrict(date, state) {
+      const clone = copyDate(date, state);
+      state.cache.set(date, clone);
+      return copyOwnPropertiesStrict(date, clone, state);
+    }
     function copyMapLoose(map, state) {
       const clone = new state.Constructor();
       state.cache.set(map, clone);
-      map.forEach((value, key) => {
+      for (const [key, value] of map) {
         clone.set(key, state.copier(value, state));
-      });
+      }
       return clone;
     }
     function copyMapStrict(map, state) {
@@ -1790,14 +1976,19 @@ var require_cjs = __commonJS({
     function copyObjectLoose(object, state) {
       const clone = getCleanClone(state.prototype);
       state.cache.set(object, clone);
-      for (const key in object) {
-        if (hasOwnProperty.call(object, key)) {
+      for (const key of Object.keys(object)) {
+        if (key === "__proto__") {
+          Object.defineProperty(clone, key, {
+            configurable: true,
+            enumerable: true,
+            value: state.copier(object[key], state),
+            writable: true
+          });
+        } else {
           clone[key] = state.copier(object[key], state);
         }
       }
-      const symbols = Object.getOwnPropertySymbols(object);
-      for (let index = 0; index < symbols.length; ++index) {
-        const symbol = symbols[index];
+      for (const symbol of Object.getOwnPropertySymbols(object)) {
         if (propertyIsEnumerable.call(object, symbol)) {
           clone[symbol] = state.copier(object[symbol], state);
         }
@@ -1823,25 +2014,26 @@ var require_cjs = __commonJS({
     function copySetLoose(set, state) {
       const clone = new state.Constructor();
       state.cache.set(set, clone);
-      set.forEach((value) => {
+      for (const value of set) {
         clone.add(state.copier(value, state));
-      });
+      }
       return clone;
     }
     function copySetStrict(set, state) {
       return copyOwnPropertiesStrict(set, copySetLoose(set, state), state);
     }
+    var DEFAULT_MAX_DEPTH = 1e3;
     function createDefaultCache() {
       return /* @__PURE__ */ new WeakMap();
     }
-    function getOptions({ createCache: createCacheOverride, methods: methodsOverride, strict }) {
+    function getOptions({ createCache: createCacheOverride, maxDepth, methods: methodsOverride, strict }) {
       const defaultMethods = {
         array: strict ? copyArrayStrict : copyArrayLoose,
         arrayBuffer: copyArrayBuffer,
         asyncGenerator: copySelf,
         blob: copyBlob,
         dataView: copyDataView,
-        date: copyDate,
+        date: strict ? copyDateStrict : copyDate,
         error: copySelf,
         generator: copySelf,
         map: strict ? copyMapStrict : copyMapLoose,
@@ -1855,10 +2047,16 @@ var require_cjs = __commonJS({
       if (!copiers.Object || !copiers.Array) {
         throw new Error("An object and array copier must be provided.");
       }
-      return { createCache, copiers, methods, strict: Boolean(strict) };
+      return {
+        createCache,
+        copiers,
+        maxDepth: maxDepth == null ? DEFAULT_MAX_DEPTH : maxDepth,
+        methods,
+        strict: Boolean(strict)
+      };
     }
     function getTagSpecificCopiers(methods) {
-      return {
+      return Object.assign(/* @__PURE__ */ Object.create(null), {
         Arguments: methods.object,
         Array: methods.array,
         ArrayBuffer: methods.arrayBuffer,
@@ -1889,10 +2087,10 @@ var require_cjs = __commonJS({
         Uint8ClampedArray: methods.arrayBuffer,
         Uint16Array: methods.arrayBuffer,
         Uint32Array: methods.arrayBuffer
-      };
+      });
     }
     function createCopier(options = {}) {
-      const { createCache, copiers } = getOptions(options);
+      const { createCache, copiers, maxDepth } = getOptions(options);
       const { Array: copyArray, Object: copyObject } = copiers;
       function copier(value, state) {
         state.prototype = state.Constructor = void 0;
@@ -1902,31 +2100,40 @@ var require_cjs = __commonJS({
         if (state.cache.has(value)) {
           return state.cache.get(value);
         }
+        if (++state.depth > maxDepth) {
+          throw new MaxDepthExceededError(maxDepth);
+        }
         state.prototype = Object.getPrototypeOf(value);
         state.Constructor = state.prototype && state.prototype.constructor;
+        let clone;
         if (!state.Constructor || state.Constructor === Object) {
-          return copyObject(value, state);
+          clone = copyObject(value, state);
+        } else if (Array.isArray(value)) {
+          clone = copyArray(value, state);
+        } else {
+          const tagSpecificCopier = copiers[getTag(value)];
+          if (tagSpecificCopier) {
+            clone = tagSpecificCopier(value, state);
+          } else {
+            clone = typeof value.then === "function" ? value : copyObject(value, state);
+          }
         }
-        if (Array.isArray(value)) {
-          return copyArray(value, state);
-        }
-        const tagSpecificCopier = copiers[getTag(value)];
-        if (tagSpecificCopier) {
-          return tagSpecificCopier(value, state);
-        }
-        return typeof value.then === "function" ? value : copyObject(value, state);
+        --state.depth;
+        return clone;
       }
       return function copy2(value) {
         return copier(value, {
           Constructor: void 0,
           cache: createCache(),
           copier,
+          depth: 0,
           prototype: void 0
         });
       };
     }
     var copyStrict = createCopier({ strict: true });
     var copy = createCopier();
+    exports.MaxDepthExceededError = MaxDepthExceededError;
     exports.copy = copy;
     exports.copyStrict = copyStrict;
     exports.createCopier = createCopier;
@@ -1941,13 +2148,43 @@ var require_filter_log = __commonJS({
     var { createCopier } = require_cjs();
     var fastCopy = createCopier({});
     var deleteLogProperty = require_delete_log_property();
+    var getPropertyValue = require_get_property_value();
+    var splitPropertyKey = require_split_property_key();
+    function hasLogProperty(log, property) {
+      const props = splitPropertyKey(property);
+      if (props.length === 0) {
+        return false;
+      }
+      let current = log;
+      for (const prop of props) {
+        if (current === null || typeof current !== "object" || !Object.prototype.hasOwnProperty.call(current, prop)) {
+          return false;
+        }
+        current = current[prop];
+      }
+      return true;
+    }
+    function setLogProperty(log, property, value) {
+      const props = splitPropertyKey(property);
+      const last = props.pop();
+      let current = log;
+      for (const prop of props) {
+        if (current[prop] === null || typeof current[prop] !== "object") {
+          current[prop] = {};
+        }
+        current = current[prop];
+      }
+      current[last] = value;
+    }
     function filterLog({ log, context }) {
       const { ignoreKeys, includeKeys } = context;
       const logCopy = fastCopy(log);
       if (includeKeys) {
         const logIncluded = {};
         includeKeys.forEach((key) => {
-          logIncluded[key] = logCopy[key];
+          if (hasLogProperty(logCopy, key)) {
+            setLogProperty(logIncluded, key, getPropertyValue(logCopy, key));
+          }
         });
         return logIncluded;
       }
@@ -2311,10 +2548,12 @@ var require_interpret_conditionals = __commonJS({
     module.exports = interpretConditionals;
     var getPropertyValue = require_get_property_value();
     function interpretConditionals(messageFormat, log) {
-      messageFormat = messageFormat.replace(/{if (.*?)}(.*?){end}/g, replacer);
+      messageFormat = messageFormat.replace(/{if (.*?)}([\s\S]*?){end}/g, replacer);
       messageFormat = messageFormat.replace(/{if (.*?)}/g, "");
       messageFormat = messageFormat.replace(/{end}/g, "");
-      return messageFormat.replace(/\s+/g, " ").trim();
+      messageFormat = messageFormat.replace(/[^\S\r\n]+/g, " ");
+      messageFormat = messageFormat.replace(/\n[^\S\r\n]*\n/g, "\n");
+      return messageFormat.trim();
       function replacer(_, key, value) {
         const propertyValue = getPropertyValue(log, key);
         if (propertyValue && value.includes(key)) {
@@ -2383,7 +2622,7 @@ var require_parse_factory_options = __commonJS({
         translateTime
       } = options;
       const errorProps = options.errorProps.split(",");
-      const useOnlyCustomProps = typeof options.useOnlyCustomProps === "boolean" ? options.useOnlyCustomProps : options.useOnlyCustomProps === "true";
+      const useOnlyCustomProps = options.useOnlyCustomProps;
       const customLevels = handleCustomLevelsOpts(options.customLevels);
       const customLevelNames = handleCustomLevelsNamesOpts(options.customLevels);
       const getLevelLabelData = handleLevelLabelData(useOnlyCustomProps, customLevels, customLevelNames);
@@ -2645,16 +2884,30 @@ var require_fast_safe_stringify = __commonJS({
   }
 });
 
+// ../../node_modules/pino-pretty/lib/utils/strip-unsafe-control-chars.js
+var require_strip_unsafe_control_chars = __commonJS({
+  "../../node_modules/pino-pretty/lib/utils/strip-unsafe-control-chars.js"(exports, module) {
+    "use strict";
+    module.exports = stripUnsafeControlChars;
+    var unsafeControlChars = /[\u0000-\u0008\u000B-\u001F\u007F-\u009F]/g;
+    function stripUnsafeControlChars(input) {
+      return String(input).replace(unsafeControlChars, "");
+    }
+  }
+});
+
 // ../../node_modules/pino-pretty/lib/utils/prettify-error.js
 var require_prettify_error = __commonJS({
   "../../node_modules/pino-pretty/lib/utils/prettify-error.js"(exports, module) {
     "use strict";
     module.exports = prettifyError;
     var joinLinesWithIndentation = require_join_lines_with_indentation();
-    function prettifyError({ keyName, lines, eol, ident }) {
+    var stripUnsafeControlChars = require_strip_unsafe_control_chars();
+    function prettifyError({ keyName, lines, eol, ident, sanitizeStack = true }) {
       let result = "";
       const joinedLines = joinLinesWithIndentation({ input: lines, ident, eol });
-      const splitLines = `${ident}${keyName}: ${joinedLines}${eol}`.split(eol);
+      const safeKeyName = stripUnsafeControlChars(keyName);
+      const splitLines = `${ident}${safeKeyName}: ${joinedLines}${eol}`.split(eol);
       for (let j = 0; j < splitLines.length; j += 1) {
         if (j !== 0) result += eol;
         const line = splitLines[j];
@@ -2664,7 +2917,9 @@ var require_prettify_error = __commonJS({
             const indentSize = /^\s*/.exec(line)[0].length + 4;
             const indentation = " ".repeat(indentSize);
             const stackMessage = matches[2];
-            result += matches[1] + eol + indentation + JSON.parse(stackMessage).replace(/\n/g, eol + indentation);
+            const parsedStack = JSON.parse(stackMessage);
+            const stack = sanitizeStack ? stripUnsafeControlChars(parsedStack) : parsedStack;
+            result += matches[1] + eol + indentation + stack.replace(/\n/g, eol + indentation);
           } else {
             result += line;
           }
@@ -2688,6 +2943,7 @@ var require_prettify_object = __commonJS({
     var stringifySafe = require_fast_safe_stringify();
     var joinLinesWithIndentation = require_join_lines_with_indentation();
     var prettifyError = require_prettify_error();
+    var stripUnsafeControlChars = require_strip_unsafe_control_chars();
     function prettifyObject({
       log,
       excludeLoggerKeys = true,
@@ -2729,13 +2985,15 @@ var require_prettify_object = __commonJS({
           if (lines === void 0) return;
           lines = lines.replace(/\\\\/gi, "\\");
           const joinedLines = joinLinesWithIndentation({ input: lines, ident, eol });
-          result += `${ident}${objectColorizer.property(keyName)}:${joinedLines.startsWith(eol) ? "" : " "}${joinedLines}${eol}`;
+          const safeKeyName = stripUnsafeControlChars(keyName);
+          result += `${ident}${objectColorizer.property(safeKeyName)}:${joinedLines.startsWith(eol) ? "" : " "}${joinedLines}${eol}`;
         });
       }
       Object.entries(errors).forEach(([keyName, keyValue]) => {
-        const lines = typeof customPrettifiers[keyName] === "function" ? keyValue : stringifySafe(keyValue, null, 2);
+        const hasCustomPrettifier = typeof customPrettifiers[keyName] === "function";
+        const lines = hasCustomPrettifier ? keyValue : stringifySafe(keyValue, null, 2);
         if (lines === void 0) return;
-        result += prettifyError({ keyName, lines, eol, ident });
+        result += prettifyError({ keyName, lines, eol, ident, sanitizeStack: !hasCustomPrettifier });
       });
       return result;
     }
@@ -2753,6 +3011,7 @@ var require_prettify_error_log = __commonJS({
     var isObject = require_is_object();
     var joinLinesWithIndentation = require_join_lines_with_indentation();
     var prettifyObject = require_prettify_object();
+    var stripUnsafeControlChars = require_strip_unsafe_control_chars();
     function prettifyErrorLog({ log, context }) {
       const {
         EOL: eol,
@@ -2760,7 +3019,7 @@ var require_prettify_error_log = __commonJS({
         errorProps: errorProperties,
         messageKey
       } = context;
-      const stack = log.stack;
+      const stack = stripUnsafeControlChars(log.stack);
       const joinedLines = joinLinesWithIndentation({ input: stack, ident, eol });
       let result = `${ident}${joinedLines}${eol}`;
       if (errorProperties.length > 0) {
@@ -2774,6 +3033,7 @@ var require_prettify_error_log = __commonJS({
         for (let i = 0; i < propertiesToPrint.length; i += 1) {
           const key = propertiesToPrint[i];
           if (key in log === false) continue;
+          const safeKey = stripUnsafeControlChars(key);
           if (isObject(log[key])) {
             const prettifiedObject = prettifyObject({
               log: log[key],
@@ -2783,10 +3043,11 @@ var require_prettify_error_log = __commonJS({
                 IDENT: ident + ident
               }
             });
-            result = `${result}${ident}${key}: {${eol}${prettifiedObject}${ident}}${eol}`;
+            result = `${result}${ident}${safeKey}: {${eol}${prettifiedObject}${ident}}${eol}`;
             continue;
           }
-          result = `${result}${ident}${key}: ${log[key]}${eol}`;
+          const value = stripUnsafeControlChars(log[key]);
+          result = `${result}${ident}${safeKey}: ${value}${eol}`;
         }
       }
       return result;
@@ -2831,6 +3092,7 @@ var require_prettify_message = __commonJS({
     } = require_constants();
     var getPropertyValue = require_get_property_value();
     var interpretConditionals = require_interpret_conditionals();
+    var stripUnsafeControlChars = require_strip_unsafe_control_chars();
     function prettifyMessage({ log, context }) {
       const {
         colorizer,
@@ -2855,7 +3117,7 @@ var require_prettify_message = __commonJS({
             return value !== void 0 ? value : "";
           }
         );
-        return colorizer.message(message);
+        return colorizer.message(stripUnsafeControlChars(message));
       }
       if (messageFormat && typeof messageFormat === "function") {
         const msg = messageFormat(log, messageKey, levelLabel, { colors: colorizer.colors });
@@ -2863,7 +3125,7 @@ var require_prettify_message = __commonJS({
       }
       if (messageKey in log === false) return void 0;
       if (typeof log[messageKey] !== "string" && typeof log[messageKey] !== "number" && typeof log[messageKey] !== "boolean") return void 0;
-      return colorizer.message(log[messageKey]);
+      return colorizer.message(stripUnsafeControlChars(log[messageKey]));
     }
   }
 });
@@ -2873,16 +3135,17 @@ var require_prettify_metadata = __commonJS({
   "../../node_modules/pino-pretty/lib/utils/prettify-metadata.js"(exports, module) {
     "use strict";
     module.exports = prettifyMetadata;
+    var stripUnsafeControlChars = require_strip_unsafe_control_chars();
     function prettifyMetadata({ log, context }) {
       const { customPrettifiers: prettifiers, colorizer } = context;
       let line = "";
       if (log.name || log.pid || log.hostname) {
         line += "(";
         if (log.name) {
-          line += prettifiers.name ? prettifiers.name(log.name, "name", log, { colors: colorizer.colors }) : log.name;
+          line += prettifiers.name ? prettifiers.name(log.name, "name", log, { colors: colorizer.colors }) : stripUnsafeControlChars(log.name);
         }
         if (log.pid) {
-          const prettyPid = prettifiers.pid ? prettifiers.pid(log.pid, "pid", log, { colors: colorizer.colors }) : log.pid;
+          const prettyPid = prettifiers.pid ? prettifiers.pid(log.pid, "pid", log, { colors: colorizer.colors }) : stripUnsafeControlChars(log.pid);
           if (log.name && log.pid) {
             line += "/" + prettyPid;
           } else {
@@ -2890,13 +3153,13 @@ var require_prettify_metadata = __commonJS({
           }
         }
         if (log.hostname) {
-          const prettyHostname = prettifiers.hostname ? prettifiers.hostname(log.hostname, "hostname", log, { colors: colorizer.colors }) : log.hostname;
+          const prettyHostname = prettifiers.hostname ? prettifiers.hostname(log.hostname, "hostname", log, { colors: colorizer.colors }) : stripUnsafeControlChars(log.hostname);
           line += `${line === "(" ? "on" : " on"} ${prettyHostname}`;
         }
         line += ")";
       }
       if (log.caller) {
-        const prettyCaller = prettifiers.caller ? prettifiers.caller(log.caller, "caller", log, { colors: colorizer.colors }) : log.caller;
+        const prettyCaller = prettifiers.caller ? prettifiers.caller(log.caller, "caller", log, { colors: colorizer.colors }) : stripUnsafeControlChars(log.caller);
         line += `${line === "" ? "" : " "}<${prettyCaller}>`;
       }
       if (line === "") {
@@ -2914,6 +3177,7 @@ var require_prettify_time = __commonJS({
     "use strict";
     module.exports = prettifyTime;
     var formatTime = require_format_time();
+    var stripUnsafeControlChars = require_strip_unsafe_control_chars();
     function prettifyTime({ log, context }) {
       const {
         timestampKey,
@@ -2928,7 +3192,7 @@ var require_prettify_time = __commonJS({
       }
       if (time === null) return void 0;
       const output = translateFormat ? formatTime(time, translateFormat) : time;
-      return prettifier ? prettifier(output) : `[${output}]`;
+      return prettifier ? prettifier(output) : `[${stripUnsafeControlChars(output)}]`;
     }
   }
 });
@@ -2960,6 +3224,7 @@ var require_utils = __commonJS({
       prettifyObject: require_prettify_object(),
       prettifyTime: require_prettify_time(),
       splitPropertyKey: require_split_property_key(),
+      stripUnsafeControlChars: require_strip_unsafe_control_chars(),
       getLevelLabelData: require_get_level_label_data()
     };
   }
@@ -3053,13 +3318,15 @@ var require_secure_json_parse = __commonJS({
     function safeParse(text, reviver) {
       const { stackTraceLimit } = Error;
       Error.stackTraceLimit = 0;
+      let result;
       try {
-        return _parse(text, reviver, { safe: true });
+        result = _parse(text, reviver, { safe: true });
       } catch {
-        return void 0;
+        result = void 0;
       } finally {
         Error.stackTraceLimit = stackTraceLimit;
       }
+      return result;
     }
     module.exports = parse;
     module.exports.default = parse;
@@ -3242,14 +3509,41 @@ var require_pino_pretty = __commonJS({
       messageFormat: null,
       messageKey: MESSAGE_KEY,
       minimumLevel: void 0,
-      outputStream: process.stdout,
       singleLine: false,
       timestampKey: TIMESTAMP_KEY,
       translateTime: true,
       useOnlyCustomProps: true
     };
+    function normalizeBoolean(value) {
+      if (value === "true") return true;
+      if (value === "false") return false;
+      return value;
+    }
+    function normalizeBooleanOptions(options) {
+      const normalized = { ...options };
+      const booleanOptions = [
+        "colorize",
+        "colorizeObjects",
+        "crlf",
+        "hideObject",
+        "levelFirst",
+        "singleLine",
+        "useOnlyCustomProps"
+      ];
+      for (const key of booleanOptions) {
+        if (key in normalized) {
+          normalized[key] = normalizeBoolean(normalized[key]);
+        }
+      }
+      if ("translateTime" in normalized && (normalized.translateTime === "true" || normalized.translateTime === "false")) {
+        normalized.translateTime = normalizeBoolean(normalized.translateTime);
+      }
+      return normalized;
+    }
     function prettyFactory(options) {
-      const context = parseFactoryOptions(Object.assign({}, defaultOptions, options));
+      const mergedOptions = Object.assign({}, defaultOptions, options);
+      const normalizedOptions = normalizeBooleanOptions(mergedOptions);
+      const context = parseFactoryOptions(normalizedOptions);
       return pretty.bind({ ...context, context });
     }
     function build(opts = {}) {

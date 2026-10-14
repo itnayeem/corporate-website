@@ -49,10 +49,10 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
     { title: string; subtitle: string; description: string; cta: { label: string; href: string } }
   >;
   const page = pages[pageKey] ?? {
-    title: "Noviatify",
+    title: "IT Nayeem",
     subtitle: "",
     description:
-      "Noviatify handles all the paperwork so you can focus on what matters — building your business.",
+      "IT Nayeem handles all the paperwork so you can focus on what matters — building your business.",
     cta: { label: "Start Now — It's Free", href: "/start" },
   };
   const shared = content.site.genericShared;
@@ -137,7 +137,7 @@ export default function GenericPage({ pageKey }: GenericPageProps) {
         </div>
       </section>
 
-      {/* Why Noviatify */}
+      {/* Why IT Nayeem */}
       <section className="py-20 bg-white dark:bg-[#060d2b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeUp className="text-center mb-14">

@@ -63,10 +63,10 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onChange = () => setIsAdmin(isAdminAuthed());
-    window.addEventListener("noviatify-auth", onChange);
+    window.addEventListener("itnayeem-auth", onChange);
     window.addEventListener("storage", onChange);
     return () => {
-      window.removeEventListener("noviatify-auth", onChange);
+      window.removeEventListener("itnayeem-auth", onChange);
       window.removeEventListener("storage", onChange);
     };
   }, []);

@@ -47,11 +47,17 @@ export default defineConfig({
   },
   server: {
     port,
-    strictPort: true,
+    strictPort: false,
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {
       strict: true,
+    },
+    proxy: {
+      "/api": {
+        target: process.env.API_TARGET || "http://127.0.0.1:5050",
+        changeOrigin: true,
+      },
     },
   },
   preview: {

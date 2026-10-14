@@ -4,7 +4,7 @@ export const site = {
   // ThemeController (toggles the `dark` class on <html>).
   theme: "dark",
   brand: {
-    name: "Noviatify",
+    name: "IT Nayeem",
     slogan: "Business formation, made effortless.",
     logoUrl: "",
     faviconUrl: "",
@@ -18,7 +18,7 @@ export const site = {
     enabled: false,
     title: "We'll be right back",
     message:
-      "Noviatify is currently undergoing scheduled maintenance. We're working to improve your experience and will be back online shortly. Thank you for your patience.",
+      "IT Nayeem is currently undergoing scheduled maintenance. We're working to improve your experience and will be back online shortly. Thank you for your patience.",
   },
   nav: {
     home: "Home",
@@ -43,8 +43,8 @@ export const site = {
       { label: "File for an S Corporation", href: "/services/s-corporation" },
     ],
     aboutLinks: [
-      { label: "About Noviatify", href: "/about" },
-      { label: "Noviatify Partnerships", href: "/about/partnerships" },
+      { label: "About IT Nayeem", href: "/about" },
+      { label: "IT Nayeem Partnerships", href: "/about/partnerships" },
       { label: "Read the Blog", href: "/about/blog" },
       { label: "Contact Us", href: "/about/contact" },
     ],
@@ -57,7 +57,7 @@ export const site = {
     ],
   },
   footer: {
-    copyright: "© 2023. Noviatify All Rights Reserved.",
+    copyright: "© 2026. IT Nayeem All Rights Reserved.",
     links: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
@@ -66,9 +66,9 @@ export const site = {
   },
   genericShared: {
     seeHowHref: "/how-it-works",
-    whyTitle: "Why Thousands Choose Noviatify",
+    whyTitle: "Why Thousands Choose IT Nayeem",
     whySubtitle:
-      "From first-time founders to serial entrepreneurs, Noviatify delivers the speed, accuracy, and support you need.",
+      "From first-time founders to serial entrepreneurs, IT Nayeem delivers the speed, accuracy, and support you need.",
     features: [
       {
         title: "Lightning-Fast Filing",
@@ -84,7 +84,7 @@ export const site = {
       },
       {
         title: "All 50 States",
-        desc: "Noviatify operates in every U.S. state. Form your business wherever your goals take you.",
+        desc: "IT Nayeem operates in every U.S. state. Form your business wherever your goals take you.",
       },
     ],
     stepsTitle: "Get Started in 3 Simple Steps",
@@ -102,28 +102,28 @@ export const site = {
       {
         num: "3",
         label: "We File For You",
-        desc: "Noviatify submits everything to the state and delivers your formation documents by email.",
+        desc: "IT Nayeem submits everything to the state and delivers your formation documents by email.",
       },
     ],
     testimonialsTitle: "Trusted by Business Owners",
-    testimonialsSubtitle: "Real reviews from real Noviatify customers",
+    testimonialsSubtitle: "Real reviews from real IT Nayeem customers",
     testimonials: [
       {
         name: "Marcus W.",
         role: "Founder, SaaS startup",
-        body: "Noviatify made the whole process effortless. I had my LLC up and running in less than two days. Worth every penny.",
+        body: "IT Nayeem made the whole process effortless. I had my LLC up and running in less than two days. Worth every penny.",
         stars: 5,
       },
       {
         name: "Priya S.",
         role: "E-commerce entrepreneur",
-        body: "I was nervous about doing this on my own but Noviatify walked me through everything. Highly recommend.",
+        body: "I was nervous about doing this on my own but IT Nayeem walked me through everything. Highly recommend.",
         stars: 5,
       },
       {
         name: "Daniel R.",
         role: "Freelance consultant",
-        body: "Switched my registered agent to Noviatify and the transition was seamless. Their team is responsive and professional.",
+        body: "Switched my registered agent to IT Nayeem and the transition was seamless. Their team is responsive and professional.",
         stars: 5,
       },
     ],
@@ -135,7 +135,7 @@ export const site = {
       },
       {
         q: "Are there any hidden fees?",
-        a: "Never. Noviatify is fully transparent about all costs, including state filing fees, before you complete your application.",
+        a: "Never. IT Nayeem is fully transparent about all costs, including state filing fees, before you complete your application.",
       },
       {
         q: "What if I need help during the process?",
@@ -144,18 +144,18 @@ export const site = {
     ],
     ctaTitle: "Ready to make it official?",
     ctaSubtitle:
-      "Join 1,000+ business owners who trusted Noviatify to get their company off the ground — fast and stress-free.",
+      "Join 1,000+ business owners who trusted IT Nayeem to get their company off the ground — fast and stress-free.",
     trustBar: ["No hidden fees", "All 50 states", "24–72 hr filing", "1,000+ businesses formed"],
     seeHow: "See how it works",
   },
   genericPages: {
     "/about/partnerships": {
-      title: "Noviatify Partnerships",
+      title: "IT Nayeem Partnerships",
       subtitle: "Partnerships",
       description:
-        "Partner with Noviatify to offer world-class business formation services to your clients or community. Reach out to discuss partnership opportunities.",
+        "Partner with IT Nayeem to offer world-class business formation services to your clients or community. Reach out to discuss partnership opportunities.",
       cta: { label: "Contact Us About Partnerships", href: "/about/contact" },
-      whyTitle: "Why Partner With Noviatify",
+      whyTitle: "Why Partner With IT Nayeem",
       whySubtitle:
         "Bring trusted business formation services to your clients and community. Our partner program is built to grow with you.",
       features: [
@@ -174,18 +174,18 @@ export const site = {
       faqs: [
         { q: "Who is the partner program for?", a: "Accountants, attorneys, consultants, agencies, and creators who serve entrepreneurs and small businesses." },
         { q: "How do I get paid?", a: "We offer transparent, recurring payouts for the clients you refer. Details are shared during onboarding." },
-        { q: "Is there a cost to join?", a: "No. Joining the Noviatify partner program is free." },
+        { q: "Is there a cost to join?", a: "No. Joining the IT Nayeem partner program is free." },
       ],
       ctaTitle: "Let's grow together",
-      ctaSubtitle: "Partner with Noviatify and bring trusted formation services to the people you serve.",
+      ctaSubtitle: "Partner with IT Nayeem and bring trusted formation services to the people you serve.",
     },
     "/about/blog": {
-      title: "Noviatify Blog",
+      title: "IT Nayeem Blog",
       subtitle: "Blog",
       description:
         "Stay up to date with the latest guides, tips, and news for entrepreneurs and business owners.",
       cta: { label: "Start Now — It's Free", href: "/start" },
-      whyTitle: "Guides for Founders, From Noviatify",
+      whyTitle: "Guides for Founders, From IT Nayeem",
       whySubtitle:
         "Practical articles on forming, running, and growing your business — written in plain language.",
       features: [
@@ -201,15 +201,15 @@ export const site = {
         { q: "Do the articles replace legal advice?", a: "No. Our content is educational. For advice specific to your situation, consult a professional." },
       ],
       ctaTitle: "Ready to put it into action?",
-      ctaSubtitle: "When you're ready to form your business, Noviatify makes it fast and simple.",
+      ctaSubtitle: "When you're ready to form your business, IT Nayeem makes it fast and simple.",
     },
     "/about/contact": {
-      title: "Contact Noviatify",
+      title: "Contact IT Nayeem",
       subtitle: "Get in Touch",
       description:
         "Have a question? Our team of business formation experts is ready to help. Reach out and we'll respond within one business day.",
       cta: { label: "Start a Formation Now", href: "/start" },
-      whyTitle: "How Noviatify Can Help",
+      whyTitle: "How IT Nayeem Can Help",
       whySubtitle:
         "Whatever stage you're at, our team is here to answer questions and point you in the right direction.",
       features: [
@@ -225,15 +225,15 @@ export const site = {
         { q: "Do you offer phone support?", a: "Reach us by chat or email and we'll make sure you get the help you need." },
       ],
       ctaTitle: "Have a question? We're here.",
-      ctaSubtitle: "Reach out to the Noviatify team and we'll help you take the next step.",
+      ctaSubtitle: "Reach out to the IT Nayeem team and we'll help you take the next step.",
     },
     "/services/llc": {
       title: "Form an LLC",
       subtitle: "Limited Liability Company",
       description:
-        "Start your LLC today. Noviatify handles state filing, registered agent, and all paperwork — fast, free, and stress-free.",
+        "Start your LLC today. IT Nayeem handles state filing, registered agent, and all paperwork — fast, free, and stress-free.",
       cta: { label: "Form Your LLC Now", href: "/start" },
-      whyTitle: "Why Form Your LLC With Noviatify",
+      whyTitle: "Why Form Your LLC With IT Nayeem",
       whySubtitle:
         "An LLC gives you liability protection and tax flexibility without the complexity of a corporation. We handle every step.",
       features: [
@@ -262,21 +262,21 @@ export const site = {
       ],
       faqTitle: "LLC Questions, Answered",
       faqs: [
-        { q: "How much does it cost to form an LLC?", a: "Noviatify's service starts at $0 — you only pay the state filing fee, which we show you upfront before you submit." },
+        { q: "How much does it cost to form an LLC?", a: "IT Nayeem's service starts at $0 — you only pay the state filing fee, which we show you upfront before you submit." },
         { q: "Do I need an operating agreement?", a: "It's not required in every state, but it's strongly recommended. We can help you put one in place." },
         { q: "Can I form an LLC in a different state than where I live?", a: "Yes. Many owners form in their home state, but we can file in any of the 50 states you choose." },
       ],
       ctaTitle: "Ready to launch your LLC?",
       ctaSubtitle:
-        "Join thousands of founders who started their LLC with Noviatify — fast, accurate, and stress-free.",
+        "Join thousands of founders who started their LLC with IT Nayeem — fast, accurate, and stress-free.",
     },
     "/services/c-corporation": {
       title: "Form a C Corporation",
       subtitle: "C Corporation",
       description:
-        "The ideal structure for startups seeking venture capital. Noviatify files your C Corp in days.",
+        "The ideal structure for startups seeking venture capital. IT Nayeem files your C Corp in days.",
       cta: { label: "Form Your C Corp Now", href: "/start" },
-      whyTitle: "Why Form a C Corporation With Noviatify",
+      whyTitle: "Why Form a C Corporation With IT Nayeem",
       whySubtitle:
         "The C Corp is the gold standard for startups raising capital and issuing stock. We make incorporation simple.",
       features: [
@@ -298,15 +298,15 @@ export const site = {
         { q: "Should I incorporate in Delaware?", a: "Delaware offers business-friendly laws investors know well. We can file there or in your home state." },
       ],
       ctaTitle: "Ready to incorporate?",
-      ctaSubtitle: "Form the C Corporation investors trust — Noviatify files it fast and correctly.",
+      ctaSubtitle: "Form the C Corporation investors trust — IT Nayeem files it fast and correctly.",
     },
     "/services/ltd": {
       title: "Form an LTD",
       subtitle: "Limited Company",
       description:
-        "A globally recognized structure for international entrepreneurs. Noviatify makes cross-border business easy.",
+        "A globally recognized structure for international entrepreneurs. IT Nayeem makes cross-border business easy.",
       cta: { label: "Form Your LTD Now", href: "/start" },
-      whyTitle: "Why Form an LTD With Noviatify",
+      whyTitle: "Why Form an LTD With IT Nayeem",
       whySubtitle:
         "A limited company is a globally recognized structure ideal for international founders. We make cross-border formation easy.",
       features: [
@@ -328,15 +328,15 @@ export const site = {
         { q: "How long does it take?", a: "Timelines vary by jurisdiction, but we move as fast as the registry allows and keep you updated." },
       ],
       ctaTitle: "Ready to go global?",
-      ctaSubtitle: "Form your limited company with Noviatify and do business with confidence anywhere.",
+      ctaSubtitle: "Form your limited company with IT Nayeem and do business with confidence anywhere.",
     },
     "/services/s-corporation": {
       title: "File for an S Corporation",
       subtitle: "S Corp Election",
       description:
-        "Elect S Corp status with the IRS and optimize your tax structure. Noviatify prepares and files IRS Form 2553 for you.",
+        "Elect S Corp status with the IRS and optimize your tax structure. IT Nayeem prepares and files IRS Form 2553 for you.",
       cta: { label: "File for S Corp", href: "/start" },
-      whyTitle: "Why Elect S Corp Status With Noviatify",
+      whyTitle: "Why Elect S Corp Status With IT Nayeem",
       whySubtitle:
         "An S Corp election can lower your self-employment taxes. We prepare and file IRS Form 2553 for you.",
       features: [
@@ -358,7 +358,7 @@ export const site = {
         { q: "Will an S Corp save me money?", a: "It can for profitable businesses, by reducing self-employment tax. We recommend confirming with your accountant." },
       ],
       ctaTitle: "Ready to elect S Corp status?",
-      ctaSubtitle: "Let Noviatify prepare and file your IRS Form 2553 — accurately and on time.",
+      ctaSubtitle: "Let IT Nayeem prepare and file your IRS Form 2553 — accurately and on time.",
     },
     "/services/registered-agent": {
       title: "Get a Registered Agent",
@@ -366,7 +366,7 @@ export const site = {
       description:
         "A professional registered agent keeps your business compliant and your personal address private. Available in all 50 states.",
       cta: { label: "Get a Registered Agent", href: "/start" },
-      whyTitle: "Why Choose Noviatify as Your Registered Agent",
+      whyTitle: "Why Choose IT Nayeem as Your Registered Agent",
       whySubtitle:
         "Every business needs a registered agent in its state. We keep you compliant and your address private.",
       features: [
@@ -388,15 +388,15 @@ export const site = {
         { q: "What happens if I don't have one?", a: "Your business can fall out of good standing or miss a lawsuit notice. A reliable agent keeps you protected." },
       ],
       ctaTitle: "Ready for a reliable registered agent?",
-      ctaSubtitle: "Keep your business compliant and your address private with Noviatify.",
+      ctaSubtitle: "Keep your business compliant and your address private with IT Nayeem.",
     },
     "/services/annual-report": {
       title: "Submit an Annual Report",
       subtitle: "Annual Report Filing",
       description:
-        "Never miss a deadline. Noviatify tracks your filing dates and submits annual reports with the state on your behalf.",
+        "Never miss a deadline. IT Nayeem tracks your filing dates and submits annual reports with the state on your behalf.",
       cta: { label: "File Your Annual Report", href: "/start" },
-      whyTitle: "Why File Your Annual Report With Noviatify",
+      whyTitle: "Why File Your Annual Report With IT Nayeem",
       whySubtitle:
         "Most states require an annual or biennial report to stay active. We track the deadlines and file for you.",
       features: [
@@ -418,15 +418,15 @@ export const site = {
         { q: "How often do I need to file?", a: "It depends on your state — some require it annually, others biennially. We track your specific schedule." },
       ],
       ctaTitle: "Ready to stay compliant?",
-      ctaSubtitle: "Let Noviatify track your deadlines and file your annual report — on time, every time.",
+      ctaSubtitle: "Let IT Nayeem track your deadlines and file your annual report — on time, every time.",
     },
     "/services/foreign-qualification": {
       title: "Foreign Qualification",
       subtitle: "Expand to New States",
       description:
-        "Register your existing company to operate legally in a new state. Noviatify handles all paperwork for foreign qualification.",
+        "Register your existing company to operate legally in a new state. IT Nayeem handles all paperwork for foreign qualification.",
       cta: { label: "Get Foreign Qualified", href: "/start" },
-      whyTitle: "Why Foreign Qualify With Noviatify",
+      whyTitle: "Why Foreign Qualify With IT Nayeem",
       whySubtitle:
         "Expanding into a new state? Foreign qualification lets your existing company operate there legally. We handle the paperwork.",
       features: [
@@ -448,7 +448,7 @@ export const site = {
         { q: "How is it different from forming a new company?", a: "You keep your original company — qualification simply gives it legal authority to operate in the new state." },
       ],
       ctaTitle: "Ready to expand to a new state?",
-      ctaSubtitle: "Let Noviatify handle your foreign qualification so you can grow with confidence.",
+      ctaSubtitle: "Let IT Nayeem handle your foreign qualification so you can grow with confidence.",
     },
     "/services/good-standing": {
       title: "Certificate of Good Standing",
@@ -456,7 +456,7 @@ export const site = {
       description:
         "Obtain official proof that your business is active and compliant — required for loans, leases, and bank accounts.",
       cta: { label: "Get Your Certificate", href: "/start" },
-      whyTitle: "Why Get Your Certificate Through Noviatify",
+      whyTitle: "Why Get Your Certificate Through IT Nayeem",
       whySubtitle:
         "A certificate of good standing proves your business is active and compliant. We obtain it from the state for you.",
       features: [
@@ -478,15 +478,15 @@ export const site = {
         { q: "How long is it valid?", a: "Validity varies, and many institutions want a recent one — usually within 30 to 90 days. We can reissue as needed." },
       ],
       ctaTitle: "Need proof your business is in good standing?",
-      ctaSubtitle: "Get your official certificate quickly with Noviatify.",
+      ctaSubtitle: "Get your official certificate quickly with IT Nayeem.",
     },
     "/services/change-agent": {
       title: "Change Your Registered Agent",
       subtitle: "Agent Change Filing",
       description:
-        "Switch your registered agent quickly and keep your state records up to date. Noviatify handles all transition paperwork.",
+        "Switch your registered agent quickly and keep your state records up to date. IT Nayeem handles all transition paperwork.",
       cta: { label: "Change Your Agent", href: "/start" },
-      whyTitle: "Why Change Your Registered Agent With Noviatify",
+      whyTitle: "Why Change Your Registered Agent With IT Nayeem",
       whySubtitle:
         "Switching registered agents is simple with us. We file the change and keep your state records accurate.",
       features: [
@@ -508,15 +508,15 @@ export const site = {
         { q: "Is there a state fee to change agents?", a: "Some states charge a small fee. We'll show you any cost upfront before filing." },
       ],
       ctaTitle: "Ready to switch registered agents?",
-      ctaSubtitle: "Make the change effortless with Noviatify — we handle the paperwork and the handoff.",
+      ctaSubtitle: "Make the change effortless with IT Nayeem — we handle the paperwork and the handoff.",
     },
     "/services/name-change": {
       title: "Company Name Change",
       subtitle: "Business Name Amendment",
       description:
-        "Rebranding your company? Noviatify files the state amendment to legally update your business name.",
+        "Rebranding your company? IT Nayeem files the state amendment to legally update your business name.",
       cta: { label: "Change Your Company Name", href: "/start" },
-      whyTitle: "Why Change Your Company Name With Noviatify",
+      whyTitle: "Why Change Your Company Name With IT Nayeem",
       whySubtitle:
         "Rebranding? We file the state amendment that legally updates your registered business name.",
       features: [
@@ -538,20 +538,20 @@ export const site = {
         { q: "What else should I update?", a: "After the state approves, update your bank, licenses, contracts, and the IRS. We'll guide you through it." },
       ],
       ctaTitle: "Ready to make your new name official?",
-      ctaSubtitle: "Let Noviatify file your business name change with the state.",
+      ctaSubtitle: "Let IT Nayeem file your business name change with the state.",
     },
     "/pricing": {
       title: "Pricing",
       subtitle: "Transparent & Simple",
       description:
-        "Noviatify is built on transparency. No hidden fees — all state filing costs are clearly disclosed before you complete your application. Business formation starts at $0 + state fees.",
+        "IT Nayeem is built on transparency. No hidden fees — all state filing costs are clearly disclosed before you complete your application. Business formation starts at $0 + state fees.",
       cta: { label: "Start Now — It's Free", href: "/start" },
     },
     "/order-status": {
       title: "Check Order Status",
       subtitle: "Order Tracking",
       description:
-        "Track the status of your business formation or compliance filing. Log in to your Noviatify dashboard to see real-time updates.",
+        "Track the status of your business formation or compliance filing. Log in to your IT Nayeem dashboard to see real-time updates.",
       cta: { label: "Log In to Dashboard", href: "/login" },
       whyTitle: "Track Your Filing With Confidence",
       whySubtitle: "Log in to see real-time updates on your formation and compliance filings.",
@@ -563,13 +563,13 @@ export const site = {
       ],
       stepsTitle: "How to Check Your Status",
       steps: [
-        { num: "1", label: "Log In", desc: "Sign in to your Noviatify dashboard." },
+        { num: "1", label: "Log In", desc: "Sign in to your IT Nayeem dashboard." },
         { num: "2", label: "Open Your Order", desc: "Select the filing you want to check." },
         { num: "3", label: "See Live Status", desc: "View real-time progress and any documents ready for you." },
       ],
       faqTitle: "Order Status Questions, Answered",
       faqs: [
-        { q: "How do I check my order status?", a: "Just log in to your Noviatify dashboard to see real-time updates on every filing." },
+        { q: "How do I check my order status?", a: "Just log in to your IT Nayeem dashboard to see real-time updates on every filing." },
         { q: "How long do filings take?", a: "Most formations are processed within 24–72 hours after submission, depending on the state." },
         { q: "I can't find my order — what now?", a: "Reach out to our support team and we'll locate it for you right away." },
       ],
@@ -604,7 +604,7 @@ export const site = {
         { q: "Which entity should I choose?", a: "It depends on your goals. Our comparisons and team can help you decide." },
       ],
       ctaTitle: "Done researching?",
-      ctaSubtitle: "Turn your research into a registered business with Noviatify.",
+      ctaSubtitle: "Turn your research into a registered business with IT Nayeem.",
     },
     "/start": {
       title: "Start Your Business",
@@ -612,7 +612,7 @@ export const site = {
       description:
         "You're one step away from having a registered company. Complete your formation in minutes.",
       cta: { label: "Begin My Application", href: "/" },
-      whyTitle: "Why Start With Noviatify",
+      whyTitle: "Why Start With IT Nayeem",
       whySubtitle: "You're one step from a registered company. Here's what you get when you start today.",
       features: [
         { title: "$0 to Start", desc: "Begin your formation for free — you only pay the state filing fee." },
@@ -627,15 +627,15 @@ export const site = {
         { q: "What happens after I apply?", a: "We prepare and file your documents, then email you once they're approved." },
       ],
       ctaTitle: "Let's make it official",
-      ctaSubtitle: "Start your business with Noviatify today — fast, free, and stress-free.",
+      ctaSubtitle: "Start your business with IT Nayeem today — fast, free, and stress-free.",
     },
     "/login": {
-      title: "Log In to Noviatify",
+      title: "Log In to IT Nayeem",
       subtitle: "Account Access",
       description:
-        "Access your Noviatify dashboard to track filings, manage compliance, and update your business information.",
+        "Access your IT Nayeem dashboard to track filings, manage compliance, and update your business information.",
       cta: { label: "Back to Home", href: "/" },
-      whyTitle: "Your Noviatify Dashboard",
+      whyTitle: "Your IT Nayeem Dashboard",
       whySubtitle: "Sign in to manage your business, track filings, and stay compliant.",
       features: [
         { title: "Track Your Filings", desc: "See real-time status on every formation and compliance order." },
@@ -649,7 +649,7 @@ export const site = {
         { q: "Can I manage multiple businesses?", a: "Yes. Your dashboard lets you manage all the businesses under your account." },
         { q: "Is my information secure?", a: "We protect your account with industry-standard safeguards and access controls." },
       ],
-      ctaTitle: "New to Noviatify?",
+      ctaTitle: "New to IT Nayeem?",
       ctaSubtitle: "Start your business in minutes — no account needed to begin.",
     },
   },
@@ -659,7 +659,7 @@ export const site = {
       title: "Privacy Policy",
       lastUpdated: "Last updated: June 8, 2026",
       intro:
-        "Noviatify is committed to protecting your personal information. This Privacy Policy explains what we collect, how we use it, and the choices you have. We never sell your data.",
+        "IT Nayeem is committed to protecting your personal information. This Privacy Policy explains what we collect, how we use it, and the choices you have. We never sell your data.",
       sections: [
         {
           heading: "1. Information We Collect",
@@ -694,7 +694,7 @@ export const site = {
         {
           heading: "7. Changes to This Policy",
           body:
-            "We may update this Privacy Policy from time to time. When we do, we will revise the date above and, where appropriate, notify you. Your continued use of Noviatify after changes take effect means you accept the updated policy.",
+            "We may update this Privacy Policy from time to time. When we do, we will revise the date above and, where appropriate, notify you. Your continued use of IT Nayeem after changes take effect means you accept the updated policy.",
         },
       ],
       contactHeading: "Contact Us",
@@ -708,22 +708,22 @@ export const site = {
       title: "Terms of Service",
       lastUpdated: "Last updated: June 8, 2026",
       intro:
-        "These Terms of Service govern your use of Noviatify and the services we provide. By creating an account or placing an order, you agree to these terms. Please read them carefully.",
+        "These Terms of Service govern your use of IT Nayeem and the services we provide. By creating an account or placing an order, you agree to these terms. Please read them carefully.",
       sections: [
         {
           heading: "1. Acceptance of Terms",
           body:
-            "By accessing or using Noviatify, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, you should not use our services. If you are using Noviatify on behalf of a business, you represent that you are authorized to bind that business.",
+            "By accessing or using IT Nayeem, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, you should not use our services. If you are using IT Nayeem on behalf of a business, you represent that you are authorized to bind that business.",
         },
         {
           heading: "2. Our Services",
           body:
-            "Noviatify provides business formation, registered agent, compliance, and related filing services. We prepare and submit documents based on the information you provide. You are responsible for ensuring that the information you give us is accurate, complete, and up to date.",
+            "IT Nayeem provides business formation, registered agent, compliance, and related filing services. We prepare and submit documents based on the information you provide. You are responsible for ensuring that the information you give us is accurate, complete, and up to date.",
         },
         {
           heading: "3. Not Legal or Tax Advice",
           body:
-            "Noviatify is not a law firm or an accounting firm, and we do not provide legal, tax, or financial advice. Our services are for informational and filing purposes only. For advice specific to your situation, you should consult a qualified attorney or accountant.",
+            "IT Nayeem is not a law firm or an accounting firm, and we do not provide legal, tax, or financial advice. Our services are for informational and filing purposes only. For advice specific to your situation, you should consult a qualified attorney or accountant.",
         },
         {
           heading: "4. Fees & Payments",
@@ -733,27 +733,27 @@ export const site = {
         {
           heading: "5. Your Responsibilities",
           body:
-            "You agree to use Noviatify only for lawful purposes, to keep your account credentials secure, and to provide accurate information. You are responsible for all activity that occurs under your account and for maintaining your business's ongoing legal and compliance obligations.",
+            "You agree to use IT Nayeem only for lawful purposes, to keep your account credentials secure, and to provide accurate information. You are responsible for all activity that occurs under your account and for maintaining your business's ongoing legal and compliance obligations.",
         },
         {
           heading: "6. Intellectual Property",
           body:
-            "All content, branding, and software on Noviatify are owned by us or our licensors and are protected by applicable laws. You may not copy, modify, distribute, or reverse-engineer any part of our service without our prior written permission.",
+            "All content, branding, and software on IT Nayeem are owned by us or our licensors and are protected by applicable laws. You may not copy, modify, distribute, or reverse-engineer any part of our service without our prior written permission.",
         },
         {
           heading: "7. Limitation of Liability",
           body:
-            "To the fullest extent permitted by law, Noviatify is not liable for any indirect, incidental, or consequential damages arising from your use of our services. Our total liability for any claim is limited to the amount you paid us for the service giving rise to the claim.",
+            "To the fullest extent permitted by law, IT Nayeem is not liable for any indirect, incidental, or consequential damages arising from your use of our services. Our total liability for any claim is limited to the amount you paid us for the service giving rise to the claim.",
         },
         {
           heading: "8. Termination",
           body:
-            "We may suspend or terminate your access to Noviatify if you violate these terms or use our services in a way that could cause harm or legal exposure. You may stop using our services at any time. Certain provisions survive termination, including payment obligations and limitations of liability.",
+            "We may suspend or terminate your access to IT Nayeem if you violate these terms or use our services in a way that could cause harm or legal exposure. You may stop using our services at any time. Certain provisions survive termination, including payment obligations and limitations of liability.",
         },
         {
           heading: "9. Changes to These Terms",
           body:
-            "We may update these Terms of Service from time to time. When we do, we will revise the date above. Your continued use of Noviatify after changes take effect constitutes acceptance of the updated terms.",
+            "We may update these Terms of Service from time to time. When we do, we will revise the date above. Your continued use of IT Nayeem after changes take effect constitutes acceptance of the updated terms.",
         },
       ],
       contactHeading: "Questions About These Terms?",

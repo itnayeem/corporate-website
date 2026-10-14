@@ -31,7 +31,7 @@ const newPackage: Pkg = {
   highlighted: false,
   features: ["Feature one", "Feature two", "Feature three"],
   ctaLabel: "Get Started",
-  ctaHref: "https://start.noviatify.io",
+  ctaHref: "/start",
 };
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {

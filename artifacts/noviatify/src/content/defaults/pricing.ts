@@ -25,7 +25,7 @@ export const pricing = {
         "Lifetime customer support",
       ],
       ctaLabel: "Get Started",
-      ctaHref: "https://start.noviatify.io",
+      ctaHref: "/start",
     },
     {
       name: "Pro",
@@ -42,7 +42,7 @@ export const pricing = {
         "Compliance & deadline reminders",
       ],
       ctaLabel: "Choose Pro",
-      ctaHref: "https://start.noviatify.io",
+      ctaHref: "/start",
     },
     {
       name: "Premium",
@@ -59,14 +59,14 @@ export const pricing = {
         "Priority phone support",
       ],
       ctaLabel: "Choose Premium",
-      ctaHref: "https://start.noviatify.io",
+      ctaHref: "/start",
     },
   ],
   cta: {
     title: "Not sure which package is right?",
     subtitle:
       "Start your formation in minutes — you can always upgrade later as your business grows.",
-    primary: { label: "Start Your Business", href: "https://start.noviatify.io" },
+    primary: { label: "Start Your Business", href: "/start" },
     secondary: { label: "Talk to an Expert", href: "/about/contact" },
   },
 };

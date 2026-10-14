@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SiteLogo from "@/components/SiteLogo";
 
-const SESSION_KEY = "noviatify_intro_shown";
+const SESSION_KEY = "itnayeem_intro_shown";
 
 /**
  * Full-screen animated brand reveal shown once per browser session on first load.

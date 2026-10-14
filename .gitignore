@@ -49,3 +49,9 @@ Thumbs.db
 .cache/
 .local/
 package-lock.json
+
+# Environment variables
+.env
+*.env
+.env.*
+!.env.example

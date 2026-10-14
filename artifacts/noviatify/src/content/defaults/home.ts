@@ -5,7 +5,7 @@ export const home = {
     typedWords: ["Award-Winning", "Fast & Simple", "Trusted by 1000+"],
     titleSuffix: "Business Formation",
     description:
-      "Since 2020, join more than 1,000 business owners using Noviatify to start and grow their companies with total confidence.",
+      "Since 2020, join more than 1,000 business owners using IT Nayeem to start and grow their companies with total confidence.",
     primaryCta: "Start Now — It's Free",
     primaryCtaHref: "/start",
     secondaryCta: "More reliable, confirmed reviews",
@@ -14,7 +14,7 @@ export const home = {
     avatars: ["SM", "MT", "DR", "EM"],
   },
   dashboard: {
-    url: "noviatify.io/dashboard",
+    url: "itnayeem.com/dashboard",
     stats: [
       { label: "Active LLCs", val: "847", trend: "+12%" },
       { label: "Filings Today", val: "23", trend: "+5%" },
@@ -82,11 +82,11 @@ export const home = {
     label: "Process",
     title: "Begin Your Business in 3 Straightforward Steps",
     subtitle:
-      "From brilliant plan to laid-out business — Noviatify has every tool and service you need, all in one place.",
+      "From brilliant plan to laid-out business — IT Nayeem has every tool and service you need, all in one place.",
     steps: [
       { num: "01", title: "Pick The Right Entity For You", desc: "Choose LLC, C Corporation, or LTD based on your goals. Our guides and experts help you decide fast." },
       { num: "02", title: "Complete a Simple Online Form", desc: "Answer a few clear questions about your business in under 5 minutes. No legal jargon." },
-      { num: "03", title: "We Handle Everything Else", desc: "Noviatify files all documents with the state. You get confirmation and get back to building." },
+      { num: "03", title: "We Handle Everything Else", desc: "IT Nayeem files all documents with the state. You get confirmation and get back to building." },
     ],
     cta: "Learn More About the Process",
     ctaHref: "/how-it-works",
@@ -108,8 +108,8 @@ export const home = {
     ],
   },
   whyChooseUs: {
-    label: "Why Noviatify",
-    title: "Why ambitious founders choose Noviatify",
+    label: "Why IT Nayeem",
+    title: "Why ambitious founders choose IT Nayeem",
     description:
       "We built our platform to eliminate every friction point of starting a business. No hidden fees, no legal jargon, no waiting weeks for simple filings.",
     items: [
@@ -124,15 +124,15 @@ export const home = {
     title: "Trusted by founders everywhere",
     items: [
       { name: "Sarah Mitchell", role: "Founder, TechFlow LLC", initials: "SM", content: "The absolute fastest way I've ever formed a company. The UI is gorgeous, the process is clear, and the support team actually answered my questions." },
-      { name: "Marcus T.", role: "CEO, GreenLeaf Capital", initials: "MT", content: "I needed a C Corporation for my startup to attract investors. Noviatify handled everything flawlessly. Their registered agent service has kept us compliant." },
-      { name: "David R.", role: "3x Founder", initials: "DR", content: "I've used Noviatify for three different formations now. Every single time it's faster and smoother than expected. This is the gold standard." },
-      { name: "Elena M.", role: "Owner, Maison Designs", initials: "EM", content: "As an international founder I needed an LTD. Noviatify guided me every step of the way and handled all state filings. Couldn't be more satisfied." },
+      { name: "Marcus T.", role: "CEO, GreenLeaf Capital", initials: "MT", content: "I needed a C Corporation for my startup to attract investors. IT Nayeem handled everything flawlessly. Their registered agent service has kept us compliant." },
+      { name: "David R.", role: "3x Founder", initials: "DR", content: "I've used IT Nayeem for three different formations now. Every single time it's faster and smoother than expected. This is the gold standard." },
+      { name: "Elena M.", role: "Owner, Maison Designs", initials: "EM", content: "As an international founder I needed an LTD. IT Nayeem guided me every step of the way and handled all state filings. Couldn't be more satisfied." },
     ],
   },
   cta: {
     title: "Ready to make it official?",
     subtitle:
-      "Join 1,000+ businesses who started their journey with Noviatify. It takes less than 5 minutes.",
+      "Join 1,000+ businesses who started their journey with IT Nayeem. It takes less than 5 minutes.",
     button: "Start Your Business Now",
     buttonHref: "/start",
     fineprint: "No credit card required. Setup in minutes.",
@@ -172,7 +172,7 @@ export const home = {
         title: "Support",
         links: [
           { label: "Contact Us", href: "/about/contact" },
-          { label: "Noviatify Partnerships", href: "/about/partnerships" },
+          { label: "IT Nayeem Partnerships", href: "/about/partnerships" },
           { label: "Privacy Policy", href: "/privacy" },
           { label: "Terms Of Service", href: "/terms" },
         ],

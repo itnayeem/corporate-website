@@ -5,7 +5,7 @@ import { useContent } from "@/content/ContentContext";
 
 const FALLBACK_TITLE = "We'll be right back";
 const FALLBACK_MESSAGE =
-  "Noviatify is currently undergoing scheduled maintenance. We'll be back online shortly. Thank you for your patience.";
+  "IT Nayeem is currently undergoing scheduled maintenance. We'll be back online shortly. Thank you for your patience.";
 
 export default function MaintenancePage() {
   const { maintenance } = useContent().site;

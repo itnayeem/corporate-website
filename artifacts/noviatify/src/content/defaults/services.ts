@@ -3,7 +3,7 @@ export const services = {
     eyebrow: "Our Services",
     title: "Everything your business needs",
     subtitle:
-      "From formation to ongoing compliance, Noviatify covers every aspect of keeping your company running smoothly across all 50 states.",
+      "From formation to ongoing compliance, IT Nayeem covers every aspect of keeping your company running smoothly across all 50 states.",
     cta: { label: "Start Now", href: "/start" },
   },
   entitiesSection: {
@@ -73,7 +73,7 @@ export const services = {
       title: "Get a Registered Agent",
       href: "/services/registered-agent",
       color: "bg-white/5 text-blue-400",
-      desc: "A professional registered agent keeps your business compliant and your personal address private. Noviatify provides registered agent service in all 50 states.",
+      desc: "A professional registered agent keeps your business compliant and your personal address private. IT Nayeem provides registered agent service in all 50 states.",
       includes: [
         "Official document receipt",
         "Privacy protection",
@@ -125,7 +125,7 @@ export const services = {
       title: "Change Of Registered Agent",
       href: "/services/change-agent",
       color: "bg-white/5 text-yellow-400",
-      desc: "Switch your registered agent quickly and keep your records current. Noviatify handles all state paperwork for the transition.",
+      desc: "Switch your registered agent quickly and keep your records current. IT Nayeem handles all state paperwork for the transition.",
       includes: [
         "State filing preparation",
         "Agent transfer coordination",
@@ -138,7 +138,7 @@ export const services = {
       title: "Company Name Change",
       href: "/services/name-change",
       color: "bg-white/5 text-orange-400",
-      desc: "Rebranding? Legally update your business name with proper state amendment filings handled entirely by Noviatify.",
+      desc: "Rebranding? Legally update your business name with proper state amendment filings handled entirely by IT Nayeem.",
       includes: [
         "Articles of amendment filing",
         "Name availability search",
